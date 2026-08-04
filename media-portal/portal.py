@@ -1,0 +1,58 @@
+"""LEIS Media Portal: local read-only search with lineage-aware ranking."""
+import json, os, re, threading, webbrowser
+from pathlib import Path
+from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
+from urllib.parse import parse_qs, urlparse, quote
+ROOT=Path(r"L:\_LEIS_\MEDIA\_MEDIA_CATALOGUE_"); CACHE=Path(__file__).with_name("portal_index.json")
+TOPICS={
+ "LEIS principles":["lineage","reconstruction","validation","orientation","reality","seed"],
+ "Artificial intelligence":["ai","claude","prompt","automation","agent","machine learning"],
+ "Technology & systems":["software","system","engineering","cyber","data","sql"],
+ "Leadership & organisation":["leadership","management","teams","business","decision"],
+ "Health & mind":["psychiatry","brain","health","clinical","immunity","medicine"],
+ "History & society":["history","rome","korea","politics","society","geopolitics"],
+ "Media archive":["video","image","book","audio","document","plaug"]}
+def pdftext(p):
+ try:
+  from pypdf import PdfReader
+  return '\n'.join((x.extract_text() or '') for x in PdfReader(str(p)).pages)
+ except Exception as e:return '[PDF text unavailable: %s]'%type(e).__name__
+def load():
+ actual={str(p):p.stat().st_mtime for p in ROOT.glob('*.pdf')}
+ try:
+  old=json.loads(CACHE.read_text(encoding='utf-8'))
+  if {x['path']:x['mtime'] for x in old['records']}==actual:return old['records']
+ except Exception:pass
+ rec=[]
+ for p in sorted(ROOT.glob('*.pdf')):
+  s=p.stat();rec.append({'name':p.name,'path':str(p),'mtime':s.st_mtime,'size':s.st_size,'text':pdftext(p)})
+ CACHE.write_text(json.dumps({'records':rec},ensure_ascii=False),encoding='utf-8');return rec
+def lookup(query,topic=''):
+ words=re.findall(r'[\wÀ-ž.-]+',query.lower())
+ expansion=TOPICS.get(topic,[]); terms=list(dict.fromkeys(words+expansion))
+ hits=[]
+ for r in load():
+  b=(r['name']+'\n'+r['text']).lower(); score=sum(b.count(t) for t in terms if len(t)>1)
+  if score:
+   pos=min([b.find(t) for t in terms if b.find(t)>=0] or [0]);snip=re.sub(r'\s+',' ',r['text'][max(0,pos-180):pos+520]).strip()
+   hits.append((score,{**r,'snippet':snip,'signals':[t for t in terms if t in b][:8]}))
+ return [x[1] for x in sorted(hits,key=lambda x:x[0],reverse=True)[:60]]
+PAGE=r'''<!doctype html><html><head><meta charset="utf-8"><title>LEIS / Media Portal</title><style>
+*{box-sizing:border-box}body{margin:0;background:#050a12;color:#dce9f4;font:15px Inter,Segoe UI,Arial;overflow-x:hidden}body:before{content:'';position:fixed;inset:0;background:radial-gradient(circle at 70% 10%,#143b5966,transparent 35%),radial-gradient(circle at 15% 90%,#0a4c5a55,transparent 32%);pointer-events:none}.shell{position:relative;display:grid;grid-template-columns:285px 1fr;min-height:100vh}.side{background:#08111ddd;border-right:1px solid #1a4254;padding:25px 18px;position:sticky;top:0;height:100vh}.omega{width:105px;border-radius:50%;display:block;margin:0 auto 13px;box-shadow:0 0 38px #7dd8ff88;animation:pulse 5s infinite}.brand{text-align:center;letter-spacing:3px;font-weight:800;color:#9ceaff}.seed{text-align:center;color:#8ca8b9;font-size:11px;line-height:1.5}.topic{width:100%;margin:8px 0;padding:11px;border:1px solid #1e5061;background:#0c1b2a;color:#bdd9e5;border-radius:10px;text-align:left;transition:.2s}.topic:hover,.topic.active{transform:translateX(5px);background:#12374a;color:#fff;border-color:#7de4ff}.main{padding:40px;max-width:1250px}.eyebrow{color:#79dcec;letter-spacing:2px;font-size:11px}.hero{display:flex;gap:22px;align-items:end}.hero h1{font-size:42px;margin:7px 0;background:linear-gradient(90deg,#e7fbff,#70cae2);color:transparent;background-clip:text}.hero p{color:#9db7c7;max-width:690px}.loop{margin:20px 0;color:#86c8d7;font-size:12px;letter-spacing:1px}.search{display:flex;background:#0b1827;border:1px solid #24566c;border-radius:15px;padding:8px;box-shadow:0 10px 45px #0008}.search input{flex:1;background:transparent;border:0;color:#fff;padding:14px;font-size:17px;outline:0}.search button{background:linear-gradient(135deg,#35b9cb,#22689a);color:#fff;border:0;border-radius:10px;padding:0 22px;font-weight:700;cursor:pointer}.status{margin:22px 0;color:#91aebb}.card{background:linear-gradient(115deg,#0c1a29,#0a1421);border:1px solid #1b4053;border-radius:14px;margin:12px 0;padding:18px;animation:in .32s ease both}.card:hover{border-color:#69d9ef;transform:translateY(-2px)}.card a{color:#91ecff;font-size:17px;font-weight:700;text-decoration:none}.meta,.line{font-size:12px;color:#8fa8b5;margin:8px 0}.snippet{white-space:pre-wrap;line-height:1.55;color:#d0dde4}.tag{display:inline-block;color:#75dff2;border:1px solid #276179;border-radius:12px;padding:3px 8px;margin:5px 4px 0 0;font-size:11px}@keyframes pulse{50%{box-shadow:0 0 60px #b7f4ffbb;transform:scale(1.025)}}@keyframes in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}@media(max-width:800px){.shell{grid-template-columns:1fr}.side{position:relative;height:auto}.main{padding:24px}.hero h1{font-size:32px}}</style></head><body><div class="shell"><aside class="side"><img class="omega" src="/omega.png"><div class="brand">LEIS</div><p class="seed">Reality-oriented understanding<br>Preserve. Validate. Reconstruct.</p><hr style="border-color:#183847"><div class="seed">TOPICS / IDEAS</div><div id="topics"></div></aside><main class="main"><div class="eyebrow">MEDIA INTELLIGENCE PORTAL</div><div class="hero"><div><h1>Find context, not only files.</h1><p>LEIS search connects signals in the catalog, shows the source lineage and keeps interpretation tied to evidence.</p></div></div><div class="loop">REALITY → SIGNALS → PATTERNS → RECOGNITION → VALIDATION → LINEAGE → ORIENTATION</div><div class="search"><input id="q" placeholder="Search books, authors, topics, names, principles…"><button onclick="go()">LEIS SEARCH</button></div><div id="status" class="status">Choose a topic or enter a question.</div><section id="results"></section></main></div><script>
+const topics=__TOPICS__;let selected='';const t=document.querySelector('#topics');Object.keys(topics).forEach(x=>{let b=document.createElement('button');b.className='topic';b.textContent=x;b.onclick=()=>{selected=x;document.querySelectorAll('.topic').forEach(z=>z.classList.remove('active'));b.classList.add('active');document.querySelector('#q').value=x;go()};t.appendChild(b)});document.querySelector('#q').onkeydown=e=>{if(e.key==='Enter')go()};async function go(){let q=document.querySelector('#q').value.trim();if(!q&&!selected)return;let s=document.querySelector('#status'),r=document.querySelector('#results');s.textContent='LEIS logic: collecting signals, checking lineage…';r.innerHTML='';let d=await fetch('/api/search?q='+encodeURIComponent(q)+'&topic='+encodeURIComponent(selected)).then(x=>x.json());s.textContent=`${d.count} relevant sources. Ranking uses query signals + selected topic; every result remains traceable to its PDF.`;r.innerHTML=d.results.map(x=>`<article class="card"><a href="/open?path=${encodeURIComponent(x.path)}">${x.name}</a><div class="meta">${x.size.toLocaleString()} B · ${x.path}</div><div class="line">LINEAGE SIGNALS: ${x.signals.map(a=>'<span class="tag">'+a+'</span>').join('')}</div><div class="snippet">${x.snippet||'Match in source filename.'}</div></article>`).join('')||'<div class="card">No reliable source match. Try a more concrete title, name, or topic.</div>'}</script></body></html>'''
+PAGE=PAGE.replace('__TOPICS__',json.dumps(TOPICS)).replace('<hr style="border-color:#183847">','<div style="margin:18px 0;padding:12px;border:1px solid #225064;border-radius:10px;background:#0a1927;color:#9fb8c6;font-size:11px;line-height:1.55"><b style="display:block;color:#dffaff;font-size:13px">Creator: Martin Pužík</b>Visionary<br>Constitution author<br>Founder of LEIS<br>Creator of ethical framework<br>Ethical and behavioral principles</div><hr style="border-color:#183847">')
+class H(BaseHTTPRequestHandler):
+ def log_message(self,*a):pass
+ def send(self,b,ct='text/html; charset=utf-8'):
+  self.send_response(200);self.send_header('Content-Type',ct);self.end_headers();self.wfile.write(b if isinstance(b,bytes) else b.encode())
+ def do_GET(self):
+  u=urlparse(self.path);a=parse_qs(u.query)
+  if u.path=='/omega.png':return self.send(Path(__file__).with_name('assets').joinpath('omega.png').read_bytes(),'image/png')
+  if u.path=='/api/search':return self.send(json.dumps({'count':len(x:=lookup(a.get('q',[''])[0],a.get('topic',[''])[0])),'results':x},ensure_ascii=False),'application/json; charset=utf-8')
+  if u.path=='/open':
+   p=Path(a.get('path',[''])[0]);
+   if p.is_file():os.startfile(p)
+   return self.send(b'<script>window.close()</script>')
+  return self.send(PAGE)
+if __name__=='__main__':
+ threading.Timer(.7,lambda:webbrowser.open('http://127.0.0.1:8787')).start();ThreadingHTTPServer(('127.0.0.1',8787),H).serve_forever()
