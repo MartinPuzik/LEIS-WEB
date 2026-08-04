@@ -82,6 +82,20 @@ PAVLA_PAGE = secondary_page(
     "#a99fff",
 )
 
+# The entry point is for every visitor.  Journalism is a focused angle inside it,
+# not a label that excludes people who simply need orientation.
+PAGE = PAGE.replace("Journalist briefing", "LEIS Quick Orientation").replace(
+    "A two-minute, human introduction: what LEIS is, why it matters, and the questions that should be tested.",
+    "A two-minute human introduction: what LEIS is, why it matters, and the questions that should be tested.",
+).replace("Enter the briefing →", "Start the orientation →")
+PAVLA_PAGE = PAVLA_PAGE.replace("LEIS / JOURNALIST BRIEFING", "LEIS / QUICK ORIENTATION").replace(
+    "A concise, source-aware introduction. It does not ask for belief: it offers a story, a usable distinction and questions that can be tested.",
+    "A concise, source-aware starting point for anyone: what LEIS is, where it came from, and how its value can be tested.",
+).replace(
+    '</article><p><a href="/">',
+    '''</article><article class="card"><span class="tag">MEDIA</span><h2>For journalists</h2><p>The useful story angle is not unverified technical superiority. It is how a human-created, reality-oriented framework tries to make sources, uncertainty and decision context survive transfer between people and technologies.</p></article><p><a href="/">''',
+)
+
 TIMELINE_PAGE = secondary_page(
     "Understanding in motion.",
     "LEIS / RECONSTRUCTION TIMELINE",
