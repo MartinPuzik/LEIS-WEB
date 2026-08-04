@@ -11,6 +11,7 @@ from urllib.parse import parse_qs, urlparse
 ROOT = Path(r"L:\_LEIS_\MEDIA\_MEDIA_CATALOGUE_")
 CACHE = Path(__file__).with_name("portal_index.json")
 ASSET = Path(__file__).with_name("assets").joinpath("omega.png")
+UI_DIST = Path(__file__).with_name("ui").joinpath("dist")
 TOPICS = {
     "LEIS principles": ["lineage", "reconstruction", "validation", "orientation", "reality", "seed"],
     "Artificial intelligence": ["ai", "claude", "prompt", "automation", "agent", "machine learning"],
@@ -117,12 +118,15 @@ class PortalHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         request = urlparse(self.path)
         args = parse_qs(request.query)
+        # Once the React build exists it becomes the presentation layer; the
+        # Python service stays responsible for source access and search.
+        if request.path.startswith("/assets/"):
+            asset = UI_DIST.joinpath(request.path.lstrip("/"))
+            if asset.is_file():
+                content_type = "text/javascript" if asset.suffix == ".js" else "text/css"
+                return self.respond(asset.read_bytes(), content_type)
         if request.path == "/omega.png":
             return self.respond(ASSET.read_bytes(), "image/png")
-        if request.path == "/timeline":
-            return self.respond(TIMELINE_PAGE)
-        if request.path == "/pavla":
-            return self.respond(PAVLA_PAGE)
         if request.path == "/api/search":
             result = search(args.get("q", [""])[0], args.get("topic", [""])[0])
             return self.respond(json.dumps({"count": len(result), "results": result}, ensure_ascii=False),
@@ -132,6 +136,13 @@ class PortalHandler(BaseHTTPRequestHandler):
             if path.is_file() and ROOT in path.parents:
                 os.startfile(path)
             return self.respond("<script>window.close()</script>")
+        index = UI_DIST.joinpath("index.html")
+        if index.is_file():
+            return self.respond(index.read_bytes())
+        if request.path == "/timeline":
+            return self.respond(TIMELINE_PAGE)
+        if request.path == "/pavla":
+            return self.respond(PAVLA_PAGE)
         return self.respond(PAGE)
 
 
