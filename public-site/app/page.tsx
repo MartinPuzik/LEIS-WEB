@@ -632,6 +632,11 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
   return <>
     <div className="globe-map-shell">
       <div className="globe-map" ref={node} aria-label="Interactive globe. Drag to rotate, scroll to zoom and choose a source point." />
+      <div className="globe-weather-hud" aria-label="Live weather layer active">
+        <i aria-hidden="true" />
+        <span>Live weather</span>
+        <small>subtle global conditions</small>
+      </div>
       <div className="globe-zoom-controls" aria-label="Globe zoom controls">
         <button onClick={() => adjustZoom(1)} aria-label="Zoom in">+</button>
         <button onClick={() => adjustZoom(-1)} aria-label="Zoom out">−</button>
