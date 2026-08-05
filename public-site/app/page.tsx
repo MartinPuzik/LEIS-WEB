@@ -455,8 +455,8 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       });
       const routes = chart.series.push(am5map.MapLineSeries.new(root, {}));
       routes.mapLines.template.setAll({
-        stroke: am5.color(0x67e9ef), strokeOpacity: 0.24, strokeWidth: 1.15,
-        strokeDasharray: [1.5, 12], strokeDashoffset: 0,
+        stroke: am5.color(0x72f2f5), strokeOpacity: 0.44, strokeWidth: 1.5,
+        strokeDasharray: [2.4, 9], strokeDashoffset: 0,
       });
       routes.data.setAll([
         { geometry: { type: "LineString", coordinates: [[-122.4194, 37.7749], [-74.006, 40.7128]] } },
@@ -467,7 +467,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       ]);
       routes.events.on("datavalidated", () => {
         routes.mapLines.each((line: any, index: number) => {
-          line.animate({ key: "strokeDashoffset", from: 0, to: -26, duration: 2600 + index * 380, loops: Infinity, easing: am5.ease.linear });
+          line.animate({ key: "strokeDashoffset", from: 0, to: -32, duration: 1320 + index * 150, loops: Infinity, easing: am5.ease.linear });
         });
       });
       const points = chart.series.push(am5map.MapPointSeries.new(root, {}));
