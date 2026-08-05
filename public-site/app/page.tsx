@@ -679,32 +679,27 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       // horizon, and cannot spill out as flat image cards at the edge.
       const stratusGeometry = (lon: number, lat: number, cloudCover: number, severe = false) => {
         const cloud = Math.max(0, Math.min(100, cloudCover));
-        // A true low, flat cloud deck: two gently irregular latitude edges form
-        // a long band that visually sits parallel to the Earth's surface.
-        const halfLength = Math.min(severe ? 62 : 48, 13 + cloud * (severe ? 0.44 : 0.34));
-        const halfDepth = Math.min(severe ? 7.5 : 5.5, 1.3 + cloud * (severe ? 0.06 : 0.04));
-        const segments = 22;
-        const upper = Array.from({ length: segments + 1 }, (_, index) => {
-          const ratio = index / segments;
-          const longitude = lon - halfLength + ratio * halfLength * 2;
-          const waviness = Math.sin(ratio * Math.PI * 5.5) * halfDepth * 0.25 + Math.cos(ratio * Math.PI * 3) * halfDepth * 0.12;
-          return [longitude, Math.max(-83, Math.min(83, lat + halfDepth + waviness))];
+        // Small, irregular cloud decks stay within a single geographic region.
+        // This avoids crossing the date seam while keeping the texture attached
+        // to the surface as the globe moves.
+        const horizontal = Math.min(severe ? 19 : 15, 4 + cloud * (severe ? 0.15 : 0.11));
+        const vertical = Math.min(severe ? 8 : 5.8, 1.4 + cloud * (severe ? 0.06 : 0.042));
+        const ring = Array.from({ length: 25 }, (_, index) => {
+          const angle = (Math.PI * 2 * index) / 24;
+          const ripple = 1 + Math.sin(angle * 3) * 0.18 + Math.cos(angle * 5) * 0.08;
+          return [lon + Math.cos(angle) * horizontal * ripple, Math.max(-83, Math.min(83, lat + Math.sin(angle) * vertical * ripple))];
         });
-        const lower = Array.from({ length: segments + 1 }, (_, reverseIndex) => {
-          const index = segments - reverseIndex;
-          const ratio = index / segments;
-          const longitude = lon - halfLength + ratio * halfLength * 2;
-          const waviness = Math.sin(ratio * Math.PI * 5.5 + 0.7) * halfDepth * 0.22 + Math.cos(ratio * Math.PI * 3.4) * halfDepth * 0.1;
-          return [longitude, Math.max(-83, Math.min(83, lat - halfDepth + waviness))];
-        });
-        const ring = [...upper, ...lower, upper[0]];
         return { type: "Polygon", coordinates: [ring] };
       };
       const weatherLayer = chart.series.push(am5map.MapPolygonSeries.new(root, {}));
+      const cloudTexture = am5.PicturePattern.new(root, {
+        src: "/clouds/cloud-front-a.png", width: 118, height: 46,
+        fit: "pattern", repetition: "repeat-x", centered: true,
+      });
       weatherLayer.mapPolygons.template.setAll({
         templateField: "settings", interactive: false,
-        fill: am5.color(0xe6fbff), fillOpacity: 0.34,
-        stroke: am5.color(0xe8fdff), strokeOpacity: 0.12, strokeWidth: 0.4,
+        fill: am5.color(0xdffaff), fillOpacity: 0.10, fillPattern: cloudTexture,
+        stroke: am5.color(0xe8fdff), strokeOpacity: 0.06, strokeWidth: 0.35,
       });
       const stormLayer = chart.series.push(am5map.MapPointSeries.new(root, { clipBack: true }));
       stormLayer.bullets.push((rootArg: any) => {
@@ -727,7 +722,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         { name: "Bogota", lat: 4.711, lon: -74.0721 }, { name: "Buenos Aires", lat: -34.6037, lon: -58.3816 },
         { name: "Lagos", lat: 6.5244, lon: 3.3792 }, { name: "Istanbul", lat: 41.0082, lon: 28.9784 },
         { name: "Beijing", lat: 39.9042, lon: 116.4074 }, { name: "Seoul", lat: 37.5665, lon: 126.978 },
-        { name: "Sydney", lat: -33.8688, lon: 151.2093 }, { name: "Auckland", lat: -36.8485, lon: 174.7633 },
+        { name: "Sydney", lat: -33.8688, lon: 151.2093 }, { name: "Perth", lat: -31.9505, lon: 115.8605 },
       ];
       const weatherLabel = (code: number) => code >= 95 ? "thunderstorm" : code >= 80 ? "rain showers" : code >= 51 ? "rain" : code >= 45 ? "mist" : code >= 3 ? "overcast" : code >= 1 ? "partly cloudy" : "clear";
       const weatherTone = (code: number, temperature = 0) => code >= 95 ? 0xc090ff : code >= 51 ? 0x5caef5 : temperature >= 30 ? 0xf2bb78 : code >= 3 ? 0x9ad7e4 : 0x9ee6c0;
@@ -742,7 +737,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
           geometry: stratusGeometry(site.lon, site.lat, cloud, severe), lon: site.lon, lat: site.lat,
           weather: `${site.name} · atmospheric simulation · live public conditions load when available`,
           tone, cloud, wet, severe,
-          settings: { fill: am5.color(severe ? 0xf3d27d : wet ? 0xd9f9ff : 0xc3eefa), fillOpacity: severe ? 0.48 : cloud < 14 ? 0 : Math.min(0.58, 0.18 + cloud * 0.005), strokeOpacity: severe ? 0.28 : 0.13 },
+          settings: { fill: am5.color(severe ? 0xf3d27d : wet ? 0xd9f9ff : 0xc3eefa), fillOpacity: severe ? 0.18 : cloud < 14 ? 0 : Math.min(0.16, 0.045 + cloud * 0.0012), strokeOpacity: severe ? 0.20 : 0.06 },
         };
       }));
       stormLayer.data.setAll([{ geometry: { type: "Point", coordinates: [103.8198, 1.3521] } }]);
@@ -763,7 +758,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
               geometry: stratusGeometry(site.lon, site.lat, cloud, severe), lon: site.lon, lat: site.lat,
               weather: `${site.name} · LIVE ${temperature}°C · ${weatherLabel(code)} · cloud ${cloud}% · wind ${wind} km/h`,
               tone: weatherTone(code, temperature), cloud, wet: code >= 51 || rain > 0, severe,
-              settings: { fill: am5.color(severe ? 0xf3d27d : code >= 51 || rain > 0 ? 0xd9f9ff : 0xc3eefa), fillOpacity: severe ? 0.52 : cloud < 14 ? 0 : Math.min(0.64, 0.2 + cloud * 0.005), strokeOpacity: severe ? 0.32 : 0.15 },
+              settings: { fill: am5.color(severe ? 0xf3d27d : code >= 51 || rain > 0 ? 0xd9f9ff : 0xc3eefa), fillOpacity: severe ? 0.20 : cloud < 14 ? 0 : Math.min(0.18, 0.055 + cloud * 0.0013), strokeOpacity: severe ? 0.22 : 0.07 },
             };
           }));
           if (!disposed) {
