@@ -466,9 +466,14 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         interactive: false,
       });
       ocean.data.setAll([{ geometry: am5map.getGeoRectangle(90, 180, -90, -180) }]);
-      // Keep this layer deliberately simple: map templates do not expose animation
-      // methods in the browser runtime. A failed template animation would stop all
-      // later country, signal and weather layers from being drawn.
+      // The generated polygon (not its template) owns the animation. This keeps
+      // every later layer safe while providing a restrained, living water surface.
+      ocean.events.once("datavalidated", () => {
+        const oceanPolygon = ocean.dataItems[0]?.get("mapPolygon");
+        if (!oceanPolygon) return;
+        oceanPolygon.animate({ key: "fillOpacity", from: 0.72, to: 0.98, duration: 6200, loops: Infinity, easing: am5.ease.sine });
+        oceanPolygon.animate({ key: "strokeOpacity", from: 0.18, to: 0.48, duration: 6200, loops: Infinity, easing: am5.ease.sine });
+      });
       const polygons = chart.series.push(am5map.MapPolygonSeries.new(root, { geoJSON: world }));
       polygons.mapPolygons.template.setAll({
         fill: am5.color(0x286986), stroke: am5.color(0x72d2e2), strokeOpacity: 0.38,
