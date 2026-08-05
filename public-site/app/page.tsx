@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-type Source = "OpenAI" | "Anthropic" | "Google AI" | "Hugging Face" | "Mistral AI" | "Cohere" | "Google DeepMind" | "TII" | "RIKEN" | "AI Singapore" | "IndiaAI" | "KAIST" | "Brazil Government" | "CTU Prague";
+type Source = "OpenAI" | "Anthropic" | "Google AI" | "Hugging Face" | "Mistral AI" | "Cohere" | "Google DeepMind" | "TII" | "RIKEN" | "AI Singapore" | "IndiaAI" | "KAIST" | "Brazil Government" | "CTU Prague" | "DFKI" | "AI Sweden";
 type News = { title: string; source: Source; place: string; lat: number; lon: number; url: string; summary: string; leis: string; reviewed?: string };
 
 const milestones = [
@@ -46,9 +46,11 @@ const news: News[] = [
   { title: "AI cyber defence research moves toward practice", source: "CTU Prague", place: "Prague, Czech Republic", lat: 50.0934, lon: 14.4013, url: "https://www.aktualne.cvut.cz/en/press-reports/20260630-a-doctoral-student-at-the-faculty-of-electrical-engineering-and-computer", summary: "A CTU Artificial Intelligence Center project uses AI-assisted cyber-deception defence to detect, confuse and contain intruders; the team reports preparation for pilot deployments.", leis: "LEIS question: in a security response, can the next defender recover not just an alert, but the evidence and reasoning that produced it?", reviewed: "30 June 2026" },
   { title: "AI, autonomy and responsibility enter the Czech science debate", source: "CTU Prague", place: "Prague, Czech Republic", lat: 50.0868, lon: 14.4169, url: "https://aktualne.cvut.cz/en/reports/20260512-speech-by-ctu-rector-michal-pechoucek-at-the-annual-meeting-of-the-learned-society", summary: "CTU Rector Michal Pěchouček framed AI around scientific discovery, human autonomy, trust and the responsibilities that accompany advanced technologies.", leis: "LEIS aligns with the distinction between capability and orientation: a useful system should keep people able to understand, question and take responsibility.", reviewed: "12 May 2026" },
   { title: "Physical AI and intelligent industry at RICAIP Days", source: "CTU Prague", place: "Prague, Czech Republic", lat: 50.1057, lon: 14.3864, url: "https://www.aktualne.cvut.cz/en/press-reports", summary: "CTU's public news desk identified AI in the physical world and intelligent physical systems as a major RICAIP Days 2026 theme for European industrial competitiveness.", leis: "LEIS lens: physical systems need a readable chain from data and models to human intent, conditions and accountability.", reviewed: "5 June 2026" },
+  { title: "AI research moves toward real-world use", source: "DFKI", place: "Saarbrucken, Germany", lat: 49.2402, lon: 6.9969, url: "https://www.dfki.de/en/web/news/ki-als-transformator-dfki-auf-der-hannover-messe-2026", summary: "The German Research Center for Artificial Intelligence presents practical AI applications across industry, health, logistics and decision support, with attention to social responsibility and technological autonomy.", leis: "LEIS question: when research crosses into practice, can the next operator recover the evidence, constraints and human judgement that made a system safe to use?", reviewed: "9 April 2026" },
+  { title: "AI skills and practical collaboration", source: "AI Sweden", place: "Stockholm, Sweden", lat: 59.3293, lon: 18.0686, url: "https://www.ai.se/en/news", summary: "AI Sweden's public work connects skills, public institutions, industry and research, treating human-AI collaboration as a national capability rather than a tool rollout alone.", leis: "LEIS lens: skills endure when people can recognise not only how to use a system, but also its purpose, limits and the conditions in which it can be trusted.", reviewed: "9 July 2026" },
 ];
 
-const sourceColors: Record<Source, string> = { OpenAI: "#a991ff", Anthropic: "#ffb16e", "Google AI": "#6de4ff", "Hugging Face": "#f6dc6a", "Mistral AI": "#ff8bbb", Cohere: "#ffb270", "Google DeepMind": "#84a7ff", TII: "#7af0c8", RIKEN: "#ffd66d", "AI Singapore": "#91e8ee", IndiaAI: "#ffcf6a", KAIST: "#b6a2ff", "Brazil Government": "#6ff0b0", "CTU Prague": "#72e7c1" };
+const sourceColors: Record<Source, string> = { OpenAI: "#a991ff", Anthropic: "#ffb16e", "Google AI": "#6de4ff", "Hugging Face": "#f6dc6a", "Mistral AI": "#ff8bbb", Cohere: "#ffb270", "Google DeepMind": "#84a7ff", TII: "#7af0c8", RIKEN: "#ffd66d", "AI Singapore": "#91e8ee", IndiaAI: "#ffcf6a", KAIST: "#b6a2ff", "Brazil Government": "#6ff0b0", "CTU Prague": "#72e7c1", DFKI: "#ffcb72", "AI Sweden": "#8eb8ff" };
 const leisOriginPoints = [
   { label: "LEIS CREATOR, Martin Pužík", role: "Founder and constitution author", location: "PRAGUE, Czech Republic", lat: 50.0755, lon: 14.4378 },
   { label: "LEIS TECHNICAL COLLABORATION, M.A.J. Pužík", role: "Technical activation and development", location: "PRAGUE, Czech Republic", lat: 50.087, lon: 14.425 },
@@ -167,6 +169,17 @@ const countryProfiles: Record<string, { eyebrow: string; title: string; summary:
     links: [
       { label: "Germany · AI strategy", url: "https://www.bundesregierung.de/breg-de/themen/digitalisierung/ki-strategie-1542410" },
       { label: "DFKI · German AI research", url: "https://www.dfki.de/en/web" },
+    ],
+  },
+  Sweden: {
+    eyebrow: "COUNTRY AI CONTEXT · REVIEWED 5 AUGUST 2026",
+    title: "Sweden: skills, public value and human-AI collaboration",
+    summary: "Sweden's public AI ecosystem brings research, municipalities, health, industry and workforce learning into the same conversation. AI Sweden is one public hub for this work.",
+    use: "Current public work covers workforce skills, responsible adoption, public-sector collaboration, digital sovereignty, health and practical AI transformation across organisations.",
+    leis: "LEIS context: capability becomes more durable when people can recover the purpose, local conditions and limits behind an AI-assisted result — not only the result itself.",
+    links: [
+      { label: "AI Sweden · public news and projects", url: "https://www.ai.se/en/news" },
+      { label: "AI Sweden · national ecosystem", url: "https://www.ai.se/en" },
     ],
   },
   "United Kingdom": {
