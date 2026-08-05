@@ -713,6 +713,11 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         fill: am5.color(0xdffaff), fillOpacity: 0.035,
         stroke: am5.color(0xe8fdff), strokeOpacity: 0.025, strokeWidth: 0.3,
       });
+      // amCharts projects broad geographic polygons differently across some
+      // viewports, which can turn thin weather shapes into a full-screen haze.
+      // Keep the geographic weather feed for storm detection, but never render
+      // that unreliable fill across the Earth surface.
+      weatherLayer.set("visible", false);
       const stormLayer = chart.series.push(am5map.MapPointSeries.new(root, { clipBack: true }));
       stormLayer.bullets.push((rootArg: any) => {
         const holder = am5.Container.new(rootArg, { width: 0, height: 0, centerX: am5.p50, centerY: am5.p50 });
@@ -783,7 +788,6 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       weatherRefresh = setInterval(() => { void refreshWeather(); }, 10 * 60 * 1000);
       const atmosphereToggle = (event: Event) => {
         const visible = Boolean((event as CustomEvent<boolean>).detail);
-        weatherLayer.set("visible", visible);
         stormLayer.set("visible", visible);
       };
       node.current?.addEventListener("leis-atmosphere-toggle", atmosphereToggle);
