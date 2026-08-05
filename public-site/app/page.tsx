@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-type Source = "OpenAI" | "Anthropic" | "Google AI" | "Hugging Face" | "Mistral AI" | "Cohere" | "Google DeepMind" | "TII" | "RIKEN" | "AI Singapore" | "IndiaAI" | "KAIST" | "Brazil Government";
+type Source = "OpenAI" | "Anthropic" | "Google AI" | "Hugging Face" | "Mistral AI" | "Cohere" | "Google DeepMind" | "TII" | "RIKEN" | "AI Singapore" | "IndiaAI" | "KAIST" | "Brazil Government" | "CTU Prague";
 type News = { title: string; source: Source; place: string; lat: number; lon: number; url: string; summary: string; leis: string; reviewed?: string };
 
 const milestones = [
@@ -42,9 +42,13 @@ const news: News[] = [
   { title: "AI Impact Summit: public AI capacity", source: "IndiaAI", place: "New Delhi, India", lat: 28.6139, lon: 77.209, url: "https://impact.indiaai.gov.in/events/AiImpactExpo.pdf", summary: "India's Ministry of Electronics and Information Technology presents the AI Impact Summit 2026 as a public showcase for AI capability, research and societal application.", leis: "LEIS lens: capacity matters most when people can recover the human purpose, evidence and public responsibility behind deployment.", reviewed: "2026" },
   { title: "AI technology transfer and public research", source: "KAIST", place: "Seoul, South Korea", lat: 37.5665, lon: 126.978, url: "https://www.kaist.ac.kr/news/html/news/?skey=keyword&sval=KAIST+AI+%EA%B8%B0%EC%88%A0%EC%84%A4%EB%AA%85%ED%9A%8C+2026", summary: "KAIST's AI technology briefing presents research in trustworthy AI, health AI, robotics, multimodal systems and physical AI for collaboration with industry and the public.", leis: "LEIS question: when research crosses into practice, can its intent, limitations and evidence travel with it?", reviewed: "6 May 2026" },
   { title: "Responsible AI in public services", source: "Brazil Government", place: "Brasília, Brazil", lat: -15.7939, lon: -47.8828, url: "https://www.gov.br/governodigital/pt-br/infraestrutura-nacional-de-dados/inteligencia-artificial-1/inteligencia-artificial-1", summary: "Brazil's digital-government AI initiative reports public-sector AI tools, governance guidance, risk and ethics work, and planned capability building.", leis: "LEIS lens: public AI needs an understandable lineage from policy to implementation, including who remains responsible when systems change.", reviewed: "2026" },
+  { title: "National Artificial Intelligence Center launches in Prague", source: "CTU Prague", place: "Prague, Czech Republic", lat: 50.1012, lon: 14.3948, url: "https://aktualne.cvut.cz/en/media-screenings/20260423-launch-of-the-national-artificial-intelligence-center", summary: "Czech Technical University reports the launch of the National Artificial Intelligence Center: six universities and dozens of companies are joining research with practical AI use in Czech industry and public life.", leis: "LEIS lens: practical adoption is stronger when research, pilots and decisions retain their evidence, purpose and responsibility across handovers.", reviewed: "23 April 2026" },
+  { title: "AI cyber defence research moves toward practice", source: "CTU Prague", place: "Prague, Czech Republic", lat: 50.0934, lon: 14.4013, url: "https://www.aktualne.cvut.cz/en/press-reports/20260630-a-doctoral-student-at-the-faculty-of-electrical-engineering-and-computer", summary: "A CTU Artificial Intelligence Center project uses AI-assisted cyber-deception defence to detect, confuse and contain intruders; the team reports preparation for pilot deployments.", leis: "LEIS question: in a security response, can the next defender recover not just an alert, but the evidence and reasoning that produced it?", reviewed: "30 June 2026" },
+  { title: "AI, autonomy and responsibility enter the Czech science debate", source: "CTU Prague", place: "Prague, Czech Republic", lat: 50.0868, lon: 14.4169, url: "https://aktualne.cvut.cz/en/reports/20260512-speech-by-ctu-rector-michal-pechoucek-at-the-annual-meeting-of-the-learned-society", summary: "CTU Rector Michal Pěchouček framed AI around scientific discovery, human autonomy, trust and the responsibilities that accompany advanced technologies.", leis: "LEIS aligns with the distinction between capability and orientation: a useful system should keep people able to understand, question and take responsibility.", reviewed: "12 May 2026" },
+  { title: "Physical AI and intelligent industry at RICAIP Days", source: "CTU Prague", place: "Prague, Czech Republic", lat: 50.1057, lon: 14.3864, url: "https://www.aktualne.cvut.cz/en/press-reports", summary: "CTU's public news desk identified AI in the physical world and intelligent physical systems as a major RICAIP Days 2026 theme for European industrial competitiveness.", leis: "LEIS lens: physical systems need a readable chain from data and models to human intent, conditions and accountability.", reviewed: "5 June 2026" },
 ];
 
-const sourceColors: Record<Source, string> = { OpenAI: "#a991ff", Anthropic: "#ffb16e", "Google AI": "#6de4ff", "Hugging Face": "#f6dc6a", "Mistral AI": "#ff8bbb", Cohere: "#ffb270", "Google DeepMind": "#84a7ff", TII: "#7af0c8", RIKEN: "#ffd66d", "AI Singapore": "#91e8ee", IndiaAI: "#ffcf6a", KAIST: "#b6a2ff", "Brazil Government": "#6ff0b0" };
+const sourceColors: Record<Source, string> = { OpenAI: "#a991ff", Anthropic: "#ffb16e", "Google AI": "#6de4ff", "Hugging Face": "#f6dc6a", "Mistral AI": "#ff8bbb", Cohere: "#ffb270", "Google DeepMind": "#84a7ff", TII: "#7af0c8", RIKEN: "#ffd66d", "AI Singapore": "#91e8ee", IndiaAI: "#ffcf6a", KAIST: "#b6a2ff", "Brazil Government": "#6ff0b0", "CTU Prague": "#72e7c1" };
 const leisOriginPoints = [
   { label: "LEIS CREATOR, Martin Pužík", role: "Founder and constitution author", location: "PRAGUE, Czech Republic", lat: 50.0755, lon: 14.4378 },
   { label: "LEIS TECHNICAL COLLABORATION, M.A.J. Pužík", role: "Technical activation and development", location: "PRAGUE, Czech Republic", lat: 50.087, lon: 14.425 },
@@ -353,7 +357,15 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
     aim(news[index]);
   }, [aim, onSelect]);
 
-  const openPrague = useCallback(() => {
+  const openCzechia = useCallback(() => {
+    setCountry("Czech Republic");
+    setSelected(null);
+    setDetail(false);
+    setDeskStart(null);
+    setFocus(true);
+  }, []);
+
+  const openPragueOrigin = useCallback(() => {
     setCountry("Prague, Czech Republic");
     setSelected(null);
     setDetail(false);
@@ -462,7 +474,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       polygons.mapPolygons.template.states.create("hover", { fill: am5.color(0x246f8a) });
       polygons.mapPolygons.template.events.on("click", (event: any) => {
         const data = event.target.dataItem?.dataContext ?? {};
-        if (data.name === "Czechia" || data.name === "Czech Republic") openPrague();
+        if (data.name === "Czechia" || data.name === "Czech Republic") openCzechia();
         else { setCountry(data.name ?? "Selected country"); setSelected(null); setDeskStart(null); setDetail(false); setFocus(true); }
         manualUntil = Date.now() + 13000;
       });
@@ -523,7 +535,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         halo.animate({ key: "opacity", from: 0.72, to: 0, duration: 2400, loops: Infinity, easing: am5.ease.cubic });
         hit.events.on("click", () => {
           if (typeof data.deskStart === "number") openDesk(data.deskStart);
-          else openPrague();
+          else openPragueOrigin();
           manualUntil = Date.now() + 13000;
         });
         return am5.Bullet.new(rootArg, { sprite: holder });
@@ -531,7 +543,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       const clusterIndex = new Map<string, number>();
       const anchors = new Map<string, [number, number]>();
       points.data.setAll([
-        ...[0, 5, 10, 13, 15, 20, 21, 22, 23, 24, 25, 26, 27, 28].map((deskStart) => {
+        ...[0, 5, 10, 13, 15, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29].map((deskStart) => {
           const item = news[deskStart];
           return { deskStart, color: 0x69ffba, geometry: { type: "Point", coordinates: [item.lon, item.lat] } };
         }),
@@ -558,12 +570,13 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       if (wheelHost && onTouchEnd) wheelHost.removeEventListener("touchend", onTouchEnd);
       root?.dispose();
     };
-  }, [openDesk, openPrague]);
+  }, [openCzechia, openDesk, openPragueOrigin]);
 
   const countrySignals = country
     ? news.map((item, index) => ({ item, index })).filter(({ item }) =>
       country.includes("United States") ? item.place.includes("USA") :
-      country.includes("France") ? item.place.includes("France") : false)
+      country.includes("France") ? item.place.includes("France") :
+      country.includes("Czech Republic") ? item.place.includes("Czech Republic") : false)
     : [];
   const isPrague = Boolean(country?.includes("Prague"));
   const deskSignals = deskStart === null ? [] : news.map((item, index) => ({ item, index })).filter(({ item }) => item.source === news[deskStart].source && item.place === news[deskStart].place).slice(0, 5);
@@ -609,6 +622,22 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
               <small>{item.source} NEWSROOM · {item.place} · SOURCE REVIEWED {item.reviewed ?? "5 AUGUST 2026"}</small>
               <strong>{item.title}</strong>
             </button>)}
+          </div>
+        </> : country === "Czech Republic" ? <>
+          <small>CZECH REPUBLIC · PUBLIC AI SIGNALS + LEIS ORIGIN</small>
+          <h3>Czech AI, with Prague context.</h3>
+          <div className="country-profile czech-intro">
+            <p>These are public AI articles from Czech Technical University in Prague. They are separate from LEIS: the Prague origin cards below identify authorship and collaboration, not a Czech news desk.</p>
+          </div>
+          <div className="focus-choices">
+            {countrySignals.slice(0, 5).map(({ item, index }) => <button key={item.title} onClick={() => choose(index, true)}>
+              <small>{item.source} · {item.place} · SOURCE REVIEWED {item.reviewed ?? "5 AUGUST 2026"}</small>
+              <strong>{item.title}</strong>
+            </button>)}
+          </div>
+          <div className="prague-origin-cards czech-origin-summary">
+            <article><small>LEIS ORIGIN · PRAGUE</small><strong>Martin Pužík</strong><span>Founder, creator and constitution author of LEIS. The core was independently completed around 10 July 2026.</span></article>
+            <article><small>TECHNICAL COLLABORATION</small><strong>M.A.J. Pužík</strong><span>Technical activation and development after the independent LEIS seed.</span></article>
           </div>
         </> : isPrague ? <>
           <small>LEIS ORIGIN / PRAGUE</small>
