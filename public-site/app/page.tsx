@@ -466,10 +466,9 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         interactive: false,
       });
       ocean.data.setAll([{ geometry: am5map.getGeoRectangle(90, 180, -90, -180) }]);
-      // This deliberately uses only the proven MapPolygon properties. It keeps the
-      // ocean coupled to the globe and gives it a quiet, visible tide without
-      // risking the country layer during initialisation.
-      ocean.mapPolygons.template.animate({ key: "fillOpacity", from: 0.74, to: 1, duration: 5600, loops: Infinity, easing: am5.ease.sine });
+      // Keep this layer deliberately simple: map templates do not expose animation
+      // methods in the browser runtime. A failed template animation would stop all
+      // later country, signal and weather layers from being drawn.
       const polygons = chart.series.push(am5map.MapPolygonSeries.new(root, { geoJSON: world }));
       polygons.mapPolygons.template.setAll({
         fill: am5.color(0x286986), stroke: am5.color(0x72d2e2), strokeOpacity: 0.38,
