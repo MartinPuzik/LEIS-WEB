@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type Source = "OpenAI" | "Anthropic" | "Google AI" | "Hugging Face";
-type News = { title: string; source: Source; place: string; lat: number; lon: number; url: string; summary: string; leis: string };
+type News = { title: string; source: Source; place: string; lat: number; lon: number; url: string; summary: string; leis: string; reviewed?: string };
 
 const milestones = [
   ["DOCUMENTED", "9 July 2026", "First constitutional seed", "The earliest currently located constitutional evidence identifies Martin Puzik as Founder and Initial Architect."],
@@ -13,8 +13,8 @@ const milestones = [
 ] as const;
 
 const news: News[] = [
-  { title: "New ways to learn and teach with ChatGPT", source: "OpenAI", place: "San Francisco, USA", lat: 37.7749, lon: -122.4194, url: "https://openai.com/news/", summary: "A current OpenAI newsroom item about learning and teaching with ChatGPT.", leis: "LEIS question: does the learner receive a result, or can they also recover the reasoning and limits behind it?" },
-  { title: "Third-party cyber evaluations", source: "OpenAI", place: "San Francisco, USA", lat: 37.8, lon: -122.39, url: "https://openai.com/news/", summary: "A newsroom item concerning external cyber evaluations involving OpenAI models.", leis: "LEIS question: can an evaluation preserve its evidence, conditions and uncertainty as it travels?" },
+  { title: "New ways to learn and teach with ChatGPT", source: "OpenAI", place: "San Francisco, USA", lat: 37.7749, lon: -122.4194, url: "https://openai.com/news/", summary: "A current OpenAI newsroom item about learning and teaching with ChatGPT.", leis: "LEIS question: does the learner receive a result, or can they also recover the reasoning and limits behind it?", reviewed: "5 August 2026" },
+  { title: "Third-party cyber evaluations", source: "OpenAI", place: "San Francisco, USA", lat: 37.8, lon: -122.39, url: "https://openai.com/news/", summary: "A newsroom item concerning external cyber evaluations involving OpenAI models.", leis: "LEIS question: can an evaluation preserve its evidence, conditions and uncertainty as it travels?", reviewed: "5 August 2026" },
   { title: "Continuous voice interaction with GPT Live", source: "OpenAI", place: "San Francisco, USA", lat: 37.75, lon: -122.45, url: "https://openai.com/news/", summary: "A current OpenAI announcement about continuous voice interaction.", leis: "LEIS lens: a natural interface is valuable only when people can still understand what it means and why it responded." },
   { title: "Building abundant intelligence", source: "OpenAI", place: "San Francisco, USA", lat: 37.73, lon: -122.41, url: "https://openai.com/news/", summary: "A current OpenAI discussion of abundant intelligence.", leis: "LEIS lens: capacity is not the same as continuity of understanding." },
   { title: "AI for science and discovery", source: "OpenAI", place: "San Francisco, USA", lat: 37.79, lon: -122.46, url: "https://openai.com/news/", summary: "A selected OpenAI research and science signal.", leis: "LEIS question: can discoveries remain reconstructable after the original team and tools change?" },
@@ -36,12 +36,16 @@ const news: News[] = [
 ];
 
 const sourceColors: Record<Source, string> = { OpenAI: "#a991ff", Anthropic: "#ffb16e", "Google AI": "#6de4ff", "Hugging Face": "#f6dc6a" };
+const leisOriginPoints = [
+  { label: "LEIS CREATOR, Martin Pužík", role: "Founder and constitution author", location: "PRAGUE, Czech Republic", lat: 50.0755, lon: 14.4378 },
+  { label: "LEIS TECHNICAL COLLABORATION, M.A.J. Pužík", role: "Technical activation and development", location: "PRAGUE, Czech Republic", lat: 50.087, lon: 14.425 },
+];
 const leisOrigins = [
   { label: "LEIS Creator · Martin Puzik", location: "Prague, Czech Republic", lat: 50.0755, lon: 14.4378 },
   { label: "LEIS technical collaboration · M.A.J. Puzik", location: "Prague, Czech Republic", lat: 50.087, lon: 14.425 },
 ];
 
-function Globe({ onSelect }: { onSelect: (index: number) => void }) {
+function GlobeLegacy({ onSelect }: { onSelect: (index: number) => void }) {
   const node = useRef<HTMLDivElement>(null);
   useEffect(() => {
     let root: { dispose: () => void } | undefined;
@@ -77,13 +81,63 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
   return <div className="globe-map" ref={node} aria-label="Interactive globe. Drag to rotate, scroll to zoom and choose a source point." />;
 }
 
+function Globe({ onSelect, focusIndex = 0 }: { onSelect: (index: number) => void; focusIndex?: number }) {
+  const node = useRef<HTMLDivElement>(null);
+  const chartRef = useRef<any>(null);
+  const onSelectRef = useRef(onSelect);
+  onSelectRef.current = onSelect;
+  useEffect(() => {
+    let root: any;
+    let disposed = false;
+    let focusHandler: ((event: Event) => void) | undefined;
+    (async () => {
+      const am5 = await import("@amcharts/amcharts5");
+      const am5map = await import("@amcharts/amcharts5/map");
+      const world = (await import("@amcharts/amcharts5-geodata/worldLow")).default;
+      if (disposed || !node.current) return;
+      root = am5.Root.new(node.current); root._logo?.dispose();
+      const chart = root.container.children.push(am5map.MapChart.new(root, { panX: "rotateX", panY: "rotateY", wheelY: "zoom", projection: am5map.geoOrthographic(), rotationX: -22, rotationY: -6 }));
+      chartRef.current = chart;
+      focusHandler = (event: Event) => { const item = news[(event as CustomEvent<number>).detail]; if (!item) return; chart.animate({ key: "rotationX", to: -item.lon, duration: 900 }); chart.animate({ key: "rotationY", to: -item.lat, duration: 900 }); };
+      window.addEventListener("leis-globe-focus", focusHandler);
+      const polygons = chart.series.push(am5map.MapPolygonSeries.new(root, { geoJSON: world }));
+      polygons.mapPolygons.template.setAll({ fill: am5.color(0x153f5e), stroke: am5.color(0x5bcfe0), strokeOpacity: 0.42, strokeWidth: 0.6, interactive: true, tooltipText: "{name}" });
+      polygons.mapPolygons.template.states.create("hover", { fill: am5.color(0x246f8a) });
+      const points = chart.series.push(am5map.MapPointSeries.new(root, {}));
+      points.bullets.push(() => {
+        const dot = am5.Circle.new(root, { radius: 5.4, fill: am5.color(0x69ffba), stroke: am5.color(0xeafff4), strokeWidth: 1.5, cursorOverStyle: "pointer", tooltipText: "{tooltip}" });
+        dot.adapters.add("fill", (_value: any, target: any) => am5.color(target.dataItem?.dataContext?.color ?? 0x69ffba));
+        dot.adapters.add("radius", (_value: any, target: any) => target.dataItem?.dataContext?.origin ? 6.5 : 5.4);
+        const tooltip = am5.Tooltip.new(root, { keepTargetHover: true, pointerOrientation: "horizontal" });
+        tooltip.get("background").setAll({ fill: am5.color(0x071b29), fillOpacity: 0.96, stroke: am5.color(0x77eff7), strokeOpacity: 0.8 });
+        tooltip.label.setAll({ fill: am5.color(0xe9fcff), fontSize: 11, paddingTop: 7, paddingBottom: 7, paddingLeft: 9, paddingRight: 9 });
+        dot.set("tooltip", tooltip);
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        dot.events.on("pointerover", () => { if (timer) clearTimeout(timer); dot.showTooltip(); });
+        dot.events.on("pointerout", () => { timer = setTimeout(() => dot.hideTooltip(), 1000); });
+        dot.animate({ key: "scale", from: 0.9, to: 1.72, duration: 1350, loops: Infinity, easing: am5.ease.cubic });
+        dot.animate({ key: "opacity", from: 1, to: 0.48, duration: 1350, loops: Infinity, easing: am5.ease.cubic });
+        dot.events.on("click", (event: any) => { const index = event.target.dataItem?.dataContext?.index; if (typeof index === "number") onSelectRef.current(index); });
+        return am5.Bullet.new(root, { sprite: dot });
+      });
+      points.data.setAll([
+        ...news.map((item, index) => ({ index, color: 0x69ffba, tooltip: `${item.place}\n${item.source}\nSource checked: ${item.reviewed ?? "5 August 2026"}`, geometry: { type: "Point", coordinates: [item.lon, item.lat] } })),
+        ...leisOriginPoints.map((item) => ({ origin: true, color: 0x58a9ff, tooltip: `${item.location}\n${item.label}\n${item.role}`, geometry: { type: "Point", coordinates: [item.lon, item.lat] } })),
+      ]);
+    })();
+    return () => { disposed = true; if (focusHandler) window.removeEventListener("leis-globe-focus", focusHandler); chartRef.current = null; root?.dispose(); };
+  }, []);
+  useEffect(() => { const item = news[focusIndex]; const chart = chartRef.current; if (!item || !chart) return; chart.animate({ key: "rotationX", to: -item.lon, duration: 900 }); chart.animate({ key: "rotationY", to: -item.lat, duration: 900 }); }, [focusIndex]);
+  return <div className="globe-map" ref={node} aria-label="Interactive globe. Drag to rotate, scroll to zoom and choose a source point." />;
+}
+
 export default function Home() {
   const [active, setActive] = useState(0);
   const [seedOpen, setSeedOpen] = useState(false);
   const [newsIndex, setNewsIndex] = useState(0);
   const current = milestones[active];
   const selected = news[newsIndex];
-  const choose = (index: number) => setNewsIndex(index);
+  const choose = useCallback((index: number) => { setNewsIndex(index); window.dispatchEvent(new CustomEvent("leis-globe-focus", { detail: index })); }, []);
   return <main>
     <nav><a className="mark" href="#top">Omega <b>LEIS</b></a><div><a href="#orientation">Start here</a><a href="#timeline">Our story</a><a href="#earth">Earth Pulse</a><a href="#grants">Support LEIS</a><a href="#media">Media</a></div></nav>
     <section className="hero" id="top"><div className="stars" /><div className="hero-copy"><p className="eyebrow">REALITY-ORIENTED UNDERSTANDING SYSTEM</p><h1>Understanding<br/><em>that can travel.</em></h1><p className="lead">LEIS is a technology-independent framework for recognising, activating and reconstructing understanding from reality.</p><div className="actions"><a className="primary" href="#orientation">Enter LEIS</a><a className="quiet" href="#timeline">Follow the lineage ↓</a></div></div><button className={`seed ${seedOpen ? "open" : ""}`} onClick={() => setSeedOpen(!seedOpen)} aria-expanded={seedOpen} aria-label="Open the LEIS Seed preview"><i/><span className="shell left"/><span className="shell right"/><span className="sprout"/></button><div className="seed-note"><span>LEIS SEED</span><strong>{seedOpen ? "A public Seed is taking shape." : "Touch the seed."}</strong><p>{seedOpen ? "A reviewed public entry point is being prepared: lineage, orientation and limits — without private archives." : "A small beginning, built to travel."}</p></div></section>
