@@ -446,6 +446,7 @@ function GlobeCurrentLegacy({ onSelect }: { onSelect: (index: number) => void })
   const [selected, setSelected] = useState<number | null>(null);
   const [country, setCountry] = useState<string | null>(null);
   const [deskStart, setDeskStart] = useState<number | null>(null);
+  const [atmosphereOn, setAtmosphereOn] = useState(true);
   const selectedNews = selected === null ? null : news[selected];
   const choose = (index: number, expand = false) => { setSelected(index); setCountry(null); setFocus(true); setDetail(expand); onSelect(index); const item = news[index]; const chart = chartRef.current; if (chart && item) { chart.animate({ key: "rotationX", to: -item.lon, duration: 850 }); chart.animate({ key: "rotationY", to: -item.lat, duration: 850 }); } };
   const close = () => { setFocus(false); setDetail(false); setCountry(null); };
@@ -505,6 +506,12 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
     const next = Math.max(1, Math.min(4.5, current + direction * 0.35));
     chart.animate({ key: "zoomLevel", to: next, duration: 220 });
   }, []);
+
+  const toggleAtmosphere = useCallback(() => {
+    const next = !atmosphereOn;
+    node.current?.dispatchEvent(new CustomEvent("leis-atmosphere-toggle", { detail: next }));
+    setAtmosphereOn(next);
+  }, [atmosphereOn]);
 
   const choose = useCallback((index: number, expand = false) => {
     setSelected(index);
@@ -716,6 +723,11 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       };
       void refreshWeather();
       weatherRefresh = setInterval(() => { void refreshWeather(); }, 10 * 60 * 1000);
+      const atmosphereToggle = (event: Event) => {
+        const visible = Boolean((event as CustomEvent<boolean>).detail);
+        weatherLayer.set("visible", visible);
+      };
+      node.current?.addEventListener("leis-atmosphere-toggle", atmosphereToggle);
       const routes = chart.series.push(am5map.MapLineSeries.new(root, {}));
       routes.mapLines.template.setAll({
         stroke: am5.color(0x72f2f5), strokeOpacity: 0.44, strokeWidth: 1.5,
@@ -776,6 +788,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       if (drift) clearInterval(drift);
       if (route) clearInterval(route);
       if (weatherRefresh) clearInterval(weatherRefresh);
+      node.current?.removeEventListener("leis-atmosphere-toggle", atmosphereToggle);
       if (wheelHost && onWheel) wheelHost.removeEventListener("wheel", onWheel);
       if (wheelHost && onTouchStart) wheelHost.removeEventListener("touchstart", onTouchStart);
       if (wheelHost && onTouchMove) wheelHost.removeEventListener("touchmove", onTouchMove);
@@ -822,6 +835,9 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         <span>Atmosphere layer</span>
         <small>simulated motion · live conditions when available</small>
       </div>
+      <button className={`globe-atmosphere-control ${atmosphereOn ? "active" : ""}`} onClick={toggleAtmosphere} aria-pressed={atmosphereOn}>
+        <span aria-hidden="true">☁</span>{atmosphereOn ? "Atmosphere on" : "Atmosphere off"}
+      </button>
       <div className="globe-zoom-controls" aria-label="Globe zoom controls">
         <button onClick={() => adjustZoom(1)} aria-label="Zoom in">+</button>
         <button onClick={() => adjustZoom(-1)} aria-label="Zoom out">−</button>
