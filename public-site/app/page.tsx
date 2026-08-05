@@ -522,6 +522,15 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
   const isPrague = Boolean(country?.includes("Prague"));
   const deskSignals = deskStart === null ? [] : news.map((item, index) => ({ item, index })).filter(({ item }) => item.source === news[deskStart].source && item.place === news[deskStart].place).slice(0, 5);
   const countryProfile = country ? countryProfiles[country] : undefined;
+  const pendingCountryProfile = country && !isPrague && !countryProfile && !countrySignals.length ? {
+    eyebrow: "COUNTRY AI CONTEXT · LOCAL PROFILE IN PREPARATION",
+    title: `${country}: AI context is being mapped`,
+    summary: "AI is now part of daily life, research, public services or business in every country, but the evidence, pace and safeguards are local. LEIS will not fill this space with unrelated news from elsewhere.",
+    use: "This country has not yet received a reviewed local evidence pack. The next update will attach primary local sources, relevant institutions and a concise explanation of how AI is shaping the country.",
+    leis: "LEIS context: a useful global view does not pretend that all places are the same. It keeps local evidence, uncertainty and provenance visible.",
+    links: [{ label: "OECD AI Policy Observatory", url: "https://oecd.ai/en/dashboards/countries" }],
+  } : undefined;
+  const displayedCountryProfile = countryProfile ?? pendingCountryProfile;
 
   return <>
     <div className="globe-map-shell">
@@ -537,11 +546,11 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       <section className={`globe-focus-window ${detail ? "level-2" : "level-1"}`} aria-live="polite">
         <button className="close-focus" onClick={close} aria-label="Close selection">×</button>
         {selectedNews ? <article className="selected-article">
-          <p className="focus-origin">
+          <p className="article-source">
             {selectedNews.source} NEWSROOM · {selectedNews.place} · SOURCE REVIEWED {selectedNews.reviewed ?? "5 AUGUST 2026"}
           </p>
           <h3>{selectedNews.title}</h3>
-          {detail ? <div className="focus-detail">
+          {detail ? <div className="selected-detail">
             <p><b>What this source reports</b><br />{selectedNews.summary}</p>
             <p><b>LEIS context</b><br />{selectedNews.leis}</p>
             <a className="primary" href={selectedNews.url} target="_blank" rel="noreferrer">Read the original source ↗</a>
@@ -563,14 +572,14 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
             <article><small>TECHNICAL COLLABORATION</small><strong>M.A.J. Pužík</strong><span>Technical activation and development.</span><p>Joined after the seed: practical AI and technical experience supporting LEIS activation, while the core retained its independent origin.</p></article>
             <article><small>PUBLIC CONTACT</small><strong>Work with LEIS</strong><span>Questions, research, grants or partnership.</span><a href="mailto:martin.puzik@gmail.com?subject=LEIS%20contact">Contact Martin Pužík ↗</a></article>
           </div>
-        </> : countryProfile ? <>
-          <small>{countryProfile.eyebrow}</small>
-          <h3>{countryProfile.title}</h3>
+        </> : displayedCountryProfile ? <>
+          <small>{displayedCountryProfile.eyebrow}</small>
+          <h3>{displayedCountryProfile.title}</h3>
           <div className="country-profile">
-            <p>{countryProfile.summary}</p>
-            <p><b>How AI is used</b><br />{countryProfile.use}</p>
-            <p><b>LEIS context</b><br />{countryProfile.leis}</p>
-            <div className="country-profile-links">{countryProfile.links.map((link) => <a key={link.url} href={link.url} target="_blank" rel="noreferrer">{link.label} ↗</a>)}</div>
+            <p>{displayedCountryProfile.summary}</p>
+            <p><b>How AI is used</b><br />{displayedCountryProfile.use}</p>
+            <p><b>LEIS context</b><br />{displayedCountryProfile.leis}</p>
+            <div className="country-profile-links">{displayedCountryProfile.links.map((link) => <a key={link.url} href={link.url} target="_blank" rel="noreferrer">{link.label} ↗</a>)}</div>
           </div>
         </> : <>
           <small>PUBLIC SOURCE DESKS</small>
