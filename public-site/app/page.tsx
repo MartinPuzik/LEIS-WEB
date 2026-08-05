@@ -45,6 +45,20 @@ const leisOrigins = [
   { label: "LEIS technical collaboration · M.A.J. Puzik", location: "Prague, Czech Republic", lat: 50.087, lon: 14.425 },
 ];
 
+const countryProfiles: Record<string, { eyebrow: string; title: string; summary: string; use: string; leis: string; links: Array<{ label: string; url: string }> }> = {
+  Canada: {
+    eyebrow: "COUNTRY AI CONTEXT · REVIEWED 5 AUGUST 2026",
+    title: "Canada: AI adoption, trust and sovereignty",
+    summary: "Statistics Canada reports that 19.2% of Canadian businesses used AI to produce goods or deliver services in 2026, up from 12.2% in 2025.",
+    use: "Reported business uses include data analytics, text analytics, virtual agents and chatbots, natural-language processing and large language models.",
+    leis: "LEIS context: adoption becomes durable when organisations can retain the evidence, conditions and responsibility behind an AI-assisted decision.",
+    links: [
+      { label: "Statistics Canada · AI use in business", url: "https://www150.statcan.gc.ca/n1/pub/11-621-m/11-621-m2026010-eng.pdf" },
+      { label: "Government of Canada · AI for All strategy", url: "https://ised-isde.canada.ca/site/ised/en/canadas-national-artificial-intelligence-strategy-ai-all" },
+    ],
+  },
+};
+
 function GlobeLegacy({ onSelect }: { onSelect: (index: number) => void }) {
   const node = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -479,6 +493,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
     : [];
   const isPrague = Boolean(country?.includes("Prague"));
   const deskSignals = deskStart === null ? [] : news.map((item, index) => ({ item, index })).filter(({ item }) => item.source === news[deskStart].source && item.place === news[deskStart].place).slice(0, 5);
+  const countryProfile = country ? countryProfiles[country] : undefined;
 
   return <>
     <div className="globe-map-shell">
@@ -520,6 +535,15 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
             <article><small>TECHNICAL COLLABORATION</small><strong>M.A.J. Pužík</strong><span>Technical activation and development.</span><p>Joined after the seed: practical AI and technical experience supporting LEIS activation, while the core retained its independent origin.</p></article>
             <article><small>PUBLIC CONTACT</small><strong>Work with LEIS</strong><span>Questions, research, grants or partnership.</span><a href="mailto:martin.puzik@gmail.com?subject=LEIS%20contact">Contact Martin Pužík ↗</a></article>
           </div>
+        </> : countryProfile ? <>
+          <small>{countryProfile.eyebrow}</small>
+          <h3>{countryProfile.title}</h3>
+          <div className="country-profile">
+            <p>{countryProfile.summary}</p>
+            <p><b>How AI is used</b><br />{countryProfile.use}</p>
+            <p><b>LEIS context</b><br />{countryProfile.leis}</p>
+            <div className="country-profile-links">{countryProfile.links.map((link) => <a key={link.url} href={link.url} target="_blank" rel="noreferrer">{link.label} ↗</a>)}</div>
+          </div>
         </> : <>
           <small>PUBLIC SOURCE DESKS</small>
           <h3>{country ?? "Explore current AI source signals"}</h3>
@@ -528,12 +552,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
               <small>{item.source} NEWSROOM · {item.place} · SOURCE REVIEWED {item.reviewed ?? "5 AUGUST 2026"}</small>
               <strong>{item.title}</strong>
             </button>)}
-          </div> : <div className="focus-choices">
-            {[0, 5, 10, 15].map((index) => <button key={news[index].source} onClick={() => choose(index, true)}>
-              <small>{news[index].source} · {news[index].place} · PUBLIC DESK</small>
-              <strong>Open the latest reviewed signals</strong>
-            </button>)}
-          </div>}
+          </div> : <p className="country-empty">No reviewed local source or country AI profile has been added here yet. LEIS does not substitute unrelated news from another country.</p>}
         </>}
       </section>
     </>}
