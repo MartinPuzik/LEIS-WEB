@@ -491,6 +491,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
   const [country, setCountry] = useState<string | null>(null);
   const [deskStart, setDeskStart] = useState<number | null>(null);
   const [atmosphereOn, setAtmosphereOn] = useState(true);
+  const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "fallback">("loading");
   const selectedNews = selected === null ? null : news[selected];
 
   const aim = useCallback((item: News, duration = 850) => {
@@ -572,6 +573,8 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
     let onTouchStart: ((event: TouchEvent) => void) | undefined;
     let onTouchMove: ((event: TouchEvent) => void) | undefined;
     let onTouchEnd: ((event: TouchEvent) => void) | undefined;
+    let resizeObserver: ResizeObserver | undefined;
+    let resizeTimer: ReturnType<typeof setTimeout> | undefined;
     let pinchStartDistance = 0;
     let pinchStartZoom = 1;
     let manualUntil = 0;
@@ -582,6 +585,10 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       chart.animate({ key: "rotationY", to: -item.lat, duration });
     };
     (async () => {
+      try {
+      // Android Chrome can report its final viewport after the initial React
+      // paint. Waiting two frames prevents an invisible zero-size map root.
+      await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
       const am5 = await import("@amcharts/amcharts5");
       const am5map = await import("@amcharts/amcharts5/map");
       const world = (await import("@amcharts/amcharts5-geodata/worldLow")).default;
@@ -594,6 +601,13 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       }));
       chartRef.current = chart;
       wheelHost = node.current;
+      const resizeMap = () => root?.resize?.();
+      if (typeof ResizeObserver !== "undefined") {
+        resizeObserver = new ResizeObserver(resizeMap);
+        resizeObserver.observe(wheelHost);
+      }
+      resizeTimer = setTimeout(resizeMap, 140);
+      setMapStatus("ready");
       onWheel = (event: WheelEvent) => {
         if (!event.shiftKey) return;
         event.preventDefault();
@@ -829,12 +843,18 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
           rotateTo(news[next]);
         }
       }, 11500);
+      } catch (error) {
+        if (!disposed) setMapStatus("fallback");
+        console.error("LEIS globe initialisation failed", error);
+      }
     })();
     return () => {
       disposed = true;
       if (drift) clearInterval(drift);
       if (route) clearInterval(route);
       if (weatherRefresh) clearInterval(weatherRefresh);
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeObserver?.disconnect();
       node.current?.removeEventListener("leis-atmosphere-toggle", atmosphereToggle);
       if (wheelHost && onWheel) wheelHost.removeEventListener("wheel", onWheel);
       if (wheelHost && onTouchStart) wheelHost.removeEventListener("touchstart", onTouchStart);
@@ -870,17 +890,22 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
   return <>
     <div className="globe-map-shell">
       <div className="globe-map" ref={node} aria-label="Interactive globe. Drag to rotate, scroll to zoom and choose a source point." />
+      {mapStatus !== "ready" && <div className={`mobile-map-status ${mapStatus}`} aria-live="polite">
+        <span aria-hidden="true">◌</span>
+        <b>{mapStatus === "loading" ? "Preparing the interactive Earth" : "Interactive Earth is reloading"}</b>
+        <small>{mapStatus === "loading" ? "The globe will appear in a moment." : "Please refresh once to try the live map again."}</small>
+      </div>}
       <div className="globe-weather-hud" aria-label="Live weather layer active">
         <i aria-hidden="true" />
         <span>Live cloud conditions</span>
         <small>Open-Meteo · visualised cloud cover · refreshes every 10 min</small>
       </div>
-      <button className={`globe-atmosphere-control ${atmosphereOn ? "active" : ""}`} onClick={toggleAtmosphere} aria-pressed={atmosphereOn}>
+      <button type="button" className={`globe-atmosphere-control ${atmosphereOn ? "active" : ""}`} onPointerDown={(event) => event.stopPropagation()} onClick={toggleAtmosphere} aria-pressed={atmosphereOn}>
         <span aria-hidden="true">☁</span>{atmosphereOn ? "Atmosphere on" : "Atmosphere off"}
       </button>
       <div className="globe-zoom-controls" aria-label="Globe zoom controls">
-        <button onClick={() => adjustZoom(1)} aria-label="Zoom in">+</button>
-        <button onClick={() => adjustZoom(-1)} aria-label="Zoom out">−</button>
+        <button type="button" onPointerDown={(event) => event.stopPropagation()} onClick={() => adjustZoom(1)} aria-label="Zoom in">+</button>
+        <button type="button" onPointerDown={(event) => event.stopPropagation()} onClick={() => adjustZoom(-1)} aria-label="Zoom out">−</button>
         <span>Shift + scroll</span>
       </div>
     </div>
