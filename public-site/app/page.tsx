@@ -991,6 +991,38 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
   </>;
 }
 
+function ContactPath() {
+  const [open, setOpen] = useState(false);
+  const [topic, setTopic] = useState("Research dialogue");
+  const [name, setName] = useState("");
+  const [organisation, setOrganisation] = useState("");
+  const [message, setMessage] = useState("");
+  const openMail = (event: React.FormEvent) => {
+    event.preventDefault();
+    const subject = `LEIS · ${topic}`;
+    const body = [
+      `Topic: ${topic}`,
+      `Name: ${name || "Not provided"}`,
+      `Organisation: ${organisation || "Not provided"}`,
+      "",
+      message || "Hello Martin, I would like to begin a conversation about LEIS.",
+    ].join("\n");
+    window.location.href = `mailto:martin.puzik@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+  return <section className="contact-path" aria-label="Contact LEIS">
+    <p className="eyebrow">A HUMAN CONTACT PATH</p>
+    <h2>Start with a real question.</h2>
+    <p>For a grant, a research conversation, a practical pilot or media context. Your note stays on your device until you choose to open an e-mail.</p>
+    {!open ? <button type="button" className="primary" onClick={() => setOpen(true)}>Write to LEIS</button> : <form onSubmit={openMail}>
+      <div className="contact-topics">{["Grant or support", "Research dialogue", "Practical pilot", "Media enquiry"].map((item) => <button type="button" key={item} className={topic === item ? "active" : ""} onClick={() => setTopic(item)}>{item}</button>)}</div>
+      <label>Your name<input value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" /></label>
+      <label>Organisation <small>(optional)</small><input value={organisation} onChange={(event) => setOrganisation(event.target.value)} autoComplete="organization" /></label>
+      <label>What would you like to explore?<textarea value={message} onChange={(event) => setMessage(event.target.value)} required /></label>
+      <div className="contact-actions"><button type="submit" className="primary">Open prepared e-mail</button><button type="button" className="quiet" onClick={() => setOpen(false)}>Not now</button></div>
+    </form>}
+  </section>;
+}
+
 export default function Home() {
   const [active, setActive] = useState(0);
   const [seedOpen, setSeedOpen] = useState(false);
@@ -1014,7 +1046,7 @@ export default function Home() {
     <section className="grants" id="grants"><p className="eyebrow">SUPPORT / COOPERATION / GRANT INTENT</p><h2>Keep LEIS free.<br/>Make it durable.</h2><p className="grant-lead">LEIS is free of charge forever. Support does not buy a wall around knowledge; it gives the human work behind preservation, validation and accessible public orientation the time to continue.</p><div className="grant-grid"><article><b>01</b><h3>Preserve</h3><p>Recover source lineage, distinguish evidence from interpretation and prevent years of work from becoming unreadable files.</p></article><article><b>02</b><h3>Test</h3><p>Measure whether understanding survives a handover: can a new person reconstruct a decision, its conditions and its limits?</p></article><article><b>03</b><h3>Share</h3><p>Build public explanations, practical pilots and open materials that let people judge LEIS for themselves.</p></article></div><div className="grant-path"><p><b>For grants:</b> operational continuity, documentation, validation, infrastructure and independent review.</p><p><b>For companies:</b> a bounded collaboration around a real handover, decision or knowledge-continuity problem.</p><p><b>For researchers and institutions:</b> an invitation to challenge the method and improve its tests.</p></div><a className="primary" href="mailto:martin.puzik@gmail.com?subject=LEIS%20grant%20or%20cooperation%20dialogue">Discuss support or a pilot</a></section>
     <section className="media" id="media"><p className="eyebrow">MEDIA / JOURNALISTS / RESEARCHERS</p><h2>Start with the human question.</h2><p>Can understanding survive the departure of the person who created it? This is the story before any technology claim: continuity, evidence, uncertainty and the possibility of rebuilding context.</p><div className="media-grid"><article><h3>Two-minute orientation</h3><p>What LEIS is, what it is not, where it began and how it can be tested without asking anyone to simply believe it.</p></article><article><h3>Source-led briefing</h3><p>Timeline labels distinguish documented evidence, creator-reported context and open questions. Private archives remain private.</p></article><article><h3>Talk to Martin</h3><p>For an interview, research question or source packet, use the public contact route. No mailing-list subscription is required.</p></article></div><a className="primary" href="mailto:martin.puzik@gmail.com?subject=LEIS%20media%20enquiry">Media / research enquiry</a></section>
     <section className="participate" id="participate"><p className="eyebrow">OPEN · FREE · EVOLVING</p><h2>LEIS has no walls.</h2><p>LEIS remains free of charge. Support, research dialogue and carefully scoped pilots help sustain its validation, preservation and human work.</p><div className="contact"><a className="primary" href="mailto:martin.puzik@gmail.com?subject=LEIS%20dialogue">Start a respectful dialogue</a><span>Public contact route · no mailing list · no pressure</span></div><footer>Created by <b>Martin Puzik</b> · Technical collaboration: <b>M.A.J. Puzik</b></footer></section>
-  </main><aside className={`leis-dock ${leisOpen ? "open" : ""}`} aria-label="LEIS orientation guide">
+  <ContactPath/></main><aside className={`leis-dock ${leisOpen ? "open" : ""}`} aria-label="LEIS orientation guide">
     {leisOpen && <div className="leis-dock-window">
       <button className="leis-dock-close" onClick={() => setLeisOpen(false)} aria-label="Close LEIS guide">×</button>
       <small>LEIS ORIENTATION GUIDE</small>
