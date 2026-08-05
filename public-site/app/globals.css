@@ -64,3 +64,5 @@
 .globe-focus-window:has(.focus-origin) h3{order:1!important;margin:0 0 18px!important}
 .globe-focus-window .open-context{order:2!important;margin:0!important;align-self:flex-start!important}
 .globe-focus-window:has(.focus-origin) .focus-detail{order:2!important}
+/* Intentional zoom: Shift + wheel on desktop; touch-safe controls everywhere. */
+.globe-zoom-controls{position:absolute;right:18px;bottom:18px;z-index:8;display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid #5eeaf078;border-radius:999px;background:#071622a8;backdrop-filter:blur(10px);box-shadow:0 9px 28px #0006}.globe-zoom-controls button{width:30px;height:30px;border:1px solid #79edf5aa;border-radius:50%;background:#0c3042d9;color:#d9f9fb;font-size:20px;line-height:1;cursor:pointer}.globe-zoom-controls button:hover{background:#176077;box-shadow:0 0 15px #55e8f388}.globe-zoom-controls span{padding:0 3px;color:#9fe8ed;font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}@media(max-width:760px){.globe-zoom-controls{right:9px;bottom:9px}.globe-zoom-controls span{display:none}.globe-zoom-controls button{width:36px;height:36px;font-size:23px}}

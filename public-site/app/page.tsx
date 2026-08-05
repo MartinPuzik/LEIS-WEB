@@ -301,6 +301,14 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
     chart.animate({ key: "rotationY", to: -item.lat, duration });
   }, []);
 
+  const adjustZoom = useCallback((direction: number) => {
+    const chart = chartRef.current;
+    if (!chart) return;
+    const current = chart.get("zoomLevel") ?? 1;
+    const next = Math.max(1, Math.min(4.5, current + direction * 0.35));
+    chart.animate({ key: "zoomLevel", to: next, duration: 220 });
+  }, []);
+
   const choose = useCallback((index: number, expand = false) => {
     setSelected(index);
     setCountry(null);
@@ -345,6 +353,8 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
     let disposed = false;
     let drift: ReturnType<typeof setInterval> | undefined;
     let route: ReturnType<typeof setInterval> | undefined;
+    let wheelHost: HTMLDivElement | null = null;
+    let onWheel: ((event: WheelEvent) => void) | undefined;
     let manualUntil = 0;
     const rotateTo = (item: News, duration = 3000) => {
       const chart = chartRef.current;
@@ -364,6 +374,16 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         projection: am5map.geoOrthographic(), rotationX: -22, rotationY: -6,
       }));
       chartRef.current = chart;
+      wheelHost = node.current;
+      onWheel = (event: WheelEvent) => {
+        if (!event.shiftKey) return;
+        event.preventDefault();
+        manualUntil = Date.now() + 9000;
+        const current = chart.get("zoomLevel") ?? 1;
+        const next = Math.max(1, Math.min(4.5, current + (event.deltaY < 0 ? 0.35 : -0.35)));
+        chart.animate({ key: "zoomLevel", to: next, duration: 180 });
+      };
+      wheelHost.addEventListener("wheel", onWheel, { passive: false });
       chart.chartContainer.events.on("pointerdown", () => { manualUntil = Date.now() + 13000; });
       const polygons = chart.series.push(am5map.MapPolygonSeries.new(root, { geoJSON: world }));
       polygons.mapPolygons.template.setAll({
@@ -419,6 +439,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       disposed = true;
       if (drift) clearInterval(drift);
       if (route) clearInterval(route);
+      if (wheelHost && onWheel) wheelHost.removeEventListener("wheel", onWheel);
       root?.dispose();
     };
   }, [openDesk, openPrague]);
@@ -434,6 +455,11 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
   return <>
     <div className="globe-map-shell">
       <div className="globe-map" ref={node} aria-label="Interactive globe. Drag to rotate, scroll to zoom and choose a source point." />
+      <div className="globe-zoom-controls" aria-label="Globe zoom controls">
+        <button onClick={() => adjustZoom(1)} aria-label="Zoom in">+</button>
+        <button onClick={() => adjustZoom(-1)} aria-label="Zoom out">−</button>
+        <span>Shift + scroll</span>
+      </div>
     </div>
     {focus && <>
       <div className="globe-focus-scrim" onClick={close}/>
