@@ -101,3 +101,25 @@
 .leis-dock-window{position:relative;width:min(360px,calc(100vw - 34px));padding:23px 24px 20px;border:1px solid #72e7efa8;border-radius:20px;background:linear-gradient(145deg,#113c50da,#07111cd9);backdrop-filter:blur(18px) saturate(1.08);box-shadow:0 24px 80px #000b,0 0 40px #55dfe13b;animation:dock-rise .28s cubic-bezier(.2,.8,.2,1)}
 .leis-dock-window small{display:block;margin:0 0 10px;color:#81edf3;font-size:.62rem;letter-spacing:.13em}.leis-dock-window h3{margin:0 26px 9px 0;color:var(--leis-moon-strong);font-size:1.45rem;line-height:1.12}.leis-dock-window p{margin:0;color:var(--leis-moon-muted);font-size:.88rem;line-height:1.55}.leis-dock-window>a{display:inline-block;margin-top:14px;color:#9bf5fa;font-size:.86rem;font-weight:760;text-decoration:none}.leis-dock-window>a:hover{text-decoration:underline}.leis-dock-window em{display:block;margin-top:14px;color:#83aab2;font-size:.66rem;line-height:1.35;font-style:normal}.leis-dock-close{position:absolute;right:12px;top:8px;border:0;background:transparent;color:#c4f8fa;font-size:25px;cursor:pointer}.leis-dock-choices{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}.leis-dock-choices button{border:1px solid #5ddde67d;border-radius:999px;padding:7px 9px;background:#0a26358a;color:#b5dde1;font-size:.72rem;cursor:pointer}.leis-dock-choices button:hover,.leis-dock-choices button.active{border-color:#98f6fb;color:#e0fcfd;background:#1a58698c}@keyframes dock-rise{from{opacity:0;transform:translateY(13px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(max-width:640px){.leis-dock{right:14px;bottom:14px}.leis-dock-trigger{min-height:45px}.leis-dock-window{padding:20px}.leis-dock-choices{display:grid;grid-template-columns:1fr 1fr}.leis-dock-choices button:last-child{grid-column:span 2}}
+
+/* The map remains the same live instrument. This layer only gives the planet a quiet oceanic depth beneath the country geometry. */
+.earth-experience .globe-map{
+  background-image:
+    radial-gradient(ellipse 28% 48% at 50% 50%,#0d3351ee 0%,#09253eea 48%,#061827dc 72%,transparent 78%),
+    repeating-radial-gradient(ellipse 42% 70% at 48% 50%,#7ce8f00c 0 1px,transparent 2px 24px)!important;
+  background-size:100% 100%,122% 116%!important;
+  background-position:center center,47% 49%!important;
+  background-repeat:no-repeat!important;
+  animation:leis-water-drift 19s ease-in-out infinite alternate!important;
+}
+@keyframes leis-water-drift{
+  from{background-position:center center,46% 48%}
+  to{background-position:center center,54% 52%}
+}
+@media(max-width:760px){
+  .earth-experience .globe-map{
+    background-image:
+      radial-gradient(ellipse 43% 47% at 50% 50%,#0d3351ee 0%,#09253eea 48%,#061827dc 72%,transparent 78%),
+      repeating-radial-gradient(ellipse 68% 70% at 48% 50%,#7ce8f00c 0 1px,transparent 2px 24px)!important;
+  }
+}

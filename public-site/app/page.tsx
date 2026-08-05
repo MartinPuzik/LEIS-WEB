@@ -446,8 +446,9 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       chart.chartContainer.events.on("pointerdown", () => { manualUntil = Date.now() + 13000; });
       const polygons = chart.series.push(am5map.MapPolygonSeries.new(root, { geoJSON: world }));
       polygons.mapPolygons.template.setAll({
-        fill: am5.color(0x153f5e), stroke: am5.color(0x5bcfe0), strokeOpacity: 0.42,
-        strokeWidth: 0.6, interactive: true, tooltipText: "{name}",
+        fill: am5.color(0x1a4d6b), stroke: am5.color(0x5bcfe0), strokeOpacity: 0.46,
+        strokeWidth: 0.65, interactive: true, tooltipText: "{name}",
+        shadowColor: am5.color(0x01070e), shadowBlur: 6, shadowOffsetY: 3, shadowOpacity: 0.68,
       });
       polygons.mapPolygons.template.states.create("hover", { fill: am5.color(0x246f8a) });
       polygons.mapPolygons.template.events.on("click", (event: any) => {
