@@ -728,12 +728,15 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
   const deskSignals = deskStart === null ? [] : news.map((item, index) => ({ item, index })).filter(({ item }) => item.source === news[deskStart].source && item.place === news[deskStart].place).slice(0, 5);
   const countryProfile = country ? countryProfiles[country] ?? (country.includes("Korea") ? countryProfiles["South Korea"] : country.includes("UAE") ? countryProfiles["United Arab Emirates"] : undefined) : undefined;
   const pendingCountryProfile = country && !isPrague && !countryProfile && !countrySignals.length ? {
-    eyebrow: "COUNTRY AI CONTEXT · LOCAL PROFILE IN PREPARATION",
-    title: `${country}: AI context is being mapped`,
-    summary: "AI is now part of daily life, research, public services or business in every country, but the evidence, pace and safeguards are local. LEIS will not fill this space with unrelated news from elsewhere.",
-    use: "This country has not yet received a reviewed local evidence pack. The next update will attach primary local sources, relevant institutions and a concise explanation of how AI is shaping the country.",
-    leis: "LEIS context: a useful global view does not pretend that all places are the same. It keeps local evidence, uncertainty and provenance visible.",
-    links: [{ label: "OECD AI Policy Observatory", url: "https://oecd.ai/en/dashboards/countries" }],
+    eyebrow: "COUNTRY AI CONTEXT · GLOBAL BASELINE",
+    title: `${country}: AI context`,
+    summary: `Every country on this globe now has an AI context card. For ${country}, this baseline deliberately separates a global evidence lens from country-specific claims that have not yet been independently reviewed by LEIS.`,
+    use: "A meaningful national AI picture has at least four dimensions: people and skills; public institutions and rules; research and infrastructure; and how organisations use AI in daily work. The links below are public starting points for checking those dimensions without importing unrelated news.",
+    leis: "LEIS context: global orientation should never flatten local reality. The next local source added for this country will stay visibly attributed, dated and separate from this baseline.",
+    links: [
+      { label: "OECD · AI policy and country evidence", url: "https://oecd.ai/en/" },
+      { label: "UNESCO · AI readiness methodology", url: "https://www.unesco.org/ethics-ai/en/ram" },
+    ],
   } : undefined;
   const displayedCountryProfile = countryProfile ?? pendingCountryProfile;
 
