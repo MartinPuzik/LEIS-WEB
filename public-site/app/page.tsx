@@ -81,6 +81,94 @@ const countryProfiles: Record<string, { eyebrow: string; title: string; summary:
       { label: "Austria · AIM AT 2030", url: "https://www.digitalaustria.gv.at/eng/strategy/strategy-AI-AIM-AT-2030.html" },
     ],
   },
+  Singapore: {
+    eyebrow: "COUNTRY AI CONTEXT · REVIEWED 5 AUGUST 2026",
+    title: "Singapore: AI for the public good",
+    summary: "Singapore’s National AI Strategy frames AI as a public-good capability: useful across government, research, industry and daily life, with trust and public confidence kept visible alongside adoption.",
+    use: "The national strategy connects practical adoption, workforce capability, applied research, public services and governance. Its current priorities include manufacturing, financial services, connectivity and healthcare.",
+    leis: "LEIS context: broad access becomes more useful when people can still recover why a system is being used, what it knows, and where human judgement remains necessary.",
+    links: [
+      { label: "Singapore · National AI Strategy", url: "https://www.smartnation.gov.sg/initiatives/national-ai-strategy/" },
+      { label: "Singapore · 2026 strategy update", url: "https://www.mddi.gov.sg/newsroom/update-to-singapore-s-national-ai-strategy--refreshed-priorities-to-harness-ai-for-the-public-good-factsheet/" },
+    ],
+  },
+  India: {
+    eyebrow: "COUNTRY AI CONTEXT · REVIEWED 5 AUGUST 2026",
+    title: "India: public AI capacity and access",
+    summary: "India’s public AI work brings together national capability, datasets, compute, skills and responsible-use initiatives intended to make AI useful across a very large and diverse society.",
+    use: "The IndiaAI ecosystem provides public routes to data, models, toolkits, compute and sector-specific use cases, while national programmes also emphasise responsible and human-centred use.",
+    leis: "LEIS context: scale does not remove the need for local meaning. A useful system must let people trace a result back to its data, purpose, conditions and responsibility.",
+    links: [
+      { label: "IndiaAI · public mission and resources", url: "https://indiaai.gov.in/" },
+      { label: "AIKosh · datasets, models and tools", url: "https://aikosh.indiaai.gov.in/home/about-us/" },
+    ],
+  },
+  Brazil: {
+    eyebrow: "COUNTRY AI CONTEXT · REVIEWED 5 AUGUST 2026",
+    title: "Brazil: inclusion, public services and AI sovereignty",
+    summary: "Brazil’s public AI plan links technology development with inclusion, Portuguese-language capability, public services, skills, governance and national infrastructure.",
+    use: "The 2024–2028 Brazilian AI Plan describes work across infrastructure, education and skills, public-service improvement, business innovation, and regulation and governance.",
+    leis: "LEIS context: public value depends on more than deployment. People need to be able to understand which evidence, protections and human responsibilities travel with an AI system.",
+    links: [
+      { label: "Brazil · National AI Plan", url: "https://www.gov.br/mcti/pt-br/acompanhe-o-mcti/transformacaodigital/plano-brasileiro-de-inteligencia-artificial" },
+      { label: "Brazil · AI in digital government", url: "https://www.gov.br/governodigital/pt-br/infraestrutura-nacional-de-dados/inteligencia-artificial-1/inteligencia-artificial-1" },
+    ],
+  },
+  Japan: {
+    eyebrow: "COUNTRY AI CONTEXT · REVIEWED 5 AUGUST 2026",
+    title: "Japan: AI for science and practical discovery",
+    summary: "Japan’s public research landscape connects advanced computing, AI and scientific discovery. RIKEN’s AI-for-Science development work is one visible example of that direction.",
+    use: "AI is being developed alongside scientific infrastructure and research communities, with an emphasis on accelerating discovery while retaining rigorous scientific practice.",
+    leis: "LEIS context: faster discovery still needs durable explanation — assumptions, negative results and human reasons must remain available to the next researcher.",
+    links: [
+      { label: "RIKEN · AI for Science news", url: "https://www.riken.jp/en/news_pubs/news/2026/20260619_1/index.html" },
+      { label: "RIKEN · research overview", url: "https://www.riken.jp/en/research/" },
+    ],
+  },
+  "South Korea": {
+    eyebrow: "COUNTRY AI CONTEXT · REVIEWED 5 AUGUST 2026",
+    title: "South Korea: research moving toward practice",
+    summary: "South Korea’s AI ecosystem combines research universities, advanced industry and public-private technology transfer. KAIST is one public source for work in trustworthy AI, health, robotics and physical systems.",
+    use: "The local conversation spans AI research, manufacturing, robotics, health and deployment partnerships — areas where technical performance and practical accountability have to travel together.",
+    leis: "LEIS context: when research becomes practice, the implementation needs to retain its limits, provenance and reasons — not merely its final output.",
+    links: [
+      { label: "KAIST · AI research and technology transfer", url: "https://www.kaist.ac.kr/en/" },
+      { label: "KAIST · public news", url: "https://www.kaist.ac.kr/news/html/news/" },
+    ],
+  },
+  "United Arab Emirates": {
+    eyebrow: "COUNTRY AI CONTEXT · REVIEWED 5 AUGUST 2026",
+    title: "United Arab Emirates: language, research and sovereignty",
+    summary: "The UAE’s AI ecosystem includes national policy, advanced research and Arabic-language model development. Abu Dhabi’s Technology Innovation Institute is one public research source in this landscape.",
+    use: "Local work includes foundation models, language technologies, applied research and national AI capacity, with Arabic relevance and regional context treated as technical as well as cultural concerns.",
+    leis: "LEIS context: language and cultural context are part of the evidence needed to interpret a system responsibly; they are not an optional decoration around the model.",
+    links: [
+      { label: "UAE · national AI strategy", url: "https://ai.gov.ae/" },
+      { label: "TII · research and news", url: "https://www.tii.ae/" },
+    ],
+  },
+  France: {
+    eyebrow: "COUNTRY AI CONTEXT · REVIEWED 5 AUGUST 2026",
+    title: "France: research, open ecosystems and public debate",
+    summary: "France is a major European AI research and startup hub. The public conversation links frontier research, open-source communities, applied science, policy and responsible deployment.",
+    use: "Paris-based research and AI organisations contribute to work in geospatial modelling, robotics, health and language technologies, while European governance remains an important part of the setting.",
+    leis: "LEIS context: a strong ecosystem does not only produce models. It keeps the evidence, limits and human responsibility around their use readable across organisations.",
+    links: [
+      { label: "French government · national AI strategy", url: "https://www.economie.gouv.fr/numerique/strategie-nationale-intelligence-artificielle" },
+      { label: "Hugging Face · public research community", url: "https://huggingface.co/blog" },
+    ],
+  },
+  Germany: {
+    eyebrow: "COUNTRY AI CONTEXT · REVIEWED 5 AUGUST 2026",
+    title: "Germany: industrial AI and human-centred deployment",
+    summary: "Germany’s AI landscape connects research, manufacturing, public institutions and a large industrial base. The practical question is how capable systems remain understandable and accountable in real work.",
+    use: "Key areas include industrial automation, mobility, health, research and enterprise systems, shaped by European rules and a strong emphasis on technical quality and safety.",
+    leis: "LEIS context: industrial continuity depends on preserving the decision trail: the conditions, evidence and practical expertise that let another person operate or improve a system.",
+    links: [
+      { label: "Germany · AI strategy", url: "https://www.bundesregierung.de/breg-de/themen/digitalisierung/ki-strategie-1542410" },
+      { label: "DFKI · German AI research", url: "https://www.dfki.de/en/web" },
+    ],
+  },
 };
 
 function GlobeLegacy({ onSelect }: { onSelect: (index: number) => void }) {
@@ -607,15 +695,16 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
     };
   }, [openCzechia, openDesk, openPragueOrigin]);
 
+  const isCzechRepublic = Boolean(country && /Czechia|Czech Republic/i.test(country));
   const countrySignals = country
     ? news.map((item, index) => ({ item, index })).filter(({ item }) =>
       country.includes("United States") ? item.place.includes("USA") :
       country.includes("France") ? item.place.includes("France") :
-      country.includes("Czech Republic") ? item.place.includes("Czech Republic") : false)
+      isCzechRepublic ? item.place.includes("Czech Republic") : false)
     : [];
   const isPrague = Boolean(country?.includes("Prague"));
   const deskSignals = deskStart === null ? [] : news.map((item, index) => ({ item, index })).filter(({ item }) => item.source === news[deskStart].source && item.place === news[deskStart].place).slice(0, 5);
-  const countryProfile = country ? countryProfiles[country] : undefined;
+  const countryProfile = country ? countryProfiles[country] ?? (country.includes("Korea") ? countryProfiles["South Korea"] : country.includes("UAE") ? countryProfiles["United Arab Emirates"] : undefined) : undefined;
   const pendingCountryProfile = country && !isPrague && !countryProfile && !countrySignals.length ? {
     eyebrow: "COUNTRY AI CONTEXT · LOCAL PROFILE IN PREPARATION",
     title: `${country}: AI context is being mapped`,
@@ -663,7 +752,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
               <strong>{item.title}</strong>
             </button>)}
           </div>
-        </> : country === "Czech Republic" ? <>
+        </> : isCzechRepublic ? <>
           <small>CZECH REPUBLIC · PUBLIC AI SIGNALS + LEIS ORIGIN</small>
           <h3>Czech AI, with Prague context.</h3>
           <div className="country-profile czech-intro">
