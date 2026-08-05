@@ -679,13 +679,25 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       // horizon, and cannot spill out as flat image cards at the edge.
       const stratusGeometry = (lon: number, lat: number, cloudCover: number, severe = false) => {
         const cloud = Math.max(0, Math.min(100, cloudCover));
-        const horizontal = Math.min(severe ? 30 : 24, 5 + cloud * (severe ? 0.25 : 0.19));
-        const vertical = Math.min(severe ? 12 : 8, 1.6 + cloud * (severe ? 0.095 : 0.06));
-        const ring = Array.from({ length: 26 }, (_, index) => {
-          const angle = (Math.PI * 2 * index) / 25;
-          const ripple = 1 + Math.sin(angle * 3) * 0.12 + Math.cos(angle * 5) * 0.06;
-          return [lon + Math.cos(angle) * horizontal * ripple, Math.max(-83, Math.min(83, lat + Math.sin(angle) * vertical * ripple))];
+        // A true low, flat cloud deck: two gently irregular latitude edges form
+        // a long band that visually sits parallel to the Earth's surface.
+        const halfLength = Math.min(severe ? 62 : 48, 13 + cloud * (severe ? 0.44 : 0.34));
+        const halfDepth = Math.min(severe ? 7.5 : 5.5, 1.3 + cloud * (severe ? 0.06 : 0.04));
+        const segments = 22;
+        const upper = Array.from({ length: segments + 1 }, (_, index) => {
+          const ratio = index / segments;
+          const longitude = lon - halfLength + ratio * halfLength * 2;
+          const waviness = Math.sin(ratio * Math.PI * 5.5) * halfDepth * 0.25 + Math.cos(ratio * Math.PI * 3) * halfDepth * 0.12;
+          return [longitude, Math.max(-83, Math.min(83, lat + halfDepth + waviness))];
         });
+        const lower = Array.from({ length: segments + 1 }, (_, reverseIndex) => {
+          const index = segments - reverseIndex;
+          const ratio = index / segments;
+          const longitude = lon - halfLength + ratio * halfLength * 2;
+          const waviness = Math.sin(ratio * Math.PI * 5.5 + 0.7) * halfDepth * 0.22 + Math.cos(ratio * Math.PI * 3.4) * halfDepth * 0.1;
+          return [longitude, Math.max(-83, Math.min(83, lat - halfDepth + waviness))];
+        });
+        const ring = [...upper, ...lower, upper[0]];
         return { type: "Polygon", coordinates: [ring] };
       };
       const weatherLayer = chart.series.push(am5map.MapPolygonSeries.new(root, {}));
