@@ -57,6 +57,17 @@ const countryProfiles: Record<string, { eyebrow: string; title: string; summary:
       { label: "Government of Canada · AI for All strategy", url: "https://ised-isde.canada.ca/site/ised/en/canadas-national-artificial-intelligence-strategy-ai-all" },
     ],
   },
+  Austria: {
+    eyebrow: "COUNTRY AI CONTEXT · REVIEWED 5 AUGUST 2026",
+    title: "Austria: research, industry and trustworthy AI",
+    summary: "Statistics Austria reports that 29.9% of Austrian enterprises with at least ten employees used at least one AI-based technology in 2025, compared with 20% across the EU.",
+    use: "Austria's public AI strategy, AIM AT 2030, connects research and innovation with skills, administration, industrial competitiveness, resilience and trustworthy AI.",
+    leis: "LEIS context: when AI moves through organisations, the durable asset is not a result alone but the recoverable evidence, purpose and human responsibility behind it.",
+    links: [
+      { label: "Statistics Austria · enterprise AI use", url: "https://www.statistik.at/fileadmin/announcement/2026/06/20260624IKTU2025EN.pdf" },
+      { label: "Austria · AIM AT 2030", url: "https://www.digitalaustria.gv.at/eng/strategy/strategy-AI-AIM-AT-2030.html" },
+    ],
+  },
 };
 
 function GlobeLegacy({ onSelect }: { onSelect: (index: number) => void }) {
@@ -508,7 +519,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       <div className="globe-focus-scrim" onClick={close}/>
       <section className={`globe-focus-window ${detail ? "level-2" : "level-1"}`} aria-live="polite">
         <button className="close-focus" onClick={close} aria-label="Close selection">×</button>
-        {selectedNews ? <>
+        {selectedNews ? <article className="selected-article">
           <p className="focus-origin">
             {selectedNews.source} NEWSROOM · {selectedNews.place} · SOURCE REVIEWED {selectedNews.reviewed ?? "5 AUGUST 2026"}
           </p>
@@ -518,7 +529,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
             <p><b>LEIS context</b><br />{selectedNews.leis}</p>
             <a className="primary" href={selectedNews.url} target="_blank" rel="noreferrer">Read the original source ↗</a>
           </div> : <button className="open-context" onClick={() => setDetail(true)}>Open context</button>}
-        </> : deskStart !== null ? <>
+        </article> : deskStart !== null ? <>
           <small>PUBLIC SOURCE DESK · UP TO FIVE REVIEWED SIGNALS</small>
           <h3>{news[deskStart].source} · {news[deskStart].place}</h3>
           <div className="focus-choices">
