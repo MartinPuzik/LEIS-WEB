@@ -447,6 +447,23 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         else { setCountry(data.name ?? "Selected country"); setSelected(null); setDeskStart(null); setDetail(false); setFocus(true); }
         manualUntil = Date.now() + 13000;
       });
+      const routes = chart.series.push(am5map.MapLineSeries.new(root, {}));
+      routes.mapLines.template.setAll({
+        stroke: am5.color(0x67e9ef), strokeOpacity: 0.24, strokeWidth: 1.15,
+        strokeDasharray: [1.5, 12], strokeDashoffset: 0,
+      });
+      routes.data.setAll([
+        { geometry: { type: "LineString", coordinates: [[-122.4194, 37.7749], [-74.006, 40.7128]] } },
+        { geometry: { type: "LineString", coordinates: [[-74.006, 40.7128], [2.3522, 48.8566]] } },
+        { geometry: { type: "LineString", coordinates: [[2.3522, 48.8566], [14.4378, 50.0755]] } },
+        { geometry: { type: "LineString", coordinates: [[14.4378, 50.0755], [-122.0839, 37.3861]] } },
+        { geometry: { type: "LineString", coordinates: [[-122.0839, 37.3861], [-122.4194, 37.7749]] } },
+      ]);
+      routes.events.on("datavalidated", () => {
+        routes.mapLines.each((line: any, index: number) => {
+          line.animate({ key: "strokeDashoffset", from: 0, to: -26, duration: 2600 + index * 380, loops: Infinity, easing: am5.ease.linear });
+        });
+      });
       const points = chart.series.push(am5map.MapPointSeries.new(root, {}));
       points.bullets.push((rootArg: any, _series: any, dataItem: any) => {
         const data = dataItem?.dataContext ?? {};
