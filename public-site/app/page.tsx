@@ -646,50 +646,27 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         else { setCountry(data.name ?? "Selected country"); setSelected(null); setDeskStart(null); setDetail(false); setFocus(true); }
         manualUntil = Date.now() + 13000;
       });
+      const cloudAssets = [
+        "/clouds/cloud-bank-a.png", "/clouds/cloud-bank-b.png", "/clouds/cloud-storm-a.png", "/clouds/cloud-bank-c.png",
+        "/clouds/cloud-front-a.png", "/clouds/cloud-bank-d.png", "/clouds/cloud-storm-b.png", "/clouds/cloud-bank-e.png",
+      ];
       const weatherLayer = chart.series.push(am5map.MapPointSeries.new(root, {}));
       weatherLayer.bullets.push((rootArg: any, _series: any, dataItem: any) => {
         const data = dataItem?.dataContext ?? {};
-        const tone = data.tone ?? 0x8edce8;
         const severe = Boolean(data.severe);
         const wet = Boolean(data.wet);
         const cloud = Math.max(0, Math.min(100, Number(data.cloud ?? 0)));
-        // Weather systems are intentionally much broader than news markers. Their
-        // MapPointSeries holder keeps every cloud attached to the globe's own
-        // coordinates through both rotation and zoom.
-        const cloudRadius = 28 + cloud * 0.26;
+        // These are photographic cloud systems rather than status bubbles. Their
+        // MapPointSeries holder keeps every transparent cloud texture attached to
+        // the globe's coordinates through both rotation and zoom.
         const holder = am5.Container.new(rootArg, { width: 0, height: 0, centerX: am5.p50, centerY: am5.p50, tooltipText: data.weather });
-        const field = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 62 : wet ? 53 : cloudRadius + 12, centerX: am5.p50, centerY: am5.p50, fill: am5.color(tone), fillOpacity: severe ? 0.18 : wet ? 0.12 : 0.045 + cloud * 0.0006 }));
-        const cloudPuffs = severe ? 13 : wet ? 11 : 8;
-        for (let puffIndex = 0; puffIndex < cloudPuffs; puffIndex += 1) {
-          const angle = (Math.PI * 2 * puffIndex) / cloudPuffs;
-          const spread = severe ? 42 : wet ? 36 : 28;
-          const radius = severe ? 17 + (puffIndex % 3) * 2 : wet ? 14 + (puffIndex % 3) * 2 : 11 + (puffIndex % 2) * 2;
-          const puff = holder.children.push(am5.Circle.new(rootArg, {
-            radius,
-            x: Math.cos(angle) * spread,
-            y: Math.sin(angle) * spread * 0.52,
-            centerX: am5.p50, centerY: am5.p50,
-            fill: am5.color(severe ? 0xd1bcff : 0xe3fbff),
-            fillOpacity: severe ? 0.42 : wet ? 0.33 : 0.23,
-            stroke: am5.color(severe ? 0xd9c9ff : 0xcff8ff),
-            strokeOpacity: 0.12,
-            strokeWidth: 1,
-          }));
-          puff.animate({ key: "scale", from: 0.84, to: 1.12, duration: 4200 + puffIndex * 260, loops: Infinity, easing: am5.ease.yoyo(am5.ease.sine) });
-        }
-        const core = holder.children.push(am5.Ellipse.new(rootArg, {
-          width: severe ? 86 : wet ? 74 : 58, height: severe ? 44 : wet ? 36 : 28,
-          centerX: am5.p50, centerY: am5.p50, fill: am5.color(severe ? 0xd1b6ff : 0xdafaff),
-          fillOpacity: severe ? 0.20 : wet ? 0.15 : 0.09,
+        const cloudWidth = Number(data.cloudWidth ?? (severe ? 154 : wet ? 122 : 92 + cloud * 0.14));
+        const cloudHeight = Number(data.cloudHeight ?? cloudWidth * 0.68);
+        const texture = holder.children.push(am5.Picture.new(rootArg, {
+          src: data.asset ?? cloudAssets[0], width: cloudWidth, height: cloudHeight,
+          centerX: am5.p50, centerY: am5.p50, opacity: severe ? 0.64 : wet ? 0.46 : 0.30,
         }));
-        core.animate({ key: "scaleX", from: 0.82, to: 1.16, duration: 6800, loops: Infinity, easing: am5.ease.yoyo(am5.ease.sine) });
-        const ring = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 23 : wet ? 19 : 10 + cloud * 0.1, centerX: am5.p50, centerY: am5.p50, fillOpacity: 0, stroke: am5.color(tone), strokeOpacity: severe ? 0.56 : wet ? 0.4 : 0.16 + cloud * 0.0018, strokeWidth: 1.2 }));
-        const centre = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 9 : wet ? 7 : 5, centerX: am5.p50, centerY: am5.p50, fill: am5.color(tone), fillOpacity: severe ? 0.74 : 0.58 }));
-        const duration = severe ? 2200 : wet ? 3200 : 5200;
-        field.animate({ key: "scale", from: 0.88, to: severe ? 1.34 : wet ? 1.24 : 1.14, duration, loops: Infinity, easing: am5.ease.sine });
-        field.animate({ key: "opacity", from: 0.55, to: 0.18, duration, loops: Infinity, easing: am5.ease.sine });
-        ring.animate({ key: "scale", from: 0.76, to: severe ? 2.6 : wet ? 2.1 : 1.55, duration, loops: Infinity, easing: am5.ease.sine });
-        ring.animate({ key: "opacity", from: 0.62, to: 0, duration, loops: Infinity, easing: am5.ease.sine });
+        texture.animate({ key: "scale", from: 0.96, to: 1.04, duration: 9000, loops: Infinity, easing: am5.ease.yoyo(am5.ease.sine) });
         return am5.Bullet.new(rootArg, { sprite: holder });
       });
       const weatherSites = [
@@ -712,12 +689,12 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         return {
           geometry: { type: "Point", coordinates: [site.lon, site.lat] },
           weather: `${site.name} · atmospheric simulation · live public conditions load when available`,
-          tone, cloud, wet, severe,
+          tone, cloud, wet, severe, asset: cloudAssets[index % cloudAssets.length],
         };
       }));
       const refreshWeather = async () => {
         try {
-          const weather = await Promise.all(weatherSites.map(async (site) => {
+          const weather = await Promise.all(weatherSites.map(async (site, index) => {
             const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${site.lat}&longitude=${site.lon}&current=temperature_2m,weather_code,cloud_cover,precipitation,wind_speed_10m&timezone=auto`);
             if (!response.ok) throw new Error("Weather response unavailable");
             const payload = await response.json();
@@ -731,6 +708,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
               geometry: { type: "Point", coordinates: [site.lon, site.lat] },
               weather: `${site.name} · LIVE ${temperature}°C · ${weatherLabel(code)} · cloud ${cloud}% · wind ${wind} km/h`,
               tone: weatherTone(code, temperature), cloud, wet: code >= 51 || rain > 0, severe: code >= 95,
+              asset: cloudAssets[index % cloudAssets.length],
             };
           }));
           if (!disposed) weatherLayer.data.setAll(weather);
