@@ -466,28 +466,9 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         interactive: false,
       });
       ocean.data.setAll([{ geometry: am5map.getGeoRectangle(90, 180, -90, -180) }]);
-      // Quiet moving water fields are map points too: they therefore remain on the Earth
-      // during rotation and zoom instead of behaving like a screen-space decoration.
+      // A slow shift in the projected water surface gives the ocean life without
+      // introducing a second geometry layer that could ever cover the countries.
       ocean.mapPolygons.template.animate({ key: "fillOpacity", from: 0.91, to: 0.99, duration: 8400, loops: Infinity, easing: am5.ease.sine });
-      const oceanMotion = chart.series.insertIndex(1, am5map.MapPointSeries.new(root, {}));
-      oceanMotion.bullets.push((rootArg: any, _series: any, dataItem: any) => {
-        const data = dataItem?.dataContext ?? {};
-        const holder = am5.Container.new(rootArg, { width: 0, height: 0, interactive: false });
-        const shimmer = holder.children.push(am5.Circle.new(rootArg, { radius: data.radius ?? 26, fill: am5.color(0x4da7c7), fillOpacity: 0.045, stroke: am5.color(0x72dff1), strokeOpacity: 0.13, strokeWidth: 0.8 }));
-        const ripple = holder.children.push(am5.Circle.new(rootArg, { radius: data.radius ?? 26, fillOpacity: 0, stroke: am5.color(0x89eefa), strokeOpacity: 0.22, strokeWidth: 0.8 }));
-        shimmer.animate({ key: "scale", from: 0.82, to: 1.26, duration: data.duration ?? 9200, loops: Infinity, easing: am5.ease.sine });
-        shimmer.animate({ key: "opacity", from: 0.34, to: 0.78, duration: data.duration ?? 9200, loops: Infinity, easing: am5.ease.sine });
-        ripple.animate({ key: "scale", from: 0.68, to: 2.35, duration: data.duration ?? 9200, loops: Infinity, easing: am5.ease.sine });
-        ripple.animate({ key: "opacity", from: 0.58, to: 0, duration: data.duration ?? 9200, loops: Infinity, easing: am5.ease.sine });
-        return am5.Bullet.new(rootArg, { sprite: holder });
-      });
-      oceanMotion.data.setAll([
-        { radius: 34, duration: 10800, geometry: { type: "Point", coordinates: [-35, 8] } },
-        { radius: 28, duration: 9400, geometry: { type: "Point", coordinates: [-150, 20] } },
-        { radius: 30, duration: 11600, geometry: { type: "Point", coordinates: [150, -24] } },
-        { radius: 25, duration: 9800, geometry: { type: "Point", coordinates: [74, -34] } },
-        { radius: 27, duration: 10400, geometry: { type: "Point", coordinates: [18, -42] } },
-      ]);
       const polygons = chart.series.push(am5map.MapPolygonSeries.new(root, { geoJSON: world }));
       polygons.mapPolygons.template.setAll({
         fill: am5.color(0x286986), stroke: am5.color(0x72d2e2), strokeOpacity: 0.38,
