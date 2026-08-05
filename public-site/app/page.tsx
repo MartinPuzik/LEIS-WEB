@@ -493,9 +493,11 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         const tone = data.tone ?? 0x8edce8;
         const severe = Boolean(data.severe);
         const wet = Boolean(data.wet);
+        const cloud = Math.max(0, Math.min(100, Number(data.cloud ?? 0)));
+        const cloudRadius = 16 + cloud * 0.13;
         const holder = am5.Container.new(rootArg, { width: 0, height: 0, tooltipText: data.weather });
-        const field = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 33 : wet ? 27 : 20, fill: am5.color(tone), fillOpacity: severe ? 0.19 : wet ? 0.13 : 0.08 }));
-        const ring = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 20 : wet ? 16 : 12, fillOpacity: 0, stroke: am5.color(tone), strokeOpacity: severe ? 0.48 : 0.28, strokeWidth: 1 }));
+        const field = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 33 : wet ? 27 : cloudRadius, fill: am5.color(tone), fillOpacity: severe ? 0.19 : wet ? 0.13 : 0.045 + cloud * 0.0007 }));
+        const ring = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 20 : wet ? 16 : 8 + cloud * 0.08, fillOpacity: 0, stroke: am5.color(tone), strokeOpacity: severe ? 0.48 : wet ? 0.32 : 0.10 + cloud * 0.0016, strokeWidth: 1 }));
         const centre = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 8 : wet ? 6 : 4.5, fill: am5.color(tone), fillOpacity: severe ? 0.68 : 0.46 }));
         const duration = severe ? 2200 : wet ? 3200 : 5200;
         field.animate({ key: "scale", from: 0.88, to: severe ? 1.34 : wet ? 1.24 : 1.14, duration, loops: Infinity, easing: am5.ease.sine });
@@ -514,12 +516,6 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       ];
       const weatherLabel = (code: number) => code >= 95 ? "thunderstorm" : code >= 80 ? "rain showers" : code >= 51 ? "rain" : code >= 45 ? "mist" : code >= 3 ? "overcast" : code >= 1 ? "partly cloudy" : "clear";
       const weatherTone = (code: number, temperature = 0) => code >= 95 ? 0xc090ff : code >= 51 ? 0x5caef5 : temperature >= 30 ? 0xf2bb78 : code >= 3 ? 0x9ad7e4 : 0x9ee6c0;
-      void Promise.all(weatherSites.map(async (site) => {
-        const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${site.lat}&longitude=${site.lon}&current=weather_code,cloud_cover,precipitation&timezone=auto`);
-        const payload = await response.json();
-        const code = Number(payload?.current?.weather_code ?? 0);
-        return { geometry: { type: "Point", coordinates: [site.lon, site.lat] }, weather: `${site.name} · live weather: ${weatherLabel(code)}`, tone: weatherTone(code), severe: code >= 95 };
-      })).then((weather) => { if (!disposed) weatherLayer.data.setAll(weather); }).catch(() => { /* The globe remains useful when the optional live weather stream is unavailable. */ });
       const refreshWeather = async () => {
         try {
           const weather = await Promise.all(weatherSites.map(async (site) => {
@@ -531,10 +527,11 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
             const temperature = Math.round(Number(current.temperature_2m ?? 0));
             const wind = Math.round(Number(current.wind_speed_10m ?? 0));
             const rain = Number(current.precipitation ?? 0);
+            const cloud = Math.round(Number(current.cloud_cover ?? 0));
             return {
               geometry: { type: "Point", coordinates: [site.lon, site.lat] },
-              weather: `${site.name} · LIVE ${temperature}°C · ${weatherLabel(code)} · wind ${wind} km/h`,
-              tone: weatherTone(code, temperature), wet: code >= 51 || rain > 0, severe: code >= 95,
+              weather: `${site.name} · LIVE ${temperature}°C · ${weatherLabel(code)} · cloud ${cloud}% · wind ${wind} km/h`,
+              tone: weatherTone(code, temperature), cloud, wet: code >= 51 || rain > 0, severe: code >= 95,
             };
           }));
           if (!disposed) weatherLayer.data.setAll(weather);
