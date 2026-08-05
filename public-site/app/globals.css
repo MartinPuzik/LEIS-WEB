@@ -141,6 +141,7 @@
 nav div{padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
 nav div a{background:transparent!important}
 nav div a:hover{background:linear-gradient(105deg,#39dfe329,#9c8dff2e)!important;box-shadow:0 0 20px #65e8f43b}
+nav div a.active{color:#e6ffff!important;background:linear-gradient(105deg,#39dfe338,#9c8dff35)!important;box-shadow:inset 0 -1px 0 #8df5fa,0 0 18px #6ceaf347}
 
 /* Reuse the founder's cyan-to-blue-to-violet spectrum as a quiet connective thread. */
 .orientation h2,.timeline h2,.earth h2,.grants h2,.media h2,.participate h2{
