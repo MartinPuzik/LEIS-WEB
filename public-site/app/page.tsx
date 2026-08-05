@@ -490,6 +490,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
   const [selected, setSelected] = useState<number | null>(null);
   const [country, setCountry] = useState<string | null>(null);
   const [deskStart, setDeskStart] = useState<number | null>(null);
+  const [atmosphereOn, setAtmosphereOn] = useState(true);
   const selectedNews = selected === null ? null : news[selected];
 
   const aim = useCallback((item: News, duration = 850) => {
