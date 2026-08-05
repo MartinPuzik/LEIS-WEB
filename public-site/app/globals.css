@@ -127,3 +127,6 @@
 .earth-experience .globe-map-shell{isolation:isolate!important}
 .earth-experience .globe-map-shell:after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(90deg,transparent 44%,#02081114 62%,#0208112b 100%);mask-image:radial-gradient(ellipse 28% 48% at 50% 50%,#000 0 76%,transparent 79%);-webkit-mask-image:radial-gradient(ellipse 28% 48% at 50% 50%,#000 0 76%,transparent 79%)}
 @media(max-width:760px){.earth-experience .globe-map-shell:after{mask-image:radial-gradient(ellipse 43% 47% at 50% 50%,#000 0 76%,transparent 79%);-webkit-mask-image:radial-gradient(ellipse 43% 47% at 50% 50%,#000 0 76%,transparent 79%)}}
+
+/* The planet is an immersive surface: interaction remains fully active, while the ordinary browser cursor stays out of the scene. */
+.earth-experience .globe-map,.earth-experience .globe-map *{cursor:none!important}
