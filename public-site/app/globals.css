@@ -108,6 +108,52 @@
   touch-action:manipulation;
   cursor:pointer;
 }
+
+/* Home-page identity: the logo and colour language stay visible without adding UI chrome. */
+.omega-mark{
+  display:inline-flex!important;
+  align-items:center;
+  gap:10px;
+  min-width:64px;
+  color:#94f3f5!important;
+  letter-spacing:2px!important;
+  text-shadow:0 0 15px #57ddec8c;
+}
+.omega-mark span{
+  display:grid;
+  place-items:center;
+  width:48px;
+  height:48px;
+  border:1px solid #7eeff4;
+  border-radius:50%;
+  font-family:Georgia,serif;
+  font-size:34px;
+  line-height:1;
+  color:#d7ffff;
+  background:radial-gradient(circle at 45% 38%,#3f90ac99,#071827 70%);
+  box-shadow:inset 0 0 18px #b4fbff42,0 0 22px #4fe7ef77;
+  transition:transform .28s ease,box-shadow .28s ease;
+}
+.omega-mark:hover span{transform:rotate(-10deg) scale(1.08);box-shadow:inset 0 0 22px #d2ffff66,0 0 30px #6debf6}
+.omega-mark b{font-size:12px!important;letter-spacing:3px!important;margin:0!important}
+
+/* The navigation remains light and floating rather than enclosed in a second box. */
+nav div{padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+nav div a{background:transparent!important}
+nav div a:hover{background:linear-gradient(105deg,#39dfe329,#9c8dff2e)!important;box-shadow:0 0 20px #65e8f43b}
+
+/* Reuse the founder's cyan-to-blue-to-violet spectrum as a quiet connective thread. */
+.orientation h2,.timeline h2,.earth h2,.grants h2,.media h2,.participate h2{
+  background:linear-gradient(98deg,#e1f4f5 8%,#7ce6ec 44%,#78bdf5 68%,#a899ff 96%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent!important;
+}
+.principles article,.media-grid article,.grant-grid article{
+  background:linear-gradient(140deg,#0c2636 0%,#0b2034 58%,#1b173b 165%)!important;
+}
+.primary{background:linear-gradient(105deg,#c6fbff 0%,#8ceff4 49%,#b2a5ff 130%)!important}
+@media(max-width:700px){.omega-mark span{width:42px;height:42px;font-size:30px}.omega-mark b{display:none}}
 .globe-focus-window .country-profile{position:relative!important;display:grid!important;grid-template-columns:minmax(0,1fr)!important;clear:both!important;gap:14px!important;width:100%!important;min-width:0!important;margin:30px 0 0!important;padding:0!important}
 .globe-focus-window .country-profile p{position:static!important;display:block!important;width:100%!important;margin:0!important;padding:0!important;line-height:1.58!important;white-space:normal!important;overflow-wrap:anywhere!important}
 .globe-focus-window .country-profile-links{position:static!important;display:flex!important;width:100%!important;margin:0!important;padding:0!important}
