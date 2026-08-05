@@ -706,14 +706,12 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         return { type: "Polygon", coordinates: [ring] };
       };
       const weatherLayer = chart.series.push(am5map.MapPolygonSeries.new(root, {}));
-      const cloudTexture = am5.PicturePattern.new(root, {
-        src: "/clouds/cloud-front-a.png", width: 118, height: 46,
-        fit: "pattern", repetition: "repeat-x", centered: true,
-      });
       weatherLayer.mapPolygons.template.setAll({
-        templateField: "settings", interactive: false,
-        fill: am5.color(0xdffaff), fillOpacity: 0.10, fillPattern: cloudTexture,
-        stroke: am5.color(0xe8fdff), strokeOpacity: 0.06, strokeWidth: 0.35,
+        // This layer is intentionally passive: source hubs are drawn later and
+        // must remain both visible and clickable through all weather conditions.
+        templateField: "settings", interactive: false, forceInactive: true,
+        fill: am5.color(0xdffaff), fillOpacity: 0.035,
+        stroke: am5.color(0xe8fdff), strokeOpacity: 0.025, strokeWidth: 0.3,
       });
       const stormLayer = chart.series.push(am5map.MapPointSeries.new(root, { clipBack: true }));
       stormLayer.bullets.push((rootArg: any) => {
@@ -751,7 +749,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
           geometry: stratusGeometry(site.lon, site.lat, cloud, severe), lon: site.lon, lat: site.lat,
           weather: `${site.name} · atmospheric simulation · live public conditions load when available`,
           tone, cloud, wet, severe,
-          settings: { fill: am5.color(severe ? 0xf3d27d : wet ? 0xd9f9ff : 0xc3eefa), fillOpacity: severe ? 0.18 : cloud < 14 ? 0 : Math.min(0.16, 0.045 + cloud * 0.0012), strokeOpacity: severe ? 0.20 : 0.06 },
+          settings: { fill: am5.color(severe ? 0xf3d27d : wet ? 0xd9f9ff : 0xc3eefa), fillOpacity: severe ? 0.12 : cloud < 22 ? 0 : Math.min(0.075, 0.012 + cloud * 0.0007), strokeOpacity: severe ? 0.13 : 0.03 },
         };
       }));
       stormLayer.data.setAll([{ geometry: { type: "Point", coordinates: [103.8198, 1.3521] } }]);
@@ -772,7 +770,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
               geometry: stratusGeometry(site.lon, site.lat, cloud, severe), lon: site.lon, lat: site.lat,
               weather: `${site.name} · LIVE ${temperature}°C · ${weatherLabel(code)} · cloud ${cloud}% · wind ${wind} km/h`,
               tone: weatherTone(code, temperature), cloud, wet: code >= 51 || rain > 0, severe,
-              settings: { fill: am5.color(severe ? 0xf3d27d : code >= 51 || rain > 0 ? 0xd9f9ff : 0xc3eefa), fillOpacity: severe ? 0.20 : cloud < 14 ? 0 : Math.min(0.18, 0.055 + cloud * 0.0013), strokeOpacity: severe ? 0.22 : 0.07 },
+              settings: { fill: am5.color(severe ? 0xf3d27d : code >= 51 || rain > 0 ? 0xd9f9ff : 0xc3eefa), fillOpacity: severe ? 0.14 : cloud < 22 ? 0 : Math.min(0.085, 0.016 + cloud * 0.00075), strokeOpacity: severe ? 0.16 : 0.035 },
             };
           }));
           if (!disposed) {

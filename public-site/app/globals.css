@@ -137,3 +137,8 @@
   .globe-atmosphere-control{left:10px!important;bottom:58px!important}
   .globe-zoom-controls{right:10px!important;bottom:12px!important}
 }
+
+/* The Earth Pulse introduction is a short orientation, not a technical note. */
+.earth-lead{font-size:0!important}
+.earth-lead:after{content:"Explore public AI signals by place. Tap a glowing hub or a newsroom card to open its source, a short summary and LEIS context. The moving lines show a source connection — not a measure of impact.";display:block;max-width:760px;color:var(--leis-moon-muted);font-size:18px;line-height:1.6}
+@media(max-width:760px){.earth-lead:after{font-size:16px;line-height:1.55}}
