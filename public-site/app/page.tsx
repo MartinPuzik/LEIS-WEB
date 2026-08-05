@@ -653,23 +653,36 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         const severe = Boolean(data.severe);
         const wet = Boolean(data.wet);
         const cloud = Math.max(0, Math.min(100, Number(data.cloud ?? 0)));
-        const cloudRadius = 16 + cloud * 0.13;
+        // Weather systems are intentionally much broader than news markers. Their
+        // MapPointSeries holder keeps every cloud attached to the globe's own
+        // coordinates through both rotation and zoom.
+        const cloudRadius = 28 + cloud * 0.26;
         const holder = am5.Container.new(rootArg, { width: 0, height: 0, centerX: am5.p50, centerY: am5.p50, tooltipText: data.weather });
-        const field = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 38 : wet ? 31 : cloudRadius + 4, centerX: am5.p50, centerY: am5.p50, fill: am5.color(tone), fillOpacity: severe ? 0.22 : wet ? 0.16 : 0.075 + cloud * 0.0008 }));
-        const cloudPuffs = severe ? 6 : wet ? 5 : 4;
+        const field = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 62 : wet ? 53 : cloudRadius + 12, centerX: am5.p50, centerY: am5.p50, fill: am5.color(tone), fillOpacity: severe ? 0.18 : wet ? 0.12 : 0.045 + cloud * 0.0006 }));
+        const cloudPuffs = severe ? 13 : wet ? 11 : 8;
         for (let puffIndex = 0; puffIndex < cloudPuffs; puffIndex += 1) {
           const angle = (Math.PI * 2 * puffIndex) / cloudPuffs;
-          const spread = severe ? 17 : wet ? 14 : 11;
+          const spread = severe ? 42 : wet ? 36 : 28;
+          const radius = severe ? 17 + (puffIndex % 3) * 2 : wet ? 14 + (puffIndex % 3) * 2 : 11 + (puffIndex % 2) * 2;
           const puff = holder.children.push(am5.Circle.new(rootArg, {
-            radius: severe ? 10 : wet ? 8.5 : 7,
+            radius,
             x: Math.cos(angle) * spread,
             y: Math.sin(angle) * spread * 0.52,
             centerX: am5.p50, centerY: am5.p50,
-            fill: am5.color(severe ? 0xc9bdff : 0xd4fbff),
-            fillOpacity: severe ? 0.42 : wet ? 0.36 : 0.28,
+            fill: am5.color(severe ? 0xd1bcff : 0xe3fbff),
+            fillOpacity: severe ? 0.42 : wet ? 0.33 : 0.23,
+            stroke: am5.color(severe ? 0xd9c9ff : 0xcff8ff),
+            strokeOpacity: 0.12,
+            strokeWidth: 1,
           }));
-          puff.animate({ key: "scale", from: 0.86, to: 1.17, duration: 2600 + puffIndex * 210, loops: Infinity, easing: am5.ease.yoyo(am5.ease.sine) });
+          puff.animate({ key: "scale", from: 0.84, to: 1.12, duration: 4200 + puffIndex * 260, loops: Infinity, easing: am5.ease.yoyo(am5.ease.sine) });
         }
+        const core = holder.children.push(am5.Ellipse.new(rootArg, {
+          width: severe ? 86 : wet ? 74 : 58, height: severe ? 44 : wet ? 36 : 28,
+          centerX: am5.p50, centerY: am5.p50, fill: am5.color(severe ? 0xd1b6ff : 0xdafaff),
+          fillOpacity: severe ? 0.20 : wet ? 0.15 : 0.09,
+        }));
+        core.animate({ key: "scaleX", from: 0.82, to: 1.16, duration: 6800, loops: Infinity, easing: am5.ease.yoyo(am5.ease.sine) });
         const ring = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 23 : wet ? 19 : 10 + cloud * 0.1, centerX: am5.p50, centerY: am5.p50, fillOpacity: 0, stroke: am5.color(tone), strokeOpacity: severe ? 0.56 : wet ? 0.4 : 0.16 + cloud * 0.0018, strokeWidth: 1.2 }));
         const centre = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 9 : wet ? 7 : 5, centerX: am5.p50, centerY: am5.p50, fill: am5.color(tone), fillOpacity: severe ? 0.74 : 0.58 }));
         const duration = severe ? 2200 : wet ? 3200 : 5200;
