@@ -154,6 +154,8 @@ nav div a.active{color:#e6ffff!important;background:linear-gradient(105deg,#39df
   background:linear-gradient(140deg,#0c2636 0%,#0b2034 58%,#1b173b 165%)!important;
 }
 .primary{background:linear-gradient(105deg,#c6fbff 0%,#8ceff4 49%,#b2a5ff 130%)!important}
+.primary{font:inherit;cursor:pointer}
+.copy-status{color:#9df6f2;font-size:.82rem}
 @media(max-width:700px){.omega-mark span{width:42px;height:42px;font-size:30px}.omega-mark b{display:none}}
 .globe-focus-window .country-profile{position:relative!important;display:grid!important;grid-template-columns:minmax(0,1fr)!important;clear:both!important;gap:14px!important;width:100%!important;min-width:0!important;margin:30px 0 0!important;padding:0!important}
 .globe-focus-window .country-profile p{position:static!important;display:block!important;width:100%!important;margin:0!important;padding:0!important;line-height:1.58!important;white-space:normal!important;overflow-wrap:anywhere!important}
