@@ -606,10 +606,17 @@ export default function Home() {
   const [active, setActive] = useState(0);
   const [seedOpen, setSeedOpen] = useState(false);
   const [newsIndex, setNewsIndex] = useState(0);
+  const [leisOpen, setLeisOpen] = useState(false);
+  const [leisTopic, setLeisTopic] = useState<"start" | "story" | "work">("start");
   const current = milestones[active];
   const selected = news[newsIndex];
+  const leisGuidance = {
+    start: { title: "What is LEIS?", text: "LEIS is not an AI product. It is a reality-oriented way to preserve, activate and reconstruct understanding when people, tools or time change.", link: "#orientation", action: "Start with orientation" },
+    story: { title: "Where did it begin?", text: "The public timeline distinguishes documentation, creator-reported context and interpretation. It begins with the constitutional seed and stays honest about what is known.", link: "#timeline", action: "Follow the timeline" },
+    work: { title: "Can we work together?", text: "Yes. LEIS is open to respectful research, a concrete pilot, a grant conversation or a company handover problem. There is no mailing list and no pressure.", link: "#grants", action: "Explore cooperation" },
+  }[leisTopic];
   const choose = useCallback((index: number) => { setNewsIndex(index); window.dispatchEvent(new CustomEvent("leis-globe-focus", { detail: index })); }, []);
-  return <main>
+  return <><main>
     <nav><a className="mark" href="#top">Omega <b>LEIS</b></a><div><a href="#orientation">Start here</a><a href="#timeline">Our story</a><a href="#earth">Earth Pulse</a><a href="#grants">Support LEIS</a><a href="#media">Media</a></div></nav>
     <section className="hero" id="top"><div className="stars" /><div className="hero-copy"><p className="eyebrow">REALITY-ORIENTED UNDERSTANDING SYSTEM</p><h1>Understanding<br/><em>that can travel.</em></h1><p className="lead">LEIS is a technology-independent framework for recognising, activating and reconstructing understanding from reality.</p><div className="actions"><a className="primary" href="#orientation">Enter LEIS</a><a className="quiet" href="#timeline">Follow the lineage ↓</a></div></div><button className={`seed ${seedOpen ? "open" : ""}`} onClick={() => setSeedOpen(!seedOpen)} aria-expanded={seedOpen} aria-label="Open the LEIS Seed preview"><i/><span className="shell left"/><span className="shell right"/><span className="sprout"/></button><div className="seed-note"><span>LEIS SEED</span><strong>{seedOpen ? "A public Seed is taking shape." : "Touch the seed."}</strong><p>{seedOpen ? "A reviewed public entry point is being prepared: lineage, orientation and limits — without private archives." : "A small beginning, built to travel."}</p></div></section>
     <section className="orientation" id="orientation"><p className="eyebrow">QUICK ORIENTATION</p><h2>Reality was never hidden.<br/>Recognition was incomplete.</h2><div className="principles"><article><b>01</b><h3>Recognition</h3><p>Questions become roots. Relationships become branches. Understanding grows when the right pattern is recognised.</p></article><article><b>02</b><h3>Lineage</h3><p>Context should survive change: of people, tools, time and technology.</p></article><article><b>03</b><h3>Validation</h3><p>Reality remains the final validator. Where evidence is incomplete, uncertainty remains visible.</p></article></div><p className="formula">Reality → recognition → activation → understanding → validation → new reality</p></section>
@@ -618,5 +625,20 @@ export default function Home() {
     <section className="grants" id="grants"><p className="eyebrow">SUPPORT / COOPERATION / GRANT INTENT</p><h2>Keep LEIS free.<br/>Make it durable.</h2><p className="grant-lead">LEIS is free of charge forever. Support does not buy a wall around knowledge; it gives the human work behind preservation, validation and accessible public orientation the time to continue.</p><div className="grant-grid"><article><b>01</b><h3>Preserve</h3><p>Recover source lineage, distinguish evidence from interpretation and prevent years of work from becoming unreadable files.</p></article><article><b>02</b><h3>Test</h3><p>Measure whether understanding survives a handover: can a new person reconstruct a decision, its conditions and its limits?</p></article><article><b>03</b><h3>Share</h3><p>Build public explanations, practical pilots and open materials that let people judge LEIS for themselves.</p></article></div><div className="grant-path"><p><b>For grants:</b> operational continuity, documentation, validation, infrastructure and independent review.</p><p><b>For companies:</b> a bounded collaboration around a real handover, decision or knowledge-continuity problem.</p><p><b>For researchers and institutions:</b> an invitation to challenge the method and improve its tests.</p></div><a className="primary" href="mailto:martin.puzik@gmail.com?subject=LEIS%20grant%20or%20cooperation%20dialogue">Discuss support or a pilot</a></section>
     <section className="media" id="media"><p className="eyebrow">MEDIA / JOURNALISTS / RESEARCHERS</p><h2>Start with the human question.</h2><p>Can understanding survive the departure of the person who created it? This is the story before any technology claim: continuity, evidence, uncertainty and the possibility of rebuilding context.</p><div className="media-grid"><article><h3>Two-minute orientation</h3><p>What LEIS is, what it is not, where it began and how it can be tested without asking anyone to simply believe it.</p></article><article><h3>Source-led briefing</h3><p>Timeline labels distinguish documented evidence, creator-reported context and open questions. Private archives remain private.</p></article><article><h3>Talk to Martin</h3><p>For an interview, research question or source packet, use the public contact route. No mailing-list subscription is required.</p></article></div><a className="primary" href="mailto:martin.puzik@gmail.com?subject=LEIS%20media%20enquiry">Media / research enquiry</a></section>
     <section className="participate" id="participate"><p className="eyebrow">OPEN · FREE · EVOLVING</p><h2>LEIS has no walls.</h2><p>LEIS remains free of charge. Support, research dialogue and carefully scoped pilots help sustain its validation, preservation and human work.</p><div className="contact"><a className="primary" href="mailto:martin.puzik@gmail.com?subject=LEIS%20dialogue">Start a respectful dialogue</a><span>Public contact route · no mailing list · no pressure</span></div><footer>Created by <b>Martin Puzik</b> · Technical collaboration: <b>M.A.J. Puzik</b></footer></section>
-  </main>;
+  </main><aside className={`leis-dock ${leisOpen ? "open" : ""}`} aria-label="LEIS orientation guide">
+    {leisOpen && <div className="leis-dock-window">
+      <button className="leis-dock-close" onClick={() => setLeisOpen(false)} aria-label="Close LEIS guide">×</button>
+      <small>LEIS ORIENTATION GUIDE</small>
+      <h3>{leisGuidance.title}</h3>
+      <p>{leisGuidance.text}</p>
+      <div className="leis-dock-choices">
+        <button className={leisTopic === "start" ? "active" : ""} onClick={() => setLeisTopic("start")}>What is LEIS?</button>
+        <button className={leisTopic === "story" ? "active" : ""} onClick={() => setLeisTopic("story")}>Our story</button>
+        <button className={leisTopic === "work" ? "active" : ""} onClick={() => setLeisTopic("work")}>Work with LEIS</button>
+      </div>
+      <a href={leisGuidance.link} onClick={() => setLeisOpen(false)}>{leisGuidance.action} ↗</a>
+      <em>This is an orientation guide, not a live AI chat.</em>
+    </div>}
+    <button className="leis-dock-trigger" onClick={() => setLeisOpen(!leisOpen)} aria-expanded={leisOpen}><span>Ω</span>{leisOpen ? "Close" : "Ask LEIS"}</button>
+  </aside></>;
 }
