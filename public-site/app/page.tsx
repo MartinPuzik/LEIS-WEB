@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-type Source = "OpenAI" | "Anthropic" | "Google AI" | "Hugging Face";
+type Source = "OpenAI" | "Anthropic" | "Google AI" | "Hugging Face" | "Mistral AI" | "Cohere" | "Google DeepMind" | "TII" | "RIKEN" | "AI Singapore";
 type News = { title: string; source: Source; place: string; lat: number; lon: number; url: string; summary: string; leis: string; reviewed?: string };
 
 const milestones = [
@@ -33,9 +33,15 @@ const news: News[] = [
   { title: "AI for crisis resilience", source: "Google AI", place: "Mountain View, USA", lat: 37.37, lon: -122.1, url: "https://blog.google/innovation-and-ai/technology/ai/", summary: "A selected Google AI theme on resilience and public benefit.", leis: "LEIS question: can a decision-support system make its assumptions visible when the situation changes quickly?" },
   { title: "Developer tools and managed agents", source: "Google AI", place: "Mountain View, USA", lat: 37.41, lon: -122.12, url: "https://blog.google/innovation-and-ai/technology/ai/", summary: "A selected Google AI developer and agent-workflow theme.", leis: "LEIS lens: tools are replaceable; the human ability to reconstruct intent must survive the tool." },
   { title: "AI safety and security", source: "Google AI", place: "Mountain View, USA", lat: 37.35, lon: -122.08, url: "https://blog.google/innovation-and-ai/technology/ai/", summary: "A selected Google AI safety and security theme.", leis: "LEIS question: can safety claims carry their underlying evidence forward instead of becoming detached statements?" },
+  { title: "Robostral Navigate: embodied navigation", source: "Mistral AI", place: "Paris, France", lat: 48.8566, lon: 2.3722, url: "https://mistral.ai/news/", summary: "Mistral AI presents Robostral Navigate, a research model for embodied navigation.", leis: "LEIS lens: when intelligence acts in a physical environment, its boundaries, evidence and responsibility need to remain reconstructable.", reviewed: "9 July 2026" },
+  { title: "Responsible AI adoption at scale", source: "Cohere", place: "Toronto, Canada", lat: 43.6532, lon: -79.3832, url: "https://cohere.com/blog", summary: "Cohere and the University of Toronto describe a partnership for sovereign, enterprise-grade AI and responsible adoption at scale.", leis: "LEIS question: can an organisation preserve the reasons, permissions and human judgement that made an AI deployment trustworthy?", reviewed: "16 July 2026" },
+  { title: "Project Genie: interactive AI worlds", source: "Google DeepMind", place: "London, United Kingdom", lat: 51.5072, lon: -0.1276, url: "https://deepmind.google/discover/blog/", summary: "Google DeepMind presents Project Genie as an experiment in infinite, interactive worlds.", leis: "LEIS lens: new capability becomes useful when people can see what it is grounded in and how to orient themselves within it.", reviewed: "January 2026" },
+  { title: "Falcon-H1 Arabic: sovereign language AI", source: "TII", place: "Abu Dhabi, UAE", lat: 24.4539, lon: 54.3773, url: "https://www.tii.ae/index.php/news/abu-dhabis-tii-launches-falcon-h1-arabic-establishing-worlds-leading-arabic-ai-model", summary: "Technology Innovation Institute announced Falcon-H1 Arabic, a hybrid-architecture Arabic language model for high-performance and locally relevant AI.", leis: "LEIS lens: language, cultural context and sovereignty are part of the conditions needed to interpret an AI system responsibly.", reviewed: "5 January 2026" },
+  { title: "RIKYU: AI for Science supercomputer", source: "RIKEN", place: "Kobe, Japan", lat: 34.6901, lon: 135.1956, url: "https://www.riken.jp/en/news_pubs/news/2026/20260619_1/index.html", summary: "RIKEN named its AI-for-Science development supercomputer RIKYU, designed to support science with large-scale AI computing.", leis: "LEIS question: as science accelerates, can the assumptions, negative results and human reasons behind discoveries remain available to the next generation?", reviewed: "23 June 2026" },
+  { title: "AI bilingualism for community learning", source: "AI Singapore", place: "Singapore", lat: 1.3521, lon: 103.8198, url: "https://aisingapore.org/news/new-initiative-by-ai-singapore-to-drive-ai-bilingualism-across-the-community-and-empower-more-than-5000-youths/", summary: "AI Singapore announced a community initiative around practical AI bilingualism, education and youth participation.", leis: "LEIS lens: AI literacy is not only access to tools; it is the ability to understand their context, limitations and real-world consequences.", reviewed: "July 2026" },
 ];
 
-const sourceColors: Record<Source, string> = { OpenAI: "#a991ff", Anthropic: "#ffb16e", "Google AI": "#6de4ff", "Hugging Face": "#f6dc6a" };
+const sourceColors: Record<Source, string> = { OpenAI: "#a991ff", Anthropic: "#ffb16e", "Google AI": "#6de4ff", "Hugging Face": "#f6dc6a", "Mistral AI": "#ff8bbb", Cohere: "#ffb270", "Google DeepMind": "#84a7ff", TII: "#7af0c8", RIKEN: "#ffd66d", "AI Singapore": "#91e8ee" };
 const leisOriginPoints = [
   { label: "LEIS CREATOR, Martin Pužík", role: "Founder and constitution author", location: "PRAGUE, Czech Republic", lat: 50.0755, lon: 14.4378 },
   { label: "LEIS TECHNICAL COLLABORATION, M.A.J. Pužík", role: "Technical activation and development", location: "PRAGUE, Czech Republic", lat: 50.087, lon: 14.425 },
@@ -485,7 +491,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       const clusterIndex = new Map<string, number>();
       const anchors = new Map<string, [number, number]>();
       points.data.setAll([
-        ...[0, 5, 10, 13, 15].map((deskStart) => {
+        ...[0, 5, 10, 13, 15, 20, 21, 22, 23, 24, 25].map((deskStart) => {
           const item = news[deskStart];
           return { deskStart, color: 0x69ffba, geometry: { type: "Point", coordinates: [item.lon, item.lat] } };
         }),
