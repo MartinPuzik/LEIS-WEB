@@ -57,3 +57,10 @@
 .earth-experience .globe-map-shell .globe-map{width:100%!important;height:100%!important}
 .earth-experience .globe-stage>p{top:16px!important;bottom:auto!important;padding:7px 11px!important;border:1px solid #5be5ef57!important;border-radius:999px!important;background:#0716228f!important;color:#a5e9ee!important;font-size:.6rem!important;letter-spacing:.08em!important}
 @media(max-width:760px){.earth-experience,.earth-experience .globe-stage{min-height:470px!important}.earth-experience .globe-map-shell{height:470px!important}.earth-experience .globe-stage>p{top:7px!important;font-size:.52rem!important}}
+/* Stable map interaction: one source hub per desk; scrolling always remains page navigation. */
+.earth-experience .globe-stage>p{font-size:0!important}.earth-experience .globe-stage>p:after{content:"DRAG TO ROTATE · CLICK A SOURCE HUB · SCROLL TO CONTINUE";font-size:.6rem!important;letter-spacing:.08em!important}
+.globe-focus-window:has(.focus-origin){display:flex!important;flex-direction:column!important;justify-content:flex-start!important;min-height:0!important}
+.globe-focus-window .focus-origin{order:0!important;display:block!important;margin:0 0 12px!important;line-height:1.35!important;white-space:normal!important}
+.globe-focus-window:has(.focus-origin) h3{order:1!important;margin:0 0 18px!important}
+.globe-focus-window .open-context{order:2!important;margin:0!important;align-self:flex-start!important}
+.globe-focus-window:has(.focus-origin) .focus-detail{order:2!important}
