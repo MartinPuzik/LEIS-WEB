@@ -563,6 +563,15 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
   }, [focus]);
 
   useEffect(() => {
+    if (!focus) return;
+    const closeWithEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") close();
+    };
+    window.addEventListener("keydown", closeWithEscape);
+    return () => window.removeEventListener("keydown", closeWithEscape);
+  }, [focus]);
+
+  useEffect(() => {
     let root: any;
     let disposed = false;
     let drift: ReturnType<typeof setInterval> | undefined;
@@ -913,7 +922,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
     </div>
     {focus && <>
       <div className="globe-focus-scrim" onClick={close}/>
-      <section className={`globe-focus-window ${detail ? "level-2" : "level-1"}`} aria-live="polite">
+      <section className={`globe-focus-window ${detail ? "level-2" : "level-1"}`} role="dialog" aria-modal="true" aria-label="Earth Pulse information" aria-live="polite">
         <button className="close-focus" onClick={close} aria-label="Close selection">×</button>
         {selectedNews ? <article className="selected-article">
           <p className="article-source">
