@@ -366,6 +366,18 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         manualUntil = Date.now() + 13000;
       });
       const points = chart.series.push(am5map.MapPointSeries.new(root, {}));
+      const clusterMembers = new Map<string, Array<{ holder: any; label: any; index: number }>>();
+      let collapseTimer: ReturnType<typeof setTimeout> | undefined;
+      const expandCluster = (key: string, open: boolean) => {
+        const members = clusterMembers.get(key) ?? [];
+        const radius = members.length > 1 ? 34 : 0;
+        members.forEach(({ holder, label, index }) => {
+          const angle = -Math.PI / 2 + (Math.PI * 2 * index) / Math.max(members.length, 1);
+          holder.animate({ key: "x", to: open ? Math.cos(angle) * radius : 0, duration: 210 });
+          holder.animate({ key: "y", to: open ? Math.sin(angle) * radius : 0, duration: 210 });
+          label.animate({ key: "opacity", to: open ? 1 : 0, duration: 160 });
+        });
+      };
       points.bullets.push((rootArg: any, _series: any, dataItem: any) => {
         const data = dataItem?.dataContext ?? {};
         const isOrigin = Boolean(data.origin);
@@ -373,9 +385,19 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         const holder = am5.Container.new(rootArg, { width: 0, height: 0, cursorOverStyle: "pointer" });
         const halo = holder.children.push(am5.Circle.new(rootArg, { radius: isOrigin ? 7 : 5.4, fill: am5.color(colour), fillOpacity: 0.42 }));
         const core = holder.children.push(am5.Circle.new(rootArg, { radius: isOrigin ? 7 : 5.4, fill: am5.color(colour), stroke: am5.color(0xeafff4), strokeWidth: 1.4 }));
-        const hit = holder.children.push(am5.Circle.new(rootArg, { radius: 20, fill: am5.color(0xffffff), fillOpacity: 0.001 }));
+        const hit = holder.children.push(am5.Circle.new(rootArg, { radius: 22, fill: am5.color(0xffffff), fillOpacity: 0.001 }));
+        const label = holder.children.push(am5.Label.new(rootArg, {
+          text: data.shortTitle ?? "LEIS origin", x: 18, centerY: am5.p50, fill: am5.color(0xd9f4f6),
+          fontSize: 10, fontWeight: "600", maxWidth: 148, oversizedBehavior: "truncate", opacity: 0,
+        }));
+        const key = data.clusterKey ?? "origin";
+        const members = clusterMembers.get(key) ?? [];
+        members.push({ holder, label, index: data.clusterIndex ?? members.length });
+        clusterMembers.set(key, members);
         halo.animate({ key: "scale", from: 1, to: 3.2, duration: 2400, loops: Infinity, easing: am5.ease.cubic });
         halo.animate({ key: "opacity", from: 0.72, to: 0, duration: 2400, loops: Infinity, easing: am5.ease.cubic });
+        hit.events.on("pointerover", () => { if (collapseTimer) clearTimeout(collapseTimer); expandCluster(key, true); });
+        hit.events.on("pointerout", () => { collapseTimer = setTimeout(() => expandCluster(key, false), 700); });
         hit.events.on("click", () => {
           if (typeof data.index === "number") choose(data.index);
           else openPrague();
@@ -383,9 +405,17 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         });
         return am5.Bullet.new(rootArg, { sprite: holder });
       });
+      const clusterIndex = new Map<string, number>();
+      const anchors = new Map<string, [number, number]>();
       points.data.setAll([
-        ...news.map((item, index) => ({ index, color: 0x69ffba, geometry: { type: "Point", coordinates: [item.lon, item.lat] } })),
-        ...leisOriginPoints.map((item) => ({ origin: true, color: 0x58a9ff, geometry: { type: "Point", coordinates: [item.lon, item.lat] } })),
+        ...news.map((item, index) => {
+          const clusterKey = `${item.source}-${item.place}`;
+          const slot = clusterIndex.get(clusterKey) ?? 0;
+          clusterIndex.set(clusterKey, slot + 1);
+          if (!anchors.has(clusterKey)) anchors.set(clusterKey, [item.lon, item.lat]);
+          return { index, color: 0x69ffba, clusterKey, clusterIndex: slot, shortTitle: item.title, geometry: { type: "Point", coordinates: anchors.get(clusterKey)! } };
+        }),
+        ...leisOriginPoints.map((item, index) => ({ origin: true, color: 0x58a9ff, clusterKey: "leis-prague", clusterIndex: index, shortTitle: index === 0 ? "Martin Pužík · LEIS" : "M.A.J. Pužík · technical", geometry: { type: "Point", coordinates: [14.4378, 50.0755] } })),
       ]);
       drift = setInterval(() => {
         if (Date.now() > manualUntil) chart.set("rotationX", (chart.get("rotationX") ?? 0) + 0.28);
