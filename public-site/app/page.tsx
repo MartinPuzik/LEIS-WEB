@@ -654,10 +654,10 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         const wet = Boolean(data.wet);
         const cloud = Math.max(0, Math.min(100, Number(data.cloud ?? 0)));
         const cloudRadius = 16 + cloud * 0.13;
-        const holder = am5.Container.new(rootArg, { width: 0, height: 0, tooltipText: data.weather });
-        const field = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 33 : wet ? 27 : cloudRadius, fill: am5.color(tone), fillOpacity: severe ? 0.19 : wet ? 0.13 : 0.045 + cloud * 0.0007 }));
-        const ring = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 20 : wet ? 16 : 8 + cloud * 0.08, fillOpacity: 0, stroke: am5.color(tone), strokeOpacity: severe ? 0.48 : wet ? 0.32 : 0.10 + cloud * 0.0016, strokeWidth: 1 }));
-        const centre = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 8 : wet ? 6 : 4.5, fill: am5.color(tone), fillOpacity: severe ? 0.68 : 0.46 }));
+        const holder = am5.Container.new(rootArg, { width: 0, height: 0, centerX: am5.p50, centerY: am5.p50, tooltipText: data.weather });
+        const field = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 38 : wet ? 31 : cloudRadius + 4, centerX: am5.p50, centerY: am5.p50, fill: am5.color(tone), fillOpacity: severe ? 0.22 : wet ? 0.16 : 0.075 + cloud * 0.0008 }));
+        const ring = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 23 : wet ? 19 : 10 + cloud * 0.1, centerX: am5.p50, centerY: am5.p50, fillOpacity: 0, stroke: am5.color(tone), strokeOpacity: severe ? 0.56 : wet ? 0.4 : 0.16 + cloud * 0.0018, strokeWidth: 1.2 }));
+        const centre = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 9 : wet ? 7 : 5, centerX: am5.p50, centerY: am5.p50, fill: am5.color(tone), fillOpacity: severe ? 0.74 : 0.58 }));
         const duration = severe ? 2200 : wet ? 3200 : 5200;
         field.animate({ key: "scale", from: 0.88, to: severe ? 1.34 : wet ? 1.24 : 1.14, duration, loops: Infinity, easing: am5.ease.sine });
         field.animate({ key: "opacity", from: 0.55, to: 0.18, duration, loops: Infinity, easing: am5.ease.sine });
@@ -675,6 +675,18 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       ];
       const weatherLabel = (code: number) => code >= 95 ? "thunderstorm" : code >= 80 ? "rain showers" : code >= 51 ? "rain" : code >= 45 ? "mist" : code >= 3 ? "overcast" : code >= 1 ? "partly cloudy" : "clear";
       const weatherTone = (code: number, temperature = 0) => code >= 95 ? 0xc090ff : code >= 51 ? 0x5caef5 : temperature >= 30 ? 0xf2bb78 : code >= 3 ? 0x9ad7e4 : 0x9ee6c0;
+      // A restrained atmospheric simulation is visible immediately. When the live
+      // public weather feed returns, it replaces these visual starting conditions.
+      weatherLayer.data.setAll(weatherSites.map((site, index) => {
+        const cloud = [76, 58, 66, 46, 12, 42, 71, 35, 57, 64, 52, 79][index] ?? 48;
+        const wet = [true, false, true, false, false, false, true, false, true, true, false, true][index] ?? false;
+        const tone = wet ? 0x5caef5 : cloud > 60 ? 0x9ad7e4 : 0x9ee6c0;
+        return {
+          geometry: { type: "Point", coordinates: [site.lon, site.lat] },
+          weather: `${site.name} · atmospheric simulation · live public conditions load when available`,
+          tone, cloud, wet, severe: false,
+        };
+      }));
       const refreshWeather = async () => {
         try {
           const weather = await Promise.all(weatherSites.map(async (site) => {
@@ -794,8 +806,8 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       <div className="globe-map" ref={node} aria-label="Interactive globe. Drag to rotate, scroll to zoom and choose a source point." />
       <div className="globe-weather-hud" aria-label="Live weather layer active">
         <i aria-hidden="true" />
-        <span>Live weather</span>
-        <small>subtle global conditions</small>
+        <span>Atmosphere layer</span>
+        <small>simulated motion · live conditions when available</small>
       </div>
       <div className="globe-zoom-controls" aria-label="Globe zoom controls">
         <button onClick={() => adjustZoom(1)} aria-label="Zoom in">+</button>
