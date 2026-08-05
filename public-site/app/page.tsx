@@ -169,6 +169,28 @@ const countryProfiles: Record<string, { eyebrow: string; title: string; summary:
       { label: "DFKI · German AI research", url: "https://www.dfki.de/en/web" },
     ],
   },
+  "United Kingdom": {
+    eyebrow: "COUNTRY AI CONTEXT · REVIEWED 5 AUGUST 2026",
+    title: "United Kingdom: capability, public value and delivery",
+    summary: "The United Kingdom’s public AI plan brings together scientific capability, public services, skills, infrastructure and homegrown companies. London is also a visible global centre for frontier AI research.",
+    use: "The government’s action plan focuses on foundations for AI, practical public benefit and long-term national capability, with progress tracked through a public delivery dashboard.",
+    leis: "LEIS context: a national plan is strongest when people can follow the path from ambition to evidence, pilots, results and the responsibilities that remain after implementation.",
+    links: [
+      { label: "UK · AI Opportunities Action Plan", url: "https://www.gov.uk/government/publications/ai-opportunities-action-plan/ai-opportunities-action-plan" },
+      { label: "UK · progress update", url: "https://www.gov.uk/government/publications/ai-opportunities-action-plan-one-year-on/ai-opportunities-action-plan-one-year-on" },
+    ],
+  },
+  China: {
+    eyebrow: "COUNTRY AI CONTEXT · REVIEWED 5 AUGUST 2026",
+    title: "China: scale, AI literacy and international cooperation",
+    summary: "China’s public AI direction includes computing, data, industrial application, talent, standards, governance and AI literacy. These are presented as connected parts of a national and international capability agenda.",
+    use: "Recent public action plans address collaboration, data, computing power, open-source ecosystems, industry, talent and governance; education policy also places AI literacy across schooling and lifelong learning.",
+    leis: "LEIS context: national scale makes provenance more important, not less. People still need to see the source, purpose, local conditions and uncertainty behind a claim about AI.",
+    links: [
+      { label: "China · AI cooperation and development action plan", url: "https://english.www.gov.cn/news/202607/17/content_WS6a5a1bbec6d00ca5f9a0c474.html" },
+      { label: "China · AI literacy system", url: "https://english.www.gov.cn/english.www.gov.cn/news/202604/15/content_WS69df29e6c6d00ca5f9a0a6b1.html" },
+    ],
+  },
 };
 
 function GlobeLegacy({ onSelect }: { onSelect: (index: number) => void }) {
