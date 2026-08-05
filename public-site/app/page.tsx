@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-type Source = "OpenAI" | "Anthropic" | "Google AI" | "Hugging Face" | "Mistral AI" | "Cohere" | "Google DeepMind" | "TII" | "RIKEN" | "AI Singapore" | "IndiaAI" | "KAIST" | "Brazil Government" | "CTU Prague" | "DFKI" | "AI Sweden";
+type Source = "OpenAI" | "Anthropic" | "Google AI" | "Hugging Face" | "Mistral AI" | "Cohere" | "Google DeepMind" | "TII" | "RIKEN" | "AI Singapore" | "IndiaAI" | "KAIST" | "Brazil Government" | "CTU Prague" | "DFKI" | "AI Sweden" | "CSIRO" | "Kenya ICT" | "NCAIR Nigeria";
 type News = { title: string; source: Source; place: string; lat: number; lon: number; url: string; summary: string; leis: string; reviewed?: string };
 
 const milestones = [
@@ -48,9 +48,12 @@ const news: News[] = [
   { title: "Physical AI and intelligent industry at RICAIP Days", source: "CTU Prague", place: "Prague, Czech Republic", lat: 50.1057, lon: 14.3864, url: "https://www.aktualne.cvut.cz/en/press-reports", summary: "CTU's public news desk identified AI in the physical world and intelligent physical systems as a major RICAIP Days 2026 theme for European industrial competitiveness.", leis: "LEIS lens: physical systems need a readable chain from data and models to human intent, conditions and accountability.", reviewed: "5 June 2026" },
   { title: "AI research moves toward real-world use", source: "DFKI", place: "Saarbrucken, Germany", lat: 49.2402, lon: 6.9969, url: "https://www.dfki.de/en/web/news/ki-als-transformator-dfki-auf-der-hannover-messe-2026", summary: "The German Research Center for Artificial Intelligence presents practical AI applications across industry, health, logistics and decision support, with attention to social responsibility and technological autonomy.", leis: "LEIS question: when research crosses into practice, can the next operator recover the evidence, constraints and human judgement that made a system safe to use?", reviewed: "9 April 2026" },
   { title: "AI skills and practical collaboration", source: "AI Sweden", place: "Stockholm, Sweden", lat: 59.3293, lon: 18.0686, url: "https://www.ai.se/en/news", summary: "AI Sweden's public work connects skills, public institutions, industry and research, treating human-AI collaboration as a national capability rather than a tool rollout alone.", leis: "LEIS lens: skills endure when people can recognise not only how to use a system, but also its purpose, limits and the conditions in which it can be trusted.", reviewed: "9 July 2026" },
+  { title: "AI infrastructure for robots learning in real time", source: "CSIRO", place: "Brisbane, Australia", lat: -27.4698, lon: 153.0251, url: "https://www.csiro.au/en/news/All/News/2026/May/Vetra-AI-infrastructure", summary: "Australia's national science agency introduced Vetra, a modular edge-AI research infrastructure designed to help robots and sensing systems process data close to where it is created.", leis: "LEIS question: in physical AI, can the evidence, decisions and safety boundaries made at the edge remain understandable when work moves to the next team or system?", reviewed: "18 May 2026" },
+  { title: "Kenya's national AI strategy: inclusion and local innovation", source: "Kenya ICT", place: "Nairobi, Kenya", lat: -1.2921, lon: 36.8219, url: "https://www.ict.go.ke/index.php/ict-ministry-set-launch-national-artificial-intelligence-strategy-2025-2030", summary: "Kenya's public AI strategy brings government, private sector, academia, civil society and communities into a plan for locally relevant AI in areas such as agriculture, health, education and public services.", leis: "LEIS lens: local relevance is not a decorative layer. It is part of the context that lets people judge whether an AI system is appropriate, fair and useful.", reviewed: "27 March 2025" },
+  { title: "Multilingual AI grounded in Nigeria's languages", source: "NCAIR Nigeria", place: "Abuja, Nigeria", lat: 9.0765, lon: 7.3986, url: "https://ncair.nitda.gov.ng/", summary: "Nigeria's National Center for Artificial Intelligence and Robotics presents public work around research, entrepreneurship and multilingual AI, including Nigerian languages and locally relevant voices.", leis: "LEIS lens: understanding travels more faithfully when a system keeps language, culture, source and purpose connected rather than treating them as optional metadata.", reviewed: "2026 public source" },
 ];
 
-const sourceColors: Record<Source, string> = { OpenAI: "#a991ff", Anthropic: "#ffb16e", "Google AI": "#6de4ff", "Hugging Face": "#f6dc6a", "Mistral AI": "#ff8bbb", Cohere: "#ffb270", "Google DeepMind": "#84a7ff", TII: "#7af0c8", RIKEN: "#ffd66d", "AI Singapore": "#91e8ee", IndiaAI: "#ffcf6a", KAIST: "#b6a2ff", "Brazil Government": "#6ff0b0", "CTU Prague": "#72e7c1", DFKI: "#ffcb72", "AI Sweden": "#8eb8ff" };
+const sourceColors: Record<Source, string> = { OpenAI: "#a991ff", Anthropic: "#ffb16e", "Google AI": "#6de4ff", "Hugging Face": "#f6dc6a", "Mistral AI": "#ff8bbb", Cohere: "#ffb270", "Google DeepMind": "#84a7ff", TII: "#7af0c8", RIKEN: "#ffd66d", "AI Singapore": "#91e8ee", IndiaAI: "#ffcf6a", KAIST: "#b6a2ff", "Brazil Government": "#6ff0b0", "CTU Prague": "#72e7c1", DFKI: "#ffcb72", "AI Sweden": "#8eb8ff", CSIRO: "#a8ecff", "Kenya ICT": "#ffb97a", "NCAIR Nigeria": "#9affb7" };
 const leisOriginPoints = [
   { label: "LEIS CREATOR, Martin Pužík", role: "Founder and constitution author", location: "PRAGUE, Czech Republic", lat: 50.0755, lon: 14.4378 },
   { label: "LEIS TECHNICAL COLLABORATION, M.A.J. Pužík", role: "Technical activation and development", location: "PRAGUE, Czech Republic", lat: 50.087, lon: 14.425 },
@@ -180,6 +183,39 @@ const countryProfiles: Record<string, { eyebrow: string; title: string; summary:
     links: [
       { label: "AI Sweden · public news and projects", url: "https://www.ai.se/en/news" },
       { label: "AI Sweden · national ecosystem", url: "https://www.ai.se/en" },
+    ],
+  },
+  Australia: {
+    eyebrow: "COUNTRY AI CONTEXT · REVIEWED 5 AUGUST 2026",
+    title: "Australia: physical AI, science and responsible use",
+    summary: "Australia's public AI landscape connects national science, environmental work, health, industry and physical systems. CSIRO is one visible source for applied research and responsible AI practice.",
+    use: "Current public work includes edge AI for robotics and sensing, health, agriculture, climate and infrastructure — settings where systems need to act safely in the physical world.",
+    leis: "LEIS context: physical intelligence needs continuity. The people who inherit a system must be able to recover its local evidence, conditions and safety boundaries.",
+    links: [
+      { label: "CSIRO · AI research", url: "https://www.csiro.au/en/research/technology-space/ai" },
+      { label: "CSIRO · Vetra edge-AI infrastructure", url: "https://www.csiro.au/en/news/All/News/2026/May/Vetra-AI-infrastructure" },
+    ],
+  },
+  Kenya: {
+    eyebrow: "COUNTRY AI CONTEXT · REVIEWED 5 AUGUST 2026",
+    title: "Kenya: local innovation, inclusion and public purpose",
+    summary: "Kenya's National AI Strategy sets out a participatory route for AI research, model innovation and adoption, with agriculture, healthcare, education and public services among the areas of focus.",
+    use: "The strategy connects local communities, government, academia, private organisations and international partners. It also treats data sovereignty, cybersecurity and ethical oversight as part of AI development.",
+    leis: "LEIS context: a system becomes locally useful only when people can see whose context it carries, what it was built for and which responsibilities remain human.",
+    links: [
+      { label: "Kenya · National AI Strategy 2025–2030", url: "https://www.ict.go.ke/sites/default/files/2025-06/National-AI-Strategy_IMPLEMENTATION.pdf" },
+      { label: "Kenya ICT Ministry · strategy launch", url: "https://www.ict.go.ke/index.php/ict-ministry-set-launch-national-artificial-intelligence-strategy-2025-2030" },
+    ],
+  },
+  Nigeria: {
+    eyebrow: "COUNTRY AI CONTEXT · REVIEWED 5 AUGUST 2026",
+    title: "Nigeria: multilingual AI, research and entrepreneurship",
+    summary: "Nigeria's National Center for Artificial Intelligence and Robotics describes a national ecosystem for research, pilot projects, entrepreneurship and locally grounded AI capability.",
+    use: "Public work includes AI and robotics research, infrastructure, education, commercialisation and language-focused models designed to include Nigerian languages and Nigerian-accented English.",
+    leis: "LEIS context: language is evidence-bearing context. When it survives the transfer, the next person has a better chance of preserving meaning rather than merely translating words.",
+    links: [
+      { label: "NCAIR Nigeria · national AI and robotics centre", url: "https://ncair.nitda.gov.ng/" },
+      { label: "Nigeria · National AI Strategy 2025", url: "https://ncair.nitda.gov.ng/" },
     ],
   },
   "United Kingdom": {
