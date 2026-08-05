@@ -102,26 +102,6 @@
 .leis-dock-window small{display:block;margin:0 0 10px;color:#81edf3;font-size:.62rem;letter-spacing:.13em}.leis-dock-window h3{margin:0 26px 9px 0;color:var(--leis-moon-strong);font-size:1.45rem;line-height:1.12}.leis-dock-window p{margin:0;color:var(--leis-moon-muted);font-size:.88rem;line-height:1.55}.leis-dock-window>a{display:inline-block;margin-top:14px;color:#9bf5fa;font-size:.86rem;font-weight:760;text-decoration:none}.leis-dock-window>a:hover{text-decoration:underline}.leis-dock-window em{display:block;margin-top:14px;color:#83aab2;font-size:.66rem;line-height:1.35;font-style:normal}.leis-dock-close{position:absolute;right:12px;top:8px;border:0;background:transparent;color:#c4f8fa;font-size:25px;cursor:pointer}.leis-dock-choices{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}.leis-dock-choices button{border:1px solid #5ddde67d;border-radius:999px;padding:7px 9px;background:#0a26358a;color:#b5dde1;font-size:.72rem;cursor:pointer}.leis-dock-choices button:hover,.leis-dock-choices button.active{border-color:#98f6fb;color:#e0fcfd;background:#1a58698c}@keyframes dock-rise{from{opacity:0;transform:translateY(13px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(max-width:640px){.leis-dock{right:14px;bottom:14px}.leis-dock-trigger{min-height:45px}.leis-dock-window{padding:20px}.leis-dock-choices{display:grid;grid-template-columns:1fr 1fr}.leis-dock-choices button:last-child{grid-column:span 2}}
 
-/* The map remains the same live instrument. This layer only gives the planet a quiet oceanic depth beneath the country geometry. */
-.earth-experience .globe-map{
-  background-image:
-    radial-gradient(ellipse 12% 4% at 42% 43%,#69d9ef24 0%,#2b9fbe16 42%,transparent 72%),
-    radial-gradient(ellipse 9% 3% at 57% 57%,#8de5f01a 0%,#2b9fbe12 42%,transparent 72%),
-    radial-gradient(ellipse 7% 2% at 53% 35%,#76d8ea1d 0%,transparent 72%),
-    radial-gradient(ellipse 35% 65% at 50% 50%,#104c76 0%,#0a3558 50%,#061f3a 76%,transparent 79%)!important;
-  background-size:100% 100%!important;
-  background-position:center center!important;
-  background-repeat:no-repeat!important;
-}
-@media(max-width:760px){
-  .earth-experience .globe-map{
-    background-image:
-      radial-gradient(ellipse 18% 4% at 42% 43%,#69d9ef24 0%,#2b9fbe16 42%,transparent 72%),
-      radial-gradient(ellipse 14% 3% at 57% 57%,#8de5f01a 0%,#2b9fbe12 42%,transparent 72%),
-      radial-gradient(ellipse 50% 65% at 50% 50%,#104c76 0%,#0a3558 50%,#061f3a 76%,transparent 79%)!important;
-  }
-}
-/* A deliberately soft terminator: the sleeping hemisphere is readable, never black. */
-.earth-experience .globe-map-shell{isolation:isolate!important}
-.earth-experience .globe-map-shell:after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(90deg,transparent 44%,#02081114 62%,#0208112b 100%);mask-image:radial-gradient(ellipse 35% 65% at 50% 50%,#000 0 76%,transparent 79%);-webkit-mask-image:radial-gradient(ellipse 35% 65% at 50% 50%,#000 0 76%,transparent 79%)}
-@media(max-width:760px){.earth-experience .globe-map-shell:after{mask-image:radial-gradient(ellipse 50% 65% at 50% 50%,#000 0 76%,transparent 79%);-webkit-mask-image:radial-gradient(ellipse 50% 65% at 50% 50%,#000 0 76%,transparent 79%)}}
+/* Water belongs to the projected map itself. It must never sit behind the globe as a fixed CSS disk. */
+.earth-experience .globe-map{background:transparent!important}
+.earth-experience .globe-map-shell:after{display:none!important}

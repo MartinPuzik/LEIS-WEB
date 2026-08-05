@@ -444,6 +444,15 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       wheelHost.addEventListener("touchmove", onTouchMove, { passive: false });
       wheelHost.addEventListener("touchend", onTouchEnd, { passive: true });
       chart.chartContainer.events.on("pointerdown", () => { manualUntil = Date.now() + 13000; });
+      // A projected water polygon stays attached to the same Earth model as the countries.
+      // Unlike a CSS background, it rotates and zooms with the orthographic globe.
+      const ocean = chart.series.unshift(am5map.MapPolygonSeries.new(root, {}));
+      ocean.mapPolygons.template.setAll({
+        fill: am5.color(0x0b4165), fillOpacity: 1,
+        stroke: am5.color(0x155b79), strokeOpacity: 0.38, strokeWidth: 0.8,
+        interactive: false,
+      });
+      ocean.data.setAll([{ geometry: am5map.getGeoRectangle(90, 180, -90, -180) }]);
       const polygons = chart.series.push(am5map.MapPolygonSeries.new(root, { geoJSON: world }));
       polygons.mapPolygons.template.setAll({
         fill: am5.color(0x286986), stroke: am5.color(0x72d2e2), strokeOpacity: 0.38,
