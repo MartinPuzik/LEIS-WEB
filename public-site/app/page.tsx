@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-type Source = "OpenAI" | "Anthropic" | "Google AI" | "Hugging Face" | "Mistral AI" | "Cohere" | "Google DeepMind" | "TII" | "RIKEN" | "AI Singapore";
+type Source = "OpenAI" | "Anthropic" | "Google AI" | "Hugging Face" | "Mistral AI" | "Cohere" | "Google DeepMind" | "TII" | "RIKEN" | "AI Singapore" | "IndiaAI" | "KAIST" | "Brazil Government";
 type News = { title: string; source: Source; place: string; lat: number; lon: number; url: string; summary: string; leis: string; reviewed?: string };
 
 const milestones = [
@@ -39,9 +39,12 @@ const news: News[] = [
   { title: "Falcon-H1 Arabic: sovereign language AI", source: "TII", place: "Abu Dhabi, UAE", lat: 24.4539, lon: 54.3773, url: "https://www.tii.ae/index.php/news/abu-dhabis-tii-launches-falcon-h1-arabic-establishing-worlds-leading-arabic-ai-model", summary: "Technology Innovation Institute announced Falcon-H1 Arabic, a hybrid-architecture Arabic language model for high-performance and locally relevant AI.", leis: "LEIS lens: language, cultural context and sovereignty are part of the conditions needed to interpret an AI system responsibly.", reviewed: "5 January 2026" },
   { title: "RIKYU: AI for Science supercomputer", source: "RIKEN", place: "Kobe, Japan", lat: 34.6901, lon: 135.1956, url: "https://www.riken.jp/en/news_pubs/news/2026/20260619_1/index.html", summary: "RIKEN named its AI-for-Science development supercomputer RIKYU, designed to support science with large-scale AI computing.", leis: "LEIS question: as science accelerates, can the assumptions, negative results and human reasons behind discoveries remain available to the next generation?", reviewed: "23 June 2026" },
   { title: "AI bilingualism for community learning", source: "AI Singapore", place: "Singapore", lat: 1.3521, lon: 103.8198, url: "https://aisingapore.org/news/new-initiative-by-ai-singapore-to-drive-ai-bilingualism-across-the-community-and-empower-more-than-5000-youths/", summary: "AI Singapore announced a community initiative around practical AI bilingualism, education and youth participation.", leis: "LEIS lens: AI literacy is not only access to tools; it is the ability to understand their context, limitations and real-world consequences.", reviewed: "July 2026" },
+  { title: "AI Impact Summit: public AI capacity", source: "IndiaAI", place: "New Delhi, India", lat: 28.6139, lon: 77.209, url: "https://impact.indiaai.gov.in/events/AiImpactExpo.pdf", summary: "India's Ministry of Electronics and Information Technology presents the AI Impact Summit 2026 as a public showcase for AI capability, research and societal application.", leis: "LEIS lens: capacity matters most when people can recover the human purpose, evidence and public responsibility behind deployment.", reviewed: "2026" },
+  { title: "AI technology transfer and public research", source: "KAIST", place: "Seoul, South Korea", lat: 37.5665, lon: 126.978, url: "https://www.kaist.ac.kr/news/html/news/?skey=keyword&sval=KAIST+AI+%EA%B8%B0%EC%88%A0%EC%84%A4%EB%AA%85%ED%9A%8C+2026", summary: "KAIST's AI technology briefing presents research in trustworthy AI, health AI, robotics, multimodal systems and physical AI for collaboration with industry and the public.", leis: "LEIS question: when research crosses into practice, can its intent, limitations and evidence travel with it?", reviewed: "6 May 2026" },
+  { title: "Responsible AI in public services", source: "Brazil Government", place: "Brasília, Brazil", lat: -15.7939, lon: -47.8828, url: "https://www.gov.br/governodigital/pt-br/infraestrutura-nacional-de-dados/inteligencia-artificial-1/inteligencia-artificial-1", summary: "Brazil's digital-government AI initiative reports public-sector AI tools, governance guidance, risk and ethics work, and planned capability building.", leis: "LEIS lens: public AI needs an understandable lineage from policy to implementation, including who remains responsible when systems change.", reviewed: "2026" },
 ];
 
-const sourceColors: Record<Source, string> = { OpenAI: "#a991ff", Anthropic: "#ffb16e", "Google AI": "#6de4ff", "Hugging Face": "#f6dc6a", "Mistral AI": "#ff8bbb", Cohere: "#ffb270", "Google DeepMind": "#84a7ff", TII: "#7af0c8", RIKEN: "#ffd66d", "AI Singapore": "#91e8ee" };
+const sourceColors: Record<Source, string> = { OpenAI: "#a991ff", Anthropic: "#ffb16e", "Google AI": "#6de4ff", "Hugging Face": "#f6dc6a", "Mistral AI": "#ff8bbb", Cohere: "#ffb270", "Google DeepMind": "#84a7ff", TII: "#7af0c8", RIKEN: "#ffd66d", "AI Singapore": "#91e8ee", IndiaAI: "#ffcf6a", KAIST: "#b6a2ff", "Brazil Government": "#6ff0b0" };
 const leisOriginPoints = [
   { label: "LEIS CREATOR, Martin Pužík", role: "Founder and constitution author", location: "PRAGUE, Czech Republic", lat: 50.0755, lon: 14.4378 },
   { label: "LEIS TECHNICAL COLLABORATION, M.A.J. Pužík", role: "Technical activation and development", location: "PRAGUE, Czech Republic", lat: 50.087, lon: 14.425 },
@@ -491,7 +494,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       const clusterIndex = new Map<string, number>();
       const anchors = new Map<string, [number, number]>();
       points.data.setAll([
-        ...[0, 5, 10, 13, 15, 20, 21, 22, 23, 24, 25].map((deskStart) => {
+        ...[0, 5, 10, 13, 15, 20, 21, 22, 23, 24, 25, 26, 27, 28].map((deskStart) => {
           const item = news[deskStart];
           return { deskStart, color: 0x69ffba, geometry: { type: "Point", coordinates: [item.lon, item.lat] } };
         }),
