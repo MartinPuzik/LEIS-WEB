@@ -620,8 +620,8 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       // Unlike a CSS background, it rotates and zooms with the orthographic globe.
       const ocean = chart.series.unshift(am5map.MapPolygonSeries.new(root, {}));
       ocean.mapPolygons.template.setAll({
-        fill: am5.color(0x0a4166), fillOpacity: 0.96,
-        stroke: am5.color(0x1b6b8b), strokeOpacity: 0.34, strokeWidth: 0.8,
+        fill: am5.color(0x061b31), fillOpacity: 0.98,
+        stroke: am5.color(0x26799d), strokeOpacity: 0.52, strokeWidth: 1,
         interactive: false,
       });
       ocean.data.setAll([{ geometry: am5map.getGeoRectangle(90, 180, -90, -180) }]);
@@ -635,7 +635,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       });
       const polygons = chart.series.push(am5map.MapPolygonSeries.new(root, { geoJSON: world }));
       polygons.mapPolygons.template.setAll({
-        fill: am5.color(0x286986), stroke: am5.color(0x72d2e2), strokeOpacity: 0.38,
+        fill: am5.color(0x347c98), stroke: am5.color(0x87d8e6), strokeOpacity: 0.35,
         strokeWidth: 0.65, interactive: true, tooltipText: "{name}",
         shadowColor: am5.color(0x01070e), shadowBlur: 4, shadowOffsetY: 2, shadowOpacity: 0.34,
       });
@@ -804,6 +804,13 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
   return <>
     <div className="globe-map-shell">
       <div className="globe-map" ref={node} aria-label="Interactive globe. Drag to rotate, scroll to zoom and choose a source point." />
+      <div className="weather-visual-layer" aria-hidden="true">
+        <i className="weather-cloud cloud-atlantic" />
+        <i className="weather-cloud cloud-eurasia" />
+        <i className="weather-cloud cloud-pacific" />
+        <i className="weather-cloud cloud-south" />
+        <i className="weather-cloud storm-indian" />
+      </div>
       <div className="globe-weather-hud" aria-label="Live weather layer active">
         <i aria-hidden="true" />
         <span>Atmosphere layer</span>
