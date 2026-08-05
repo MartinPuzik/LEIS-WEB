@@ -36,6 +36,10 @@ const news: News[] = [
 ];
 
 const sourceColors: Record<Source, string> = { OpenAI: "#a991ff", Anthropic: "#ffb16e", "Google AI": "#6de4ff", "Hugging Face": "#f6dc6a" };
+const leisOrigins = [
+  { label: "LEIS Creator · Martin Puzik", location: "Prague, Czech Republic", lat: 50.0755, lon: 14.4378 },
+  { label: "LEIS technical collaboration · M.A.J. Puzik", location: "Prague, Czech Republic", lat: 50.087, lon: 14.425 },
+];
 
 function Globe({ onSelect }: { onSelect: (index: number) => void }) {
   const node = useRef<HTMLDivElement>(null);
@@ -57,12 +61,16 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       polygons.mapPolygons.template.states.create("hover", { fill: am5.color(0x246f8a) });
       const points = chart.series.push(am5map.MapPointSeries.new(root, {}));
       points.bullets.push(() => {
-        const dot = am5.Circle.new(root!, { radius: 5, fill: am5.color(0xffffff), stroke: am5.color(0x06131d), strokeWidth: 2, cursorOverStyle: "pointer" });
-        dot.adapters.add("fill", (_fill, target) => am5.color((target.dataItem?.dataContext as { color?: number })?.color ?? 0xffffff));
-        dot.events.on("click", (event) => onSelect((event.target.dataItem?.dataContext as { index: number }).index));
+        const dot = am5.Circle.new(root!, { radius: 4.5, fill: am5.color(0x69ffba), stroke: am5.color(0xeafff4), strokeWidth: 1.5, cursorOverStyle: "pointer", tooltipText: "{location}" });
+        dot.animate({ key: "scale", from: 0.82, to: 1.65, duration: 1250, loops: Infinity, easing: am5.ease.cubic });
+        dot.animate({ key: "opacity", from: 1, to: 0.42, duration: 1250, loops: Infinity, easing: am5.ease.cubic });
+        dot.events.on("click", (event) => { const item = event.target.dataItem?.dataContext as { index?: number }; if (typeof item?.index === "number") onSelect(item.index); });
         return am5.Bullet.new(root!, { sprite: dot });
       });
-      points.data.setAll(news.map((item, index) => ({ index, color: Number.parseInt(sourceColors[item.source].slice(1), 16), geometry: { type: "Point", coordinates: [item.lon, item.lat] } })));
+      points.data.setAll([
+        ...news.map((item, index) => ({ index, location: `${item.place} · ${item.source}`, geometry: { type: "Point", coordinates: [item.lon, item.lat] } })),
+        ...leisOrigins.map((item) => ({ location: `${item.location} · ${item.label}`, geometry: { type: "Point", coordinates: [item.lon, item.lat] } })),
+      ]);
     })();
     return () => { disposed = true; root?.dispose(); };
   }, [onSelect]);
