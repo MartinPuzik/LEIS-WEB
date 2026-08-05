@@ -448,7 +448,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       polygons.mapPolygons.template.setAll({
         fill: am5.color(0x1a4d6b), stroke: am5.color(0x5bcfe0), strokeOpacity: 0.46,
         strokeWidth: 0.65, interactive: true, tooltipText: "{name}",
-        shadowColor: am5.color(0x01070e), shadowBlur: 6, shadowOffsetY: 3, shadowOpacity: 0.68,
+        shadowColor: am5.color(0x01070e), shadowBlur: 4, shadowOffsetY: 2, shadowOpacity: 0.34,
       });
       polygons.mapPolygons.template.states.create("hover", { fill: am5.color(0x246f8a) });
       polygons.mapPolygons.template.events.on("click", (event: any) => {
@@ -457,6 +457,33 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         else { setCountry(data.name ?? "Selected country"); setSelected(null); setDeskStart(null); setDetail(false); setFocus(true); }
         manualUntil = Date.now() + 13000;
       });
+      const weatherLayer = chart.series.push(am5map.MapPointSeries.new(root, {}));
+      weatherLayer.bullets.push((rootArg: any, _series: any, dataItem: any) => {
+        const data = dataItem?.dataContext ?? {};
+        const tone = data.tone ?? 0x8edce8;
+        const severe = Boolean(data.severe);
+        const holder = am5.Container.new(rootArg, { width: 0, height: 0, tooltipText: data.weather });
+        const field = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 29 : 21, fill: am5.color(tone), fillOpacity: severe ? 0.15 : 0.09 }));
+        const centre = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 8 : 5, fill: am5.color(tone), fillOpacity: severe ? 0.5 : 0.3 }));
+        field.animate({ key: "scale", from: 0.88, to: severe ? 1.28 : 1.16, duration: severe ? 2200 : 4200, loops: Infinity, easing: am5.ease.sine });
+        field.animate({ key: "opacity", from: 0.55, to: 0.18, duration: severe ? 2200 : 4200, loops: Infinity, easing: am5.ease.sine });
+        return am5.Bullet.new(rootArg, { sprite: holder });
+      });
+      const weatherSites = [
+        { name: "San Francisco", lat: 37.7749, lon: -122.4194 }, { name: "Toronto", lat: 43.6532, lon: -79.3832 },
+        { name: "London", lat: 51.5072, lon: -0.1276 }, { name: "Prague", lat: 50.0755, lon: 14.4378 },
+        { name: "Abu Dhabi", lat: 24.4539, lon: 54.3773 }, { name: "New Delhi", lat: 28.6139, lon: 77.2090 },
+        { name: "Singapore", lat: 1.3521, lon: 103.8198 }, { name: "Tokyo", lat: 35.6762, lon: 139.6503 },
+        { name: "Sao Paulo", lat: -23.5505, lon: -46.6333 }, { name: "Cape Town", lat: -33.9249, lon: 18.4241 },
+      ];
+      const weatherLabel = (code: number) => code >= 95 ? "thunderstorm" : code >= 80 ? "rain showers" : code >= 51 ? "rain" : code >= 45 ? "mist" : code >= 3 ? "overcast" : code >= 1 ? "partly cloudy" : "clear";
+      const weatherTone = (code: number) => code >= 95 ? 0xc090ff : code >= 51 ? 0x5caef5 : code >= 3 ? 0x9ad7e4 : 0x9ee6c0;
+      void Promise.all(weatherSites.map(async (site) => {
+        const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${site.lat}&longitude=${site.lon}&current=weather_code,cloud_cover,precipitation&timezone=auto`);
+        const payload = await response.json();
+        const code = Number(payload?.current?.weather_code ?? 0);
+        return { geometry: { type: "Point", coordinates: [site.lon, site.lat] }, weather: `${site.name} · live weather: ${weatherLabel(code)}`, tone: weatherTone(code), severe: code >= 95 };
+      })).then((weather) => { if (!disposed) weatherLayer.data.setAll(weather); }).catch(() => { /* The globe remains useful when the optional live weather stream is unavailable. */ });
       const routes = chart.series.push(am5map.MapLineSeries.new(root, {}));
       routes.mapLines.template.setAll({
         stroke: am5.color(0x72f2f5), strokeOpacity: 0.44, strokeWidth: 1.5,
