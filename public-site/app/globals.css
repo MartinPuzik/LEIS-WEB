@@ -105,28 +105,17 @@
 /* The map remains the same live instrument. This layer only gives the planet a quiet oceanic depth beneath the country geometry. */
 .earth-experience .globe-map{
   background-image:
-    radial-gradient(ellipse 28% 48% at 50% 50%,#123e60 0%,#0b2c49 50%,#071b2e 74%,transparent 78%),
-    repeating-radial-gradient(ellipse 42% 70% at 48% 50%,#7ce8f012 0 1px,transparent 2px 24px)!important;
-  background-size:100% 100%,122% 116%!important;
-  background-position:center center,47% 49%!important;
+    radial-gradient(ellipse 28% 48% at 50% 50%,#123e60 0%,#0b2c49 50%,#071b2e 74%,transparent 78%)!important;
+  background-size:100% 100%!important;
+  background-position:center center!important;
   background-repeat:no-repeat!important;
-  animation:leis-water-drift 19s ease-in-out infinite alternate!important;
-}
-@keyframes leis-water-drift{
-  from{background-position:center center,46% 48%}
-  to{background-position:center center,54% 52%}
 }
 @media(max-width:760px){
   .earth-experience .globe-map{
-    background-image:
-      radial-gradient(ellipse 43% 47% at 50% 50%,#0d3351ee 0%,#09253eea 48%,#061827dc 72%,transparent 78%),
-      repeating-radial-gradient(ellipse 68% 70% at 48% 50%,#7ce8f00c 0 1px,transparent 2px 24px)!important;
+    background-image:radial-gradient(ellipse 43% 47% at 50% 50%,#123e60 0%,#0b2c49 50%,#071b2e 74%,transparent 78%)!important;
   }
 }
 /* A deliberately soft terminator: the sleeping hemisphere is readable, never black. */
 .earth-experience .globe-map-shell{isolation:isolate!important}
 .earth-experience .globe-map-shell:after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(90deg,transparent 44%,#02081114 62%,#0208112b 100%);mask-image:radial-gradient(ellipse 28% 48% at 50% 50%,#000 0 76%,transparent 79%);-webkit-mask-image:radial-gradient(ellipse 28% 48% at 50% 50%,#000 0 76%,transparent 79%)}
 @media(max-width:760px){.earth-experience .globe-map-shell:after{mask-image:radial-gradient(ellipse 43% 47% at 50% 50%,#000 0 76%,transparent 79%);-webkit-mask-image:radial-gradient(ellipse 43% 47% at 50% 50%,#000 0 76%,transparent 79%)}}
-
-/* The planet is an immersive surface: interaction remains fully active, while the ordinary browser cursor stays out of the scene. */
-.earth-experience .globe-map,.earth-experience .globe-map *{cursor:none!important}
