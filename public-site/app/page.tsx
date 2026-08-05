@@ -471,8 +471,8 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       ocean.events.once("datavalidated", () => {
         const oceanPolygon = ocean.dataItems[0]?.get("mapPolygon");
         if (!oceanPolygon) return;
-        oceanPolygon.animate({ key: "fillOpacity", from: 0.72, to: 0.98, duration: 6200, loops: Infinity, easing: am5.ease.sine });
-        oceanPolygon.animate({ key: "strokeOpacity", from: 0.18, to: 0.48, duration: 6200, loops: Infinity, easing: am5.ease.sine });
+        oceanPolygon.animate({ key: "fillOpacity", from: 0.82, to: 0.98, duration: 7800, loops: Infinity, easing: am5.ease.yoyo(am5.ease.sine) });
+        oceanPolygon.animate({ key: "strokeOpacity", from: 0.22, to: 0.40, duration: 7800, loops: Infinity, easing: am5.ease.yoyo(am5.ease.sine) });
       });
       const polygons = chart.series.push(am5map.MapPolygonSeries.new(root, { geoJSON: world }));
       polygons.mapPolygons.template.setAll({
