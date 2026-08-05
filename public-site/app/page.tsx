@@ -656,6 +656,20 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         const cloudRadius = 16 + cloud * 0.13;
         const holder = am5.Container.new(rootArg, { width: 0, height: 0, centerX: am5.p50, centerY: am5.p50, tooltipText: data.weather });
         const field = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 38 : wet ? 31 : cloudRadius + 4, centerX: am5.p50, centerY: am5.p50, fill: am5.color(tone), fillOpacity: severe ? 0.22 : wet ? 0.16 : 0.075 + cloud * 0.0008 }));
+        const cloudPuffs = severe ? 6 : wet ? 5 : 4;
+        for (let puffIndex = 0; puffIndex < cloudPuffs; puffIndex += 1) {
+          const angle = (Math.PI * 2 * puffIndex) / cloudPuffs;
+          const spread = severe ? 17 : wet ? 14 : 11;
+          const puff = holder.children.push(am5.Circle.new(rootArg, {
+            radius: severe ? 10 : wet ? 8.5 : 7,
+            x: Math.cos(angle) * spread,
+            y: Math.sin(angle) * spread * 0.52,
+            centerX: am5.p50, centerY: am5.p50,
+            fill: am5.color(severe ? 0xc9bdff : 0xd4fbff),
+            fillOpacity: severe ? 0.42 : wet ? 0.36 : 0.28,
+          }));
+          puff.animate({ key: "scale", from: 0.86, to: 1.17, duration: 2600 + puffIndex * 210, loops: Infinity, easing: am5.ease.yoyo(am5.ease.sine) });
+        }
         const ring = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 23 : wet ? 19 : 10 + cloud * 0.1, centerX: am5.p50, centerY: am5.p50, fillOpacity: 0, stroke: am5.color(tone), strokeOpacity: severe ? 0.56 : wet ? 0.4 : 0.16 + cloud * 0.0018, strokeWidth: 1.2 }));
         const centre = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 9 : wet ? 7 : 5, centerX: am5.p50, centerY: am5.p50, fill: am5.color(tone), fillOpacity: severe ? 0.74 : 0.58 }));
         const duration = severe ? 2200 : wet ? 3200 : 5200;
@@ -680,11 +694,12 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       weatherLayer.data.setAll(weatherSites.map((site, index) => {
         const cloud = [76, 58, 66, 46, 12, 42, 71, 35, 57, 64, 52, 79][index] ?? 48;
         const wet = [true, false, true, false, false, false, true, false, true, true, false, true][index] ?? false;
-        const tone = wet ? 0x5caef5 : cloud > 60 ? 0x9ad7e4 : 0x9ee6c0;
+        const severe = index === 6;
+        const tone = severe ? 0xc090ff : wet ? 0x5caef5 : cloud > 60 ? 0x9ad7e4 : 0x9ee6c0;
         return {
           geometry: { type: "Point", coordinates: [site.lon, site.lat] },
           weather: `${site.name} · atmospheric simulation · live public conditions load when available`,
-          tone, cloud, wet, severe: false,
+          tone, cloud, wet, severe,
         };
       }));
       const refreshWeather = async () => {
