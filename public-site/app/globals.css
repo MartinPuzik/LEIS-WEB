@@ -105,14 +105,20 @@
 /* The map remains the same live instrument. This layer only gives the planet a quiet oceanic depth beneath the country geometry. */
 .earth-experience .globe-map{
   background-image:
-    radial-gradient(ellipse 28% 48% at 50% 50%,#123e60 0%,#0b2c49 50%,#071b2e 74%,transparent 78%)!important;
+    radial-gradient(ellipse 12% 4% at 42% 43%,#69d9ef24 0%,#2b9fbe16 42%,transparent 72%),
+    radial-gradient(ellipse 9% 3% at 57% 57%,#8de5f01a 0%,#2b9fbe12 42%,transparent 72%),
+    radial-gradient(ellipse 7% 2% at 53% 35%,#76d8ea1d 0%,transparent 72%),
+    radial-gradient(ellipse 28% 48% at 50% 50%,#104c76 0%,#0a3558 50%,#061f3a 76%,transparent 79%)!important;
   background-size:100% 100%!important;
   background-position:center center!important;
   background-repeat:no-repeat!important;
 }
 @media(max-width:760px){
   .earth-experience .globe-map{
-    background-image:radial-gradient(ellipse 43% 47% at 50% 50%,#123e60 0%,#0b2c49 50%,#071b2e 74%,transparent 78%)!important;
+    background-image:
+      radial-gradient(ellipse 18% 4% at 42% 43%,#69d9ef24 0%,#2b9fbe16 42%,transparent 72%),
+      radial-gradient(ellipse 14% 3% at 57% 57%,#8de5f01a 0%,#2b9fbe12 42%,transparent 72%),
+      radial-gradient(ellipse 43% 47% at 50% 50%,#104c76 0%,#0a3558 50%,#061f3a 76%,transparent 79%)!important;
   }
 }
 /* A deliberately soft terminator: the sleeping hemisphere is readable, never black. */

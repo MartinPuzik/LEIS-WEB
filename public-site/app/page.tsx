@@ -446,7 +446,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       chart.chartContainer.events.on("pointerdown", () => { manualUntil = Date.now() + 13000; });
       const polygons = chart.series.push(am5map.MapPolygonSeries.new(root, { geoJSON: world }));
       polygons.mapPolygons.template.setAll({
-        fill: am5.color(0x1a4d6b), stroke: am5.color(0x5bcfe0), strokeOpacity: 0.46,
+        fill: am5.color(0x286986), stroke: am5.color(0x72d2e2), strokeOpacity: 0.38,
         strokeWidth: 0.65, interactive: true, tooltipText: "{name}",
         shadowColor: am5.color(0x01070e), shadowBlur: 4, shadowOffsetY: 2, shadowOpacity: 0.34,
       });
