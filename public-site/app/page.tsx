@@ -460,26 +460,16 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       // A projected water polygon stays attached to the same Earth model as the countries.
       // Unlike a CSS background, it rotates and zooms with the orthographic globe.
       const ocean = chart.series.unshift(am5map.MapPolygonSeries.new(root, {}));
-      const oceanGradient = am5.RadialGradient.new(root, {
-        x: am5.percent(30), y: am5.percent(26), radius: am5.percent(88),
-        stops: [
-          { color: am5.color(0x17658a), opacity: 1 },
-          { color: am5.color(0x0b486f), opacity: 1 },
-          { color: am5.color(0x061d38), opacity: 1 },
-        ],
-      });
       ocean.mapPolygons.template.setAll({
-        fill: am5.color(0x0b4268), fillGradient: oceanGradient, fillOpacity: 1,
+        fill: am5.color(0x0a4166), fillOpacity: 0.96,
         stroke: am5.color(0x1b6b8b), strokeOpacity: 0.34, strokeWidth: 0.8,
         interactive: false,
       });
       ocean.data.setAll([{ geometry: am5map.getGeoRectangle(90, 180, -90, -180) }]);
-      // A slowly travelling pool of light makes the water legible as water, not a
-      // flat background. It belongs to the projected ocean polygon, so it rotates
-      // and zooms with the Earth rather than sitting behind it on the page.
-      oceanGradient.animate({ key: "x", from: am5.percent(24), to: am5.percent(68), duration: 12600, loops: Infinity, easing: am5.ease.sine });
-      oceanGradient.animate({ key: "y", from: am5.percent(22), to: am5.percent(58), duration: 16400, loops: Infinity, easing: am5.ease.sine });
-      ocean.mapPolygons.template.animate({ key: "fillOpacity", from: 0.78, to: 1, duration: 7200, loops: Infinity, easing: am5.ease.sine });
+      // This deliberately uses only the proven MapPolygon properties. It keeps the
+      // ocean coupled to the globe and gives it a quiet, visible tide without
+      // risking the country layer during initialisation.
+      ocean.mapPolygons.template.animate({ key: "fillOpacity", from: 0.74, to: 1, duration: 5600, loops: Infinity, easing: am5.ease.sine });
       const polygons = chart.series.push(am5map.MapPolygonSeries.new(root, { geoJSON: world }));
       polygons.mapPolygons.template.setAll({
         fill: am5.color(0x286986), stroke: am5.color(0x72d2e2), strokeOpacity: 0.38,
