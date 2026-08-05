@@ -674,23 +674,34 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
           cloudOpacity: cloud < 14 ? 0 : Math.min(severe ? 0.78 : 0.68, 0.16 + cloud * 0.006),
         };
       };
-      const weatherLayer = chart.series.push(am5map.MapPointSeries.new(root, {}));
-      weatherLayer.bullets.push((rootArg: any, _series: any, dataItem: any) => {
-        const data = dataItem?.dataContext ?? {};
-        const severe = Boolean(data.severe);
-        const cloud = Math.max(0, Math.min(100, Number(data.cloud ?? 0)));
-        // These are photographic cloud systems rather than status bubbles. Their
-        // MapPointSeries holder keeps every transparent cloud texture attached to
-        // the globe's coordinates through both rotation and zoom.
-        const holder = am5.Container.new(rootArg, { width: 0, height: 0, centerX: am5.p50, centerY: am5.p50, tooltipText: data.weather });
-        const cloudWidth = Number(data.cloudWidth ?? (severe ? 178 : 84 + cloud * 0.92));
-        const cloudHeight = Number(data.cloudHeight ?? (severe ? cloudWidth * 0.46 : cloudWidth * 0.28));
-        const cloudOpacity = Number(data.cloudOpacity ?? (cloud < 14 ? 0 : Math.min(severe ? 0.78 : 0.68, 0.16 + cloud * 0.006)));
-        const texture = holder.children.push(am5.Picture.new(rootArg, {
-          src: data.asset ?? stratusAssets[0], width: cloudWidth, height: cloudHeight,
-          centerX: am5.p50, centerY: am5.p50, opacity: cloudOpacity,
-        }));
-        texture.animate({ key: "scale", from: 0.96, to: 1.04, duration: 9000, loops: Infinity, easing: am5.ease.yoyo(am5.ease.sine) });
+      // Cloud sheets are polygons in the same geographic projection as the
+      // countries. They therefore follow the Earth, disappear behind its
+      // horizon, and cannot spill out as flat image cards at the edge.
+      const stratusGeometry = (lon: number, lat: number, cloudCover: number, severe = false) => {
+        const cloud = Math.max(0, Math.min(100, cloudCover));
+        const horizontal = Math.min(severe ? 30 : 24, 5 + cloud * (severe ? 0.25 : 0.19));
+        const vertical = Math.min(severe ? 12 : 8, 1.6 + cloud * (severe ? 0.095 : 0.06));
+        const ring = Array.from({ length: 26 }, (_, index) => {
+          const angle = (Math.PI * 2 * index) / 25;
+          const ripple = 1 + Math.sin(angle * 3) * 0.12 + Math.cos(angle * 5) * 0.06;
+          return [lon + Math.cos(angle) * horizontal * ripple, Math.max(-83, Math.min(83, lat + Math.sin(angle) * vertical * ripple))];
+        });
+        return { type: "Polygon", coordinates: [ring] };
+      };
+      const weatherLayer = chart.series.push(am5map.MapPolygonSeries.new(root, {}));
+      weatherLayer.mapPolygons.template.setAll({
+        templateField: "settings", interactive: false,
+        fill: am5.color(0xe6fbff), fillOpacity: 0.34,
+        stroke: am5.color(0xe8fdff), strokeOpacity: 0.12, strokeWidth: 0.4,
+      });
+      const stormLayer = chart.series.push(am5map.MapPointSeries.new(root, { clipBack: true }));
+      stormLayer.bullets.push((rootArg: any) => {
+        const holder = am5.Container.new(rootArg, { width: 0, height: 0, centerX: am5.p50, centerY: am5.p50 });
+        const halo = holder.children.push(am5.Circle.new(rootArg, { radius: 11, fill: am5.color(0xffc85b), fillOpacity: 0.12, stroke: am5.color(0xffd67a), strokeOpacity: 0.56, strokeWidth: 1 }));
+        const core = holder.children.push(am5.Circle.new(rootArg, { radius: 3.8, fill: am5.color(0xffd36e), fillOpacity: 0.96, stroke: am5.color(0xffefae), strokeOpacity: 0.95, strokeWidth: 1 }));
+        halo.animate({ key: "scale", from: 0.7, to: 2.25, duration: 1850, loops: Infinity, easing: am5.ease.out(am5.ease.cubic) });
+        halo.animate({ key: "opacity", from: 0.84, to: 0, duration: 1850, loops: Infinity, easing: am5.ease.out(am5.ease.cubic) });
+        core.animate({ key: "scale", from: 0.78, to: 1.22, duration: 900, loops: Infinity, easing: am5.ease.yoyo(am5.ease.sine) });
         return am5.Bullet.new(rootArg, { sprite: holder });
       });
       const weatherSites = [
@@ -700,6 +711,11 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         { name: "Singapore", lat: 1.3521, lon: 103.8198 }, { name: "Tokyo", lat: 35.6762, lon: 139.6503 },
         { name: "Sao Paulo", lat: -23.5505, lon: -46.6333 }, { name: "Cape Town", lat: -33.9249, lon: 18.4241 },
         { name: "Nairobi", lat: -1.2921, lon: 36.8219 }, { name: "Reykjavik", lat: 64.1466, lon: -21.9426 },
+        { name: "Los Angeles", lat: 34.0522, lon: -118.2437 }, { name: "Mexico City", lat: 19.4326, lon: -99.1332 },
+        { name: "Bogota", lat: 4.711, lon: -74.0721 }, { name: "Buenos Aires", lat: -34.6037, lon: -58.3816 },
+        { name: "Lagos", lat: 6.5244, lon: 3.3792 }, { name: "Istanbul", lat: 41.0082, lon: 28.9784 },
+        { name: "Beijing", lat: 39.9042, lon: 116.4074 }, { name: "Seoul", lat: 37.5665, lon: 126.978 },
+        { name: "Sydney", lat: -33.8688, lon: 151.2093 }, { name: "Auckland", lat: -36.8485, lon: 174.7633 },
       ];
       const weatherLabel = (code: number) => code >= 95 ? "thunderstorm" : code >= 80 ? "rain showers" : code >= 51 ? "rain" : code >= 45 ? "mist" : code >= 3 ? "overcast" : code >= 1 ? "partly cloudy" : "clear";
       const weatherTone = (code: number, temperature = 0) => code >= 95 ? 0xc090ff : code >= 51 ? 0x5caef5 : temperature >= 30 ? 0xf2bb78 : code >= 3 ? 0x9ad7e4 : 0x9ee6c0;
@@ -711,11 +727,13 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         const severe = index === 6;
         const tone = severe ? 0xc090ff : wet ? 0x5caef5 : cloud > 60 ? 0x9ad7e4 : 0x9ee6c0;
         return {
-          geometry: { type: "Point", coordinates: [site.lon, site.lat] },
+          geometry: stratusGeometry(site.lon, site.lat, cloud, severe), lon: site.lon, lat: site.lat,
           weather: `${site.name} · atmospheric simulation · live public conditions load when available`,
-          tone, cloud, wet, severe, asset: cloudAsset(index, severe), ...cloudVisual(cloud, severe),
+          tone, cloud, wet, severe,
+          settings: { fill: am5.color(severe ? 0xf3d27d : wet ? 0xd9f9ff : 0xc3eefa), fillOpacity: severe ? 0.48 : cloud < 14 ? 0 : Math.min(0.58, 0.18 + cloud * 0.005), strokeOpacity: severe ? 0.28 : 0.13 },
         };
       }));
+      stormLayer.data.setAll([{ geometry: { type: "Point", coordinates: [103.8198, 1.3521] } }]);
       const refreshWeather = async () => {
         try {
           const weather = await Promise.all(weatherSites.map(async (site, index) => {
@@ -730,13 +748,16 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
             const cloud = Math.round(Number(current.cloud_cover ?? 0));
             const severe = code >= 95;
             return {
-              geometry: { type: "Point", coordinates: [site.lon, site.lat] },
+              geometry: stratusGeometry(site.lon, site.lat, cloud, severe), lon: site.lon, lat: site.lat,
               weather: `${site.name} · LIVE ${temperature}°C · ${weatherLabel(code)} · cloud ${cloud}% · wind ${wind} km/h`,
               tone: weatherTone(code, temperature), cloud, wet: code >= 51 || rain > 0, severe,
-              asset: cloudAsset(index, severe), ...cloudVisual(cloud, severe),
+              settings: { fill: am5.color(severe ? 0xf3d27d : code >= 51 || rain > 0 ? 0xd9f9ff : 0xc3eefa), fillOpacity: severe ? 0.52 : cloud < 14 ? 0 : Math.min(0.64, 0.2 + cloud * 0.005), strokeOpacity: severe ? 0.32 : 0.15 },
             };
           }));
-          if (!disposed) weatherLayer.data.setAll(weather);
+          if (!disposed) {
+            weatherLayer.data.setAll(weather);
+            stormLayer.data.setAll(weather.filter((item: any) => item.severe).map((item: any) => ({ geometry: { type: "Point", coordinates: [item.lon, item.lat] } })));
+          }
         } catch { /* The optional stream never blocks the globe itself. */ }
       };
       void refreshWeather();
@@ -744,6 +765,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       const atmosphereToggle = (event: Event) => {
         const visible = Boolean((event as CustomEvent<boolean>).detail);
         weatherLayer.set("visible", visible);
+        stormLayer.set("visible", visible);
       };
       node.current?.addEventListener("leis-atmosphere-toggle", atmosphereToggle);
       const routes = chart.series.push(am5map.MapLineSeries.new(root, {}));
