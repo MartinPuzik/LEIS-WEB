@@ -399,6 +399,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
     let disposed = false;
     let drift: ReturnType<typeof setInterval> | undefined;
     let route: ReturnType<typeof setInterval> | undefined;
+    let weatherRefresh: ReturnType<typeof setInterval> | undefined;
     let wheelHost: HTMLDivElement | null = null;
     let onWheel: ((event: WheelEvent) => void) | undefined;
     let onTouchStart: ((event: TouchEvent) => void) | undefined;
@@ -505,11 +506,16 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         const data = dataItem?.dataContext ?? {};
         const tone = data.tone ?? 0x8edce8;
         const severe = Boolean(data.severe);
+        const wet = Boolean(data.wet);
         const holder = am5.Container.new(rootArg, { width: 0, height: 0, tooltipText: data.weather });
-        const field = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 29 : 21, fill: am5.color(tone), fillOpacity: severe ? 0.15 : 0.09 }));
-        const centre = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 8 : 5, fill: am5.color(tone), fillOpacity: severe ? 0.5 : 0.3 }));
-        field.animate({ key: "scale", from: 0.88, to: severe ? 1.28 : 1.16, duration: severe ? 2200 : 4200, loops: Infinity, easing: am5.ease.sine });
-        field.animate({ key: "opacity", from: 0.55, to: 0.18, duration: severe ? 2200 : 4200, loops: Infinity, easing: am5.ease.sine });
+        const field = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 33 : wet ? 27 : 20, fill: am5.color(tone), fillOpacity: severe ? 0.19 : wet ? 0.13 : 0.08 }));
+        const ring = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 20 : wet ? 16 : 12, fillOpacity: 0, stroke: am5.color(tone), strokeOpacity: severe ? 0.48 : 0.28, strokeWidth: 1 }));
+        const centre = holder.children.push(am5.Circle.new(rootArg, { radius: severe ? 8 : wet ? 6 : 4.5, fill: am5.color(tone), fillOpacity: severe ? 0.68 : 0.46 }));
+        const duration = severe ? 2200 : wet ? 3200 : 5200;
+        field.animate({ key: "scale", from: 0.88, to: severe ? 1.34 : wet ? 1.24 : 1.14, duration, loops: Infinity, easing: am5.ease.sine });
+        field.animate({ key: "opacity", from: 0.55, to: 0.18, duration, loops: Infinity, easing: am5.ease.sine });
+        ring.animate({ key: "scale", from: 0.76, to: severe ? 2.6 : wet ? 2.1 : 1.55, duration, loops: Infinity, easing: am5.ease.sine });
+        ring.animate({ key: "opacity", from: 0.62, to: 0, duration, loops: Infinity, easing: am5.ease.sine });
         return am5.Bullet.new(rootArg, { sprite: holder });
       });
       const weatherSites = [
@@ -518,15 +524,38 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         { name: "Abu Dhabi", lat: 24.4539, lon: 54.3773 }, { name: "New Delhi", lat: 28.6139, lon: 77.2090 },
         { name: "Singapore", lat: 1.3521, lon: 103.8198 }, { name: "Tokyo", lat: 35.6762, lon: 139.6503 },
         { name: "Sao Paulo", lat: -23.5505, lon: -46.6333 }, { name: "Cape Town", lat: -33.9249, lon: 18.4241 },
+        { name: "Nairobi", lat: -1.2921, lon: 36.8219 }, { name: "Reykjavik", lat: 64.1466, lon: -21.9426 },
       ];
       const weatherLabel = (code: number) => code >= 95 ? "thunderstorm" : code >= 80 ? "rain showers" : code >= 51 ? "rain" : code >= 45 ? "mist" : code >= 3 ? "overcast" : code >= 1 ? "partly cloudy" : "clear";
-      const weatherTone = (code: number) => code >= 95 ? 0xc090ff : code >= 51 ? 0x5caef5 : code >= 3 ? 0x9ad7e4 : 0x9ee6c0;
+      const weatherTone = (code: number, temperature = 0) => code >= 95 ? 0xc090ff : code >= 51 ? 0x5caef5 : temperature >= 30 ? 0xf2bb78 : code >= 3 ? 0x9ad7e4 : 0x9ee6c0;
       void Promise.all(weatherSites.map(async (site) => {
         const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${site.lat}&longitude=${site.lon}&current=weather_code,cloud_cover,precipitation&timezone=auto`);
         const payload = await response.json();
         const code = Number(payload?.current?.weather_code ?? 0);
         return { geometry: { type: "Point", coordinates: [site.lon, site.lat] }, weather: `${site.name} · live weather: ${weatherLabel(code)}`, tone: weatherTone(code), severe: code >= 95 };
       })).then((weather) => { if (!disposed) weatherLayer.data.setAll(weather); }).catch(() => { /* The globe remains useful when the optional live weather stream is unavailable. */ });
+      const refreshWeather = async () => {
+        try {
+          const weather = await Promise.all(weatherSites.map(async (site) => {
+            const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${site.lat}&longitude=${site.lon}&current=temperature_2m,weather_code,cloud_cover,precipitation,wind_speed_10m&timezone=auto`);
+            if (!response.ok) throw new Error("Weather response unavailable");
+            const payload = await response.json();
+            const current = payload?.current ?? {};
+            const code = Number(current.weather_code ?? 0);
+            const temperature = Math.round(Number(current.temperature_2m ?? 0));
+            const wind = Math.round(Number(current.wind_speed_10m ?? 0));
+            const rain = Number(current.precipitation ?? 0);
+            return {
+              geometry: { type: "Point", coordinates: [site.lon, site.lat] },
+              weather: `${site.name} · LIVE ${temperature}°C · ${weatherLabel(code)} · wind ${wind} km/h`,
+              tone: weatherTone(code, temperature), wet: code >= 51 || rain > 0, severe: code >= 95,
+            };
+          }));
+          if (!disposed) weatherLayer.data.setAll(weather);
+        } catch { /* The optional stream never blocks the globe itself. */ }
+      };
+      void refreshWeather();
+      weatherRefresh = setInterval(() => { void refreshWeather(); }, 10 * 60 * 1000);
       const routes = chart.series.push(am5map.MapLineSeries.new(root, {}));
       routes.mapLines.template.setAll({
         stroke: am5.color(0x72f2f5), strokeOpacity: 0.44, strokeWidth: 1.5,
@@ -586,6 +615,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       disposed = true;
       if (drift) clearInterval(drift);
       if (route) clearInterval(route);
+      if (weatherRefresh) clearInterval(weatherRefresh);
       if (wheelHost && onWheel) wheelHost.removeEventListener("wheel", onWheel);
       if (wheelHost && onTouchStart) wheelHost.removeEventListener("touchstart", onTouchStart);
       if (wheelHost && onTouchMove) wheelHost.removeEventListener("touchmove", onTouchMove);
