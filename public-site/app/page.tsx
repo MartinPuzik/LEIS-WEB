@@ -175,14 +175,14 @@ const countryProfiles: Record<string, { eyebrow: string; title: string; summary:
     ],
   },
   Sweden: {
-    eyebrow: "COUNTRY AI CONTEXT · REVIEWED 5 AUGUST 2026",
+    eyebrow: "COUNTRY AI CONTEXT Â· REVIEWED 5 AUGUST 2026",
     title: "Sweden: skills, public value and human-AI collaboration",
-    summary: "Sweden's public AI ecosystem brings research, municipalities, health, industry and workforce learning into the same conversation. AI Sweden is one public hub for this work.",
+    summary: "Swedenâ€™s public AI ecosystem brings research, municipalities, health, industry and workforce learning into the same conversation. AI Sweden is one public hub for this work.",
     use: "Current public work covers workforce skills, responsible adoption, public-sector collaboration, digital sovereignty, health and practical AI transformation across organisations.",
-    leis: "LEIS context: capability becomes more durable when people can recover the purpose, local conditions and limits behind an AI-assisted result — not only the result itself.",
+    leis: "LEIS context: capability becomes more durable when people can recover the purpose, local conditions and limits behind an AI-assisted result â€” not only the result itself.",
     links: [
-      { label: "AI Sweden · public news and projects", url: "https://www.ai.se/en/news" },
-      { label: "AI Sweden · national ecosystem", url: "https://www.ai.se/en" },
+      { label: "AI Sweden Â· public news and projects", url: "https://www.ai.se/en/news" },
+      { label: "AI Sweden Â· national ecosystem", url: "https://www.ai.se/en" },
     ],
   },
   Australia: {
@@ -653,25 +653,41 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         else { setCountry(data.name ?? "Selected country"); setSelected(null); setDeskStart(null); setDetail(false); setFocus(true); }
         manualUntil = Date.now() + 13000;
       });
-      const cloudAssets = [
-        "/clouds/cloud-bank-a.png", "/clouds/cloud-bank-b.png", "/clouds/cloud-storm-a.png", "/clouds/cloud-bank-c.png",
-        "/clouds/cloud-front-a.png", "/clouds/cloud-bank-d.png", "/clouds/cloud-storm-b.png", "/clouds/cloud-bank-e.png",
+      // Broad, low-profile cloud sheets: they deliberately read as stratiform
+      // bands from orbit, rather than individual objects floating above the map.
+      const stratusAssets = [
+        "/clouds/cloud-front-a.png", "/clouds/cloud-bank-b.png", "/clouds/cloud-bank-e.png", "/clouds/cloud-bank-a.png",
       ];
+      const stormAssets = ["/clouds/cloud-storm-a.png", "/clouds/cloud-storm-b.png"];
+      const cloudAsset = (index: number, severe: boolean) => severe
+        ? stormAssets[index % stormAssets.length]
+        : stratusAssets[index % stratusAssets.length];
+      const cloudVisual = (cloudCover: number, severe = false) => {
+        const cloud = Math.max(0, Math.min(100, cloudCover));
+        const width = severe ? 178 : 84 + cloud * 0.92;
+        return {
+          cloudWidth: width,
+          cloudHeight: severe ? width * 0.46 : width * 0.28,
+          // Low cloud cover remains transparent; real overcast becomes clearly
+          // visible without turning the globe into an opaque weather map.
+          cloudOpacity: cloud < 14 ? 0 : Math.min(severe ? 0.78 : 0.68, 0.16 + cloud * 0.006),
+        };
+      };
       const weatherLayer = chart.series.push(am5map.MapPointSeries.new(root, {}));
       weatherLayer.bullets.push((rootArg: any, _series: any, dataItem: any) => {
         const data = dataItem?.dataContext ?? {};
         const severe = Boolean(data.severe);
-        const wet = Boolean(data.wet);
         const cloud = Math.max(0, Math.min(100, Number(data.cloud ?? 0)));
         // These are photographic cloud systems rather than status bubbles. Their
         // MapPointSeries holder keeps every transparent cloud texture attached to
         // the globe's coordinates through both rotation and zoom.
         const holder = am5.Container.new(rootArg, { width: 0, height: 0, centerX: am5.p50, centerY: am5.p50, tooltipText: data.weather });
-        const cloudWidth = Number(data.cloudWidth ?? (severe ? 154 : wet ? 122 : 92 + cloud * 0.14));
-        const cloudHeight = Number(data.cloudHeight ?? cloudWidth * 0.68);
+        const cloudWidth = Number(data.cloudWidth ?? (severe ? 178 : 84 + cloud * 0.92));
+        const cloudHeight = Number(data.cloudHeight ?? (severe ? cloudWidth * 0.46 : cloudWidth * 0.28));
+        const cloudOpacity = Number(data.cloudOpacity ?? (cloud < 14 ? 0 : Math.min(severe ? 0.78 : 0.68, 0.16 + cloud * 0.006)));
         const texture = holder.children.push(am5.Picture.new(rootArg, {
-          src: data.asset ?? cloudAssets[0], width: cloudWidth, height: cloudHeight,
-          centerX: am5.p50, centerY: am5.p50, opacity: severe ? 0.64 : wet ? 0.46 : 0.30,
+          src: data.asset ?? stratusAssets[0], width: cloudWidth, height: cloudHeight,
+          centerX: am5.p50, centerY: am5.p50, opacity: cloudOpacity,
         }));
         texture.animate({ key: "scale", from: 0.96, to: 1.04, duration: 9000, loops: Infinity, easing: am5.ease.yoyo(am5.ease.sine) });
         return am5.Bullet.new(rootArg, { sprite: holder });
@@ -696,7 +712,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         return {
           geometry: { type: "Point", coordinates: [site.lon, site.lat] },
           weather: `${site.name} · atmospheric simulation · live public conditions load when available`,
-          tone, cloud, wet, severe, asset: cloudAssets[index % cloudAssets.length],
+          tone, cloud, wet, severe, asset: cloudAsset(index, severe), ...cloudVisual(cloud, severe),
         };
       }));
       const refreshWeather = async () => {
@@ -711,11 +727,12 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
             const wind = Math.round(Number(current.wind_speed_10m ?? 0));
             const rain = Number(current.precipitation ?? 0);
             const cloud = Math.round(Number(current.cloud_cover ?? 0));
+            const severe = code >= 95;
             return {
               geometry: { type: "Point", coordinates: [site.lon, site.lat] },
               weather: `${site.name} · LIVE ${temperature}°C · ${weatherLabel(code)} · cloud ${cloud}% · wind ${wind} km/h`,
-              tone: weatherTone(code, temperature), cloud, wet: code >= 51 || rain > 0, severe: code >= 95,
-              asset: cloudAssets[index % cloudAssets.length],
+              tone: weatherTone(code, temperature), cloud, wet: code >= 51 || rain > 0, severe,
+              asset: cloudAsset(index, severe), ...cloudVisual(cloud, severe),
             };
           }));
           if (!disposed) weatherLayer.data.setAll(weather);
@@ -823,17 +840,10 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
   return <>
     <div className="globe-map-shell">
       <div className="globe-map" ref={node} aria-label="Interactive globe. Drag to rotate, scroll to zoom and choose a source point." />
-      <div className="weather-visual-layer" aria-hidden="true">
-        <i className="weather-cloud cloud-atlantic" />
-        <i className="weather-cloud cloud-eurasia" />
-        <i className="weather-cloud cloud-pacific" />
-        <i className="weather-cloud cloud-south" />
-        <i className="weather-cloud storm-indian" />
-      </div>
       <div className="globe-weather-hud" aria-label="Live weather layer active">
         <i aria-hidden="true" />
-        <span>Atmosphere layer</span>
-        <small>simulated motion · live conditions when available</small>
+        <span>Live cloud conditions</span>
+        <small>Open-Meteo · visualised cloud cover · refreshes every 10 min</small>
       </div>
       <button className={`globe-atmosphere-control ${atmosphereOn ? "active" : ""}`} onClick={toggleAtmosphere} aria-pressed={atmosphereOn}>
         <span aria-hidden="true">☁</span>{atmosphereOn ? "Atmosphere on" : "Atmosphere off"}
