@@ -355,6 +355,11 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
     let route: ReturnType<typeof setInterval> | undefined;
     let wheelHost: HTMLDivElement | null = null;
     let onWheel: ((event: WheelEvent) => void) | undefined;
+    let onTouchStart: ((event: TouchEvent) => void) | undefined;
+    let onTouchMove: ((event: TouchEvent) => void) | undefined;
+    let onTouchEnd: ((event: TouchEvent) => void) | undefined;
+    let pinchStartDistance = 0;
+    let pinchStartZoom = 1;
     let manualUntil = 0;
     const rotateTo = (item: News, duration = 3000) => {
       const chart = chartRef.current;
@@ -384,6 +389,26 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         chart.animate({ key: "zoomLevel", to: next, duration: 180 });
       };
       wheelHost.addEventListener("wheel", onWheel, { passive: false });
+      const distance = (touches: TouchList) => Math.hypot(touches[0].clientX - touches[1].clientX, touches[0].clientY - touches[1].clientY);
+      onTouchStart = (event: TouchEvent) => {
+        if (event.touches.length !== 2) return;
+        event.preventDefault();
+        pinchStartDistance = distance(event.touches);
+        pinchStartZoom = chart.get("zoomLevel") ?? 1;
+        manualUntil = Date.now() + 9000;
+      };
+      onTouchMove = (event: TouchEvent) => {
+        if (event.touches.length !== 2 || !pinchStartDistance) return;
+        event.preventDefault();
+        const scale = distance(event.touches) / pinchStartDistance;
+        const next = Math.max(1, Math.min(4.5, pinchStartZoom * scale));
+        chart.set("zoomLevel", next);
+        manualUntil = Date.now() + 9000;
+      };
+      onTouchEnd = (event: TouchEvent) => { if (event.touches.length < 2) pinchStartDistance = 0; };
+      wheelHost.addEventListener("touchstart", onTouchStart, { passive: false });
+      wheelHost.addEventListener("touchmove", onTouchMove, { passive: false });
+      wheelHost.addEventListener("touchend", onTouchEnd, { passive: true });
       chart.chartContainer.events.on("pointerdown", () => { manualUntil = Date.now() + 13000; });
       const polygons = chart.series.push(am5map.MapPolygonSeries.new(root, { geoJSON: world }));
       polygons.mapPolygons.template.setAll({
@@ -440,6 +465,9 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       if (drift) clearInterval(drift);
       if (route) clearInterval(route);
       if (wheelHost && onWheel) wheelHost.removeEventListener("wheel", onWheel);
+      if (wheelHost && onTouchStart) wheelHost.removeEventListener("touchstart", onTouchStart);
+      if (wheelHost && onTouchMove) wheelHost.removeEventListener("touchmove", onTouchMove);
+      if (wheelHost && onTouchEnd) wheelHost.removeEventListener("touchend", onTouchEnd);
       root?.dispose();
     };
   }, [openDesk, openPrague]);
