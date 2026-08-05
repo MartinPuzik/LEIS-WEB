@@ -182,7 +182,7 @@ const countryProfiles: Record<string, { eyebrow: string; title: string; summary:
   },
   China: {
     eyebrow: "COUNTRY AI CONTEXT · REVIEWED 5 AUGUST 2026",
-    title: "China: scale, AI literacy and international cooperation",
+    title: "China: AI, learning and cooperation",
     summary: "China’s public AI direction includes computing, data, industrial application, talent, standards, governance and AI literacy. These are presented as connected parts of a national and international capability agenda.",
     use: "Recent public action plans address collaboration, data, computing power, open-source ecosystems, industry, talent and governance; education policy also places AI literacy across schooling and lifelong learning.",
     leis: "LEIS context: national scale makes provenance more important, not less. People still need to see the source, purpose, local conditions and uncertainty behind a claim about AI.",

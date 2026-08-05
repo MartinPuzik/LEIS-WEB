@@ -95,6 +95,15 @@
 .globe-focus-window .country-profile p{position:static!important;display:block!important;width:100%!important;margin:0!important;padding:0!important;line-height:1.58!important;white-space:normal!important;overflow-wrap:anywhere!important}
 .globe-focus-window .country-profile-links{position:static!important;display:flex!important;width:100%!important;margin:0!important;padding:0!important}
 
+/* Country context is calm explanatory reading, not a news alert. */
+.globe-focus-window:has(.country-profile)>small{display:block!important;margin:0 0 11px!important;color:#84e5eb!important;font-size:.6rem!important;letter-spacing:.11em!important;line-height:1.35!important;text-transform:uppercase!important}
+.globe-focus-window:has(.country-profile)>h3{margin:0 0 20px!important;padding:0 0 15px!important;color:var(--leis-moon-strong)!important;font-size:clamp(1.7rem,3.3vw,2.45rem)!important;font-weight:700!important;line-height:1.08!important;letter-spacing:-.035em!important;text-transform:none!important}
+.globe-focus-window:has(.country-profile)>h3:after{width:34%!important;margin-top:13px!important}
+.globe-focus-window .country-profile,.globe-focus-window .country-profile *{text-transform:none!important;letter-spacing:normal!important}
+.globe-focus-window .country-profile p{color:#b8ced5!important;font-size:.91rem!important;font-weight:400!important;line-height:1.58!important}
+.globe-focus-window .country-profile p b{display:block!important;margin-bottom:3px!important;color:#d9edf0!important;font-size:.68rem!important;font-weight:750!important;letter-spacing:.095em!important;text-transform:uppercase!important}
+.globe-focus-window .country-profile-links{padding-top:2px!important}
+
 /* A quiet, always-available human entry point into the portal. */
 .leis-dock{position:fixed;right:24px;bottom:22px;z-index:70;display:flex;flex-direction:column;align-items:flex-end;gap:11px;pointer-events:none}
 .leis-dock>*{pointer-events:auto}.leis-dock-trigger{display:inline-flex;align-items:center;gap:9px;min-height:46px;padding:8px 16px 8px 9px;border:1px solid #7aeaf2b8;border-radius:999px;background:linear-gradient(135deg,#0b3446dc,#081622e8);backdrop-filter:blur(15px);box-shadow:0 14px 42px #0009,0 0 24px #55dfe138;color:#d1f8fa;font-weight:760;cursor:pointer;transition:transform .25s ease,box-shadow .25s ease}
