@@ -1498,7 +1498,7 @@ function FirstSteps({ copy }: { copy: (typeof firstStepCopy)[Language] }) {
 }
 
 type AskMode = 0 | 1 | 2;
-type SpeechRecognizer = { lang: string; continuous: boolean; interimResults: boolean; start: () => void; stop: () => void; onresult: ((event: { resultIndex: number; results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null; onend: (() => void) | null; onerror: (() => void) | null };
+type SpeechRecognizer = { lang: string; continuous: boolean; interimResults: boolean; start: () => void; stop: () => void; onresult: ((event: { resultIndex: number; results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null; onend: (() => void) | null; onerror: ((event: { error?: string }) => void) | null };
 type SpeechWindow = Window & { SpeechRecognition?: new () => SpeechRecognizer; webkitSpeechRecognition?: new () => SpeechRecognizer };
 
 function AskLeis({ language, copy }: { language: Language; copy: (typeof askLeisCopy)[Language] }) {
@@ -1511,8 +1511,12 @@ function AskLeis({ language, copy }: { language: Language; copy: (typeof askLeis
   const [copied, setCopied] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const recognitionRef = useRef<SpeechRecognizer | null>(null);
+  const stopRequestedRef = useRef(true);
+  const silenceTimerRef = useRef<number | null>(null);
   const locale: Record<Language, string> = { en: "en-US", cs: "cs-CZ", de: "de-DE", fr: "fr-FR", es: "es-ES" };
-  useEffect(() => () => recognitionRef.current?.stop(), []);
+  const clearSilenceTimer = () => { if (silenceTimerRef.current !== null) window.clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; };
+  const stopVoice = () => { stopRequestedRef.current = true; clearSilenceTimer(); recognitionRef.current?.stop(); recognitionRef.current = null; setListening(false); };
+  useEffect(() => () => stopVoice(), []);
   useEffect(() => { setVoiceMessage(""); setCopied(false); setSubmitted(false); }, [language]);
   const buildPackage = () => {
     const userQuestion = question.trim() || copy.placeholder;
@@ -1524,17 +1528,18 @@ function AskLeis({ language, copy }: { language: Language; copy: (typeof askLeis
     const text = packageText || `LEIS CONTEXT PACKAGE\n\nQUESTION\n${question.trim() || copy.placeholder}\n\n${copy.packageRules}`;
     try { await navigator.clipboard.writeText(text); setCopied(true); } catch { setCopied(false); }
   };
-  const toggleVoice = () => {
-    if (listening) { recognitionRef.current?.stop(); return; }
+  const beginVoice = () => {
     const Speech = (window as SpeechWindow).SpeechRecognition ?? (window as SpeechWindow).webkitSpeechRecognition;
     if (!Speech) { setVoiceMessage(copy.voiceUnavailable); return; }
     const recognition = new Speech();
-    recognition.lang = locale[language]; recognition.continuous = false; recognition.interimResults = false;
-    recognition.onresult = (event) => setQuestion((current) => `${current}${current ? " " : ""}${event.results[event.resultIndex][0].transcript}`.trim());
-    recognition.onend = () => setListening(false);
-    recognition.onerror = () => { setListening(false); setVoiceMessage(copy.voiceUnavailable); };
-    recognitionRef.current = recognition; setVoiceMessage(""); setListening(true); recognition.start();
+    const refreshSilenceTimer = () => { clearSilenceTimer(); silenceTimerRef.current = window.setTimeout(stopVoice, 10_000); };
+    recognition.lang = locale[language]; recognition.continuous = true; recognition.interimResults = false;
+    recognition.onresult = (event) => { setQuestion((current) => `${current}${current ? " " : ""}${event.results[event.resultIndex][0].transcript}`.trim()); refreshSilenceTimer(); };
+    recognition.onend = () => { recognitionRef.current = null; if (!stopRequestedRef.current) window.setTimeout(beginVoice, 120); };
+    recognition.onerror = (event) => { if (event.error && event.error !== "no-speech") { stopRequestedRef.current = true; clearSilenceTimer(); setListening(false); setVoiceMessage(copy.voiceUnavailable); } };
+    stopRequestedRef.current = false; recognitionRef.current = recognition; setVoiceMessage(""); setListening(true); refreshSilenceTimer(); recognition.start();
   };
+  const toggleVoice = () => { if (listening) stopVoice(); else beginVoice(); };
   const submitQuestion = () => { setSubmitted(true); if (mode === 1) buildPackage(); };
   const publicAnswer = question.trim() ? `${copy.publicLead} ${copy.publicRoutes}` : copy.publicLead;
   return <aside className={`leis-dock ${open ? "open" : ""}`} aria-label={copy.label}>
