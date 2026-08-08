@@ -260,6 +260,14 @@ const firstStepCopy: Record<Language, { eyebrow: string; title: string; lead: st
   es: { eyebrow: "UN LUGAR TRANQUILO PARA EMPEZAR", title: "Elija su primer paso útil.", lead: "No necesita aceptar una afirmación ni aprender todo el sistema de una vez. Empiece por la ruta que corresponda a su pregunta.", routes: [["01", "Entender LEIS", "Una breve orientación sobre qué es LEIS, qué no es y cómo permanece ligado a la realidad.", "#orientation"], ["02", "Llevar el Seed", "Un contexto inicial público y portátil, con una guía sencilla para usar el archivo de forma segura.", "#seed"], ["03", "Iniciar un diálogo", "Para investigación, un piloto práctico, contexto de medios o apoyo: empiece con una pregunta real.", "#participate"]] },
 };
 
+const askLeisCopy: Record<Language, { label: string; close: string; title: string; lead: string; modes: readonly [string, string, string][]; question: string; placeholder: string; voice: string; listening: string; voiceUnavailable: string; voiceNote: string; build: string; copy: string; copied: string; packageTitle: string; packageLead: string; packageRules: string; publicTitle: string; publicLead: string; publicRoutes: string; connectedTitle: string; connectedLead: string; noPrivate: string }> = {
+  en: { label: "ASK LEIS", close: "Close", title: "Ask LEIS", lead: "A navigation layer for understanding — not a chatbot and not an AI model.", modes: [["LEIS Only", "Public orientation without external AI."], ["Build AI Package", "Recommended · make portable context for your own AI."], ["Connected AI", "Future optional connection layer."]], question: "What would you like to understand?", placeholder: "Ask a real question. For example: What must remain visible when a decision is handed over?", voice: "Use voice", listening: "Listening…", voiceUnavailable: "Voice input is not available in this browser.", voiceNote: "Audio is not stored. Only the reviewed text remains in this field.", build: "Build package", copy: "Copy package", copied: "Package copied. Paste it into the AI you choose.", packageTitle: "Your portable LEIS context package", packageLead: "It contains your question and the public LEIS frame. It does not claim access to private archives, a hidden model or live research records.", packageRules: "Keep source, evidence, creator context and interpretation visibly distinct. Preserve uncertainty and open questions. Do not invent access to LEIS records that were not supplied.", publicTitle: "Public LEIS orientation", publicLead: "The public portal can help you locate the framework, its lineage, the public Seed and selected source signals. A fuller answer needs the relevant sources and their conditions.", publicRoutes: "Start with the public Seed, then use the orientation, timeline and Earth Pulse to trace what is public.", connectedTitle: "Connected AI is not active yet", connectedLead: "This public version does not send your question to an AI provider. LEIS keeps understanding portable; you choose if and where to use AI.", noPrivate: "No private archive, personal folder or audio recording is accessed or stored here." },
+  cs: { label: "ASK LEIS", close: "Zavřít", title: "Ask LEIS", lead: "Navigační vrstva pro porozumění — ne chatbot ani model AI.", modes: [["Pouze LEIS", "Veřejná orientace bez externí AI."], ["Vytvořit AI balíček", "Doporučeno · přenositelný kontext pro vaši vlastní AI."], ["Připojená AI", "Budoucí volitelná propojovací vrstva."]], question: "Čemu chcete porozumět?", placeholder: "Položte skutečnou otázku. Například: Co musí zůstat viditelné při předání rozhodnutí?", voice: "Použít hlas", listening: "Poslouchám…", voiceUnavailable: "Hlasový vstup v tomto prohlížeči není dostupný.", voiceNote: "Zvuk se neukládá. V tomto poli zůstává pouze zkontrolovaný text.", build: "Vytvořit balíček", copy: "Kopírovat balíček", copied: "Balíček je zkopírován. Vložte jej do AI, kterou si zvolíte.", packageTitle: "Váš přenositelný kontextový balíček LEIS", packageLead: "Obsahuje vaši otázku a veřejný rámec LEIS. Netvrdí přístup k soukromým archivům, skrytému modelu ani živým výzkumným záznamům.", packageRules: "Viditelně odděluj zdroj, důkaz, kontext autora a interpretaci. Zachovej nejistotu a otevřené otázky. Nevymýšlej si přístup k záznamům LEIS, které nebyly předány.", publicTitle: "Veřejná orientace LEIS", publicLead: "Veřejný portál pomáhá dohledat rámec, jeho linii vývoje, veřejný Seed a vybrané signály zdrojů. Úplnější odpověď potřebuje odpovídající zdroje a jejich podmínky.", publicRoutes: "Začněte veřejným Seedem, poté použijte orientaci, časovou osu a Pulz Země k dohledání toho, co je veřejné.", connectedTitle: "Připojená AI zatím není aktivní", connectedLead: "Tato veřejná verze neposílá vaši otázku poskytovateli AI. LEIS udržuje porozumění přenositelné; vy si volíte, zda a kde AI použijete.", noPrivate: "Zde se nepřistupuje k soukromým archivům, osobním složkám ani zvukovým nahrávkám a nic z toho se neukládá." },
+  de: { label: "ASK LEIS", close: "Schließen", title: "Ask LEIS", lead: "Eine Navigationsebene für Verständnis — kein Chatbot und kein KI-Modell.", modes: [["Nur LEIS", "Öffentliche Orientierung ohne externe KI."], ["KI-Paket erstellen", "Empfohlen · portablen Kontext für Ihre eigene KI erstellen."], ["Verbundene KI", "Zukünftige optionale Verbindungsebene."]], question: "Was möchten Sie verstehen?", placeholder: "Stellen Sie eine echte Frage. Zum Beispiel: Was muss bei der Übergabe einer Entscheidung sichtbar bleiben?", voice: "Sprache verwenden", listening: "Hört zu…", voiceUnavailable: "Spracheingabe ist in diesem Browser nicht verfügbar.", voiceNote: "Audio wird nicht gespeichert. In diesem Feld bleibt nur der überprüfte Text.", build: "Paket erstellen", copy: "Paket kopieren", copied: "Paket kopiert. Fügen Sie es in die KI Ihrer Wahl ein.", packageTitle: "Ihr portables LEIS-Kontextpaket", packageLead: "Es enthält Ihre Frage und den öffentlichen LEIS-Rahmen. Es behauptet keinen Zugriff auf private Archive, ein verborgenes Modell oder laufende Forschungsdaten.", packageRules: "Quelle, Evidenz, Kontext des Urhebers und Interpretation sichtbar unterscheiden. Unsicherheit und offene Fragen bewahren. Keinen Zugriff auf LEIS-Daten erfinden, die nicht bereitgestellt wurden.", publicTitle: "Öffentliche LEIS-Orientierung", publicLead: "Das öffentliche Portal hilft, den Rahmen, seine Entwicklungslinie, den öffentlichen Seed und ausgewählte Quellensignale zu finden. Eine umfassendere Antwort benötigt die relevanten Quellen und ihre Bedingungen.", publicRoutes: "Beginnen Sie mit dem öffentlichen Seed; nutzen Sie dann Orientierung, Zeitleiste und Erdimpuls, um das Öffentliche nachzuverfolgen.", connectedTitle: "Verbundene KI ist noch nicht aktiv", connectedLead: "Diese öffentliche Version sendet Ihre Frage an keinen KI-Anbieter. LEIS hält Verständnis portabel; Sie entscheiden, ob und wo KI eingesetzt wird.", noPrivate: "Hier werden keine privaten Archive, persönlichen Ordner oder Audioaufnahmen aufgerufen oder gespeichert." },
+  fr: { label: "ASK LEIS", close: "Fermer", title: "Ask LEIS", lead: "Une couche de navigation pour la compréhension — ni chatbot ni modèle d’IA.", modes: [["LEIS seul", "Orientation publique sans IA externe."], ["Créer un paquet IA", "Recommandé · préparer un contexte portable pour votre propre IA."], ["IA connectée", "Future couche de connexion facultative."]], question: "Que souhaitez-vous comprendre ?", placeholder: "Posez une vraie question. Par exemple : Que faut-il rendre visible lors de la transmission d’une décision ?", voice: "Utiliser la voix", listening: "Écoute…", voiceUnavailable: "La saisie vocale n’est pas disponible dans ce navigateur.", voiceNote: "L’audio n’est pas conservé. Seul le texte relu reste dans ce champ.", build: "Créer le paquet", copy: "Copier le paquet", copied: "Paquet copié. Collez-le dans l’IA de votre choix.", packageTitle: "Votre paquet de contexte LEIS portable", packageLead: "Il contient votre question et le cadre public LEIS. Il ne prétend pas accéder à des archives privées, un modèle caché ou des données de recherche en direct.", packageRules: "Distinguez visiblement source, preuve, contexte de l’auteur et interprétation. Préservez l’incertitude et les questions ouvertes. N’inventez pas d’accès à des dossiers LEIS non fournis.", publicTitle: "Orientation LEIS publique", publicLead: "Le portail public aide à retrouver le cadre, sa lignée, le Seed public et des signaux de sources sélectionnés. Une réponse plus complète nécessite les sources pertinentes et leurs conditions.", publicRoutes: "Commencez avec le Seed public, puis utilisez l’orientation, la chronologie et le Pouls de la Terre pour suivre ce qui est public.", connectedTitle: "L’IA connectée n’est pas encore active", connectedLead: "Cette version publique n’envoie pas votre question à un fournisseur d’IA. LEIS maintient la compréhension portable ; vous choisissez si et où utiliser l’IA.", noPrivate: "Aucune archive privée, aucun dossier personnel ni enregistrement audio n’est consulté ou stocké ici." },
+  es: { label: "ASK LEIS", close: "Cerrar", title: "Ask LEIS", lead: "Una capa de navegación para la comprensión, no un chatbot ni un modelo de IA.", modes: [["Solo LEIS", "Orientación pública sin IA externa."], ["Crear paquete de IA", "Recomendado · preparar contexto portátil para su propia IA."], ["IA conectada", "Futura capa de conexión opcional."]], question: "¿Qué le gustaría comprender?", placeholder: "Haga una pregunta real. Por ejemplo: ¿Qué debe permanecer visible cuando se entrega una decisión?", voice: "Usar voz", listening: "Escuchando…", voiceUnavailable: "La entrada de voz no está disponible en este navegador.", voiceNote: "El audio no se almacena. En este campo queda solo el texto revisado.", build: "Crear paquete", copy: "Copiar paquete", copied: "Paquete copiado. Péguelo en la IA que elija.", packageTitle: "Su paquete de contexto LEIS portátil", packageLead: "Contiene su pregunta y el marco público de LEIS. No afirma acceso a archivos privados, un modelo oculto ni registros de investigación en vivo.", packageRules: "Mantenga visibles y separados la fuente, evidencia, contexto del creador e interpretación. Conserve la incertidumbre y las preguntas abiertas. No invente acceso a registros LEIS que no se proporcionaron.", publicTitle: "Orientación pública de LEIS", publicLead: "El portal público ayuda a localizar el marco, su linaje, el Seed público y señales de fuentes seleccionadas. Una respuesta más completa necesita las fuentes pertinentes y sus condiciones.", publicRoutes: "Empiece con el Seed público y después use la orientación, cronología y Pulso de la Tierra para rastrear lo que es público.", connectedTitle: "La IA conectada aún no está activa", connectedLead: "Esta versión pública no envía su pregunta a un proveedor de IA. LEIS mantiene la comprensión portátil; usted decide si y dónde usar IA.", noPrivate: "Aquí no se accede ni se almacena ningún archivo privado, carpeta personal o grabación de audio." },
+};
+
 function LanguageDock({ language, onChange, label }: { language: Language; onChange: (language: Language) => void; label: string }) {
   const [open, setOpen] = useState(false);
   const dockRef = useRef<HTMLElement>(null);
@@ -380,7 +388,7 @@ const localizedMilestones: Record<Language, readonly (readonly [string, string, 
 const translationTables: Array<[string, Partial<Record<Language, unknown>>]> = [
   ["portal", portalCopy], ["sections", sectionCopy], ["participation", participationCopy], ["grant dossier", grantDossierCopy], ["public briefing", publicBriefCopy], ["LEIS loop", loopCopy], ["LEIS test", testCopy], ["Seed download", seedDownloadCopy], ["Reality sources", sourceRegistryCopy], ["understanding path", understandingPathCopy], ["principles", principleCopy],
   ["earth", earthCopy], ["globe", globeCopy], ["country profiles", countryBaselineCopy], ["document titles", documentTitles],
-  ["Prague context", pragueCopy], ["contact", contactCopy], ["orientation guide", guideCopy], ["timeline", localizedMilestones],
+  ["Prague context", pragueCopy], ["contact", contactCopy], ["orientation guide", guideCopy], ["Ask LEIS", askLeisCopy], ["timeline", localizedMilestones],
   ["localized page content", { en: true, ...localizedStatic }],
 ];
 
@@ -1481,14 +1489,67 @@ function FirstSteps({ copy }: { copy: (typeof firstStepCopy)[Language] }) {
   </section>;
 }
 
+type AskMode = 0 | 1 | 2;
+type SpeechRecognizer = { lang: string; continuous: boolean; interimResults: boolean; start: () => void; stop: () => void; onresult: ((event: { resultIndex: number; results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null; onend: (() => void) | null; onerror: (() => void) | null };
+type SpeechWindow = Window & { SpeechRecognition?: new () => SpeechRecognizer; webkitSpeechRecognition?: new () => SpeechRecognizer };
+
+function AskLeis({ language, copy }: { language: Language; copy: (typeof askLeisCopy)[Language] }) {
+  const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<AskMode>(1);
+  const [question, setQuestion] = useState("");
+  const [listening, setListening] = useState(false);
+  const [voiceMessage, setVoiceMessage] = useState("");
+  const [packageText, setPackageText] = useState("");
+  const [copied, setCopied] = useState(false);
+  const recognitionRef = useRef<SpeechRecognizer | null>(null);
+  const locale: Record<Language, string> = { en: "en-US", cs: "cs-CZ", de: "de-DE", fr: "fr-FR", es: "es-ES" };
+  useEffect(() => () => recognitionRef.current?.stop(), []);
+  useEffect(() => { setVoiceMessage(""); setCopied(false); }, [language]);
+  const buildPackage = () => {
+    const userQuestion = question.trim() || copy.placeholder;
+    setPackageText(`LEIS CONTEXT PACKAGE\n\nLANGUAGE: ${locale[language]}\n\nQUESTION\n${userQuestion}\n\nPUBLIC LEIS FRAME\n${copy.packageLead}\n\nWORKING RULES\n${copy.packageRules}\n\nAVAILABLE PUBLIC ROUTES\n- LEIS Root Seed and Seed Manifest\n- Public orientation and LEIS method\n- Public timeline and lineage labels\n- Curated public Earth Pulse signals\n\nREQUEST TO THE AI\nHelp explore the question without pretending to access private LEIS archives or hidden data. State uncertainty, separate quoted source claims from interpretation, and name what additional evidence would be needed.`);
+    setCopied(false);
+  };
+  const copyPackage = async () => {
+    if (!packageText) buildPackage();
+    const text = packageText || `LEIS CONTEXT PACKAGE\n\nQUESTION\n${question.trim() || copy.placeholder}\n\n${copy.packageRules}`;
+    try { await navigator.clipboard.writeText(text); setCopied(true); } catch { setCopied(false); }
+  };
+  const toggleVoice = () => {
+    if (listening) { recognitionRef.current?.stop(); return; }
+    const Speech = (window as SpeechWindow).SpeechRecognition ?? (window as SpeechWindow).webkitSpeechRecognition;
+    if (!Speech) { setVoiceMessage(copy.voiceUnavailable); return; }
+    const recognition = new Speech();
+    recognition.lang = locale[language]; recognition.continuous = false; recognition.interimResults = false;
+    recognition.onresult = (event) => setQuestion((current) => `${current}${current ? " " : ""}${event.results[event.resultIndex][0].transcript}`.trim());
+    recognition.onend = () => setListening(false);
+    recognition.onerror = () => { setListening(false); setVoiceMessage(copy.voiceUnavailable); };
+    recognitionRef.current = recognition; setVoiceMessage(""); setListening(true); recognition.start();
+  };
+  const publicAnswer = question.trim() ? `${copy.publicLead} ${copy.publicRoutes}` : copy.publicLead;
+  return <aside className={`leis-dock ${open ? "open" : ""}`} aria-label={copy.label}>
+    {open && <section className="leis-dock-window ask-leis-window" role="dialog" aria-modal="false" aria-label={copy.title}>
+      <button className="leis-dock-close" onClick={() => setOpen(false)} aria-label={copy.close}>×</button>
+      <small>{copy.label} · LEIS BRAIN UI</small><h3>{copy.title}</h3><p>{copy.lead}</p>
+      <div className="ask-mode-grid">{copy.modes.map(([title, detail], index) => <button type="button" key={title} className={mode === index ? "active" : ""} onClick={() => { setMode(index as AskMode); setCopied(false); }}><b>{title}</b><span>{detail}</span></button>)}</div>
+      <label className="ask-question"><span>{copy.question}</span><textarea value={question} onChange={(event) => { setQuestion(event.target.value); setCopied(false); }} placeholder={copy.placeholder}/></label>
+      <div className="ask-actions"><button type="button" className={`ask-voice ${listening ? "listening" : ""}`} onClick={toggleVoice} aria-pressed={listening}><i aria-hidden="true">{listening ? "●" : "◉"}</i>{listening ? copy.listening : copy.voice}</button>{mode === 1 && <button type="button" className="primary" onClick={buildPackage}>{copy.build}</button>}</div>
+      <p className="ask-voice-note">{voiceMessage || copy.voiceNote}</p>
+      {mode === 0 && <article className="ask-result"><p className="eyebrow">{copy.publicTitle}</p><p>{publicAnswer}</p><a href="#seed" onClick={() => setOpen(false)}>LEIS Root Seed →</a><a href="#timeline" onClick={() => setOpen(false)}>LEIS timeline →</a></article>}
+      {mode === 1 && packageText && <article className="ask-result"><p className="eyebrow">{copy.packageTitle}</p><p>{copy.packageLead}</p><textarea readOnly value={packageText} aria-label={copy.packageTitle}/><button type="button" className="quiet" onClick={copyPackage}>{copied ? copy.copied : copy.copy}</button></article>}
+      {mode === 2 && <article className="ask-result"><p className="eyebrow">{copy.connectedTitle}</p><p>{copy.connectedLead}</p></article>}
+      <em>{copy.noPrivate}</em>
+    </section>}
+    <button className="leis-dock-trigger" onClick={() => setOpen(!open)} aria-expanded={open}><span aria-hidden="true"/>{open ? copy.close : copy.label}</button>
+  </aside>;
+}
+
 export default function Home() {
   const [language, setLanguage] = useState<Language>("en");
   const [active, setActive] = useState(0);
   const [seedOpen, setSeedOpen] = useState(false);
   const [loopStep, setLoopStep] = useState(0);
   const [newsIndex, setNewsIndex] = useState(0);
-  const [leisOpen, setLeisOpen] = useState(false);
-  const [leisTopic, setLeisTopic] = useState<"start" | "story" | "work">("start");
   const [activeSection, setActiveSection] = useState("top");
   const copy = portalCopy[language];
   const sections = sectionCopy[language];
@@ -1504,7 +1565,6 @@ export default function Home() {
   const principles = principleCopy[language];
   const earthText = earthCopy[language];
   const contactText = contactCopy[language];
-  const guideText = guideCopy[language];
   const firstSteps = firstStepCopy[language];
   const isLocalized = language !== "en";
   const local = isLocalized ? localizedStatic[language] : null;
@@ -1580,11 +1640,6 @@ export default function Home() {
     if (!("serviceWorker" in navigator)) return;
     void navigator.serviceWorker.register("/sw.js").catch(() => undefined);
   }, []);
-  const leisGuidance = {
-    start: { ...guideText.start, link: "#orientation" },
-    story: { ...guideText.story, link: "#timeline" },
-    work: { ...guideText.work, link: "#grants" },
-  }[leisTopic];
   const choose = useCallback((index: number) => { setNewsIndex(index); window.dispatchEvent(new CustomEvent("leis-globe-focus", { detail: index })); }, []);
   return <><a className="skip-link" href="#orientation">{copy.learn}</a><main>
     <nav><a className="mark omega-mark" href="#top" aria-label={`LEIS — ${copy.start}`}><span aria-hidden="true"/><b>LEIS</b></a><div>{navigation.map(([id, label]) => <a key={id} href={`#${id}`} className={activeSection === id ? "active" : ""} aria-current={activeSection === id ? "page" : undefined} onClick={() => setActiveSection(id)}>{label}</a>)}</div></nav>
@@ -1621,20 +1676,5 @@ export default function Home() {
       <button type="button" className="primary" onClick={() => window.dispatchEvent(new CustomEvent("leis-open-contact", { detail: "Media enquiry" }))}>{copy.mediaContact}</button>
     </section>
     <section className="participate" id="participate"><p className="eyebrow">{participation.eyebrow}</p><h2>{participation.title}</h2><p>{participation.lead}</p><div className="contact"><button type="button" className="primary" onClick={() => window.dispatchEvent(new CustomEvent("leis-open-contact", { detail: "Research dialogue" }))}>{participation.action}</button><span>{participation.note}</span></div><p className="source-language-note">{participation.sourceNote}</p><footer>{local ? local.footer : "Created by"} <b>Martin Puzik</b> · {local ? local.technical : "Technical collaboration:"} <b>M.A.J. Puzik</b></footer></section>
-  <ContactPath copy={copy} contactText={contactText}/></main><LanguageDock language={language} onChange={setLanguage} label={copy.language}/><aside className={`leis-dock ${leisOpen ? "open" : ""}`} aria-label={guideText.label}>
-    {leisOpen && <div className="leis-dock-window">
-      <button className="leis-dock-close" onClick={() => setLeisOpen(false)} aria-label={guideText.close}>×</button>
-      <small>{guideText.label}</small>
-      <h3>{leisGuidance.title}</h3>
-      <p>{leisGuidance.text}</p>
-      <div className="leis-dock-choices">
-        <button className={leisTopic === "start" ? "active" : ""} onClick={() => setLeisTopic("start")}>{guideText.start.choice}</button>
-        <button className={leisTopic === "story" ? "active" : ""} onClick={() => setLeisTopic("story")}>{guideText.story.choice}</button>
-        <button className={leisTopic === "work" ? "active" : ""} onClick={() => setLeisTopic("work")}>{guideText.work.choice}</button>
-      </div>
-      <a href={leisGuidance.link} onClick={() => setLeisOpen(false)}>{leisGuidance.action} ↗</a>
-      <em>{guideText.note}</em>
-    </div>}
-    <button className="leis-dock-trigger" onClick={() => setLeisOpen(!leisOpen)} aria-expanded={leisOpen}><span aria-hidden="true"/>{leisOpen ? guideText.close : guideText.ask}</button>
-  </aside></>;
+  <ContactPath copy={copy} contactText={contactText}/></main><LanguageDock language={language} onChange={setLanguage} label={copy.language}/><AskLeis language={language} copy={askLeisCopy[language]}/></>;
 }
