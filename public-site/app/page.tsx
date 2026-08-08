@@ -268,6 +268,14 @@ const askLeisCopy: Record<Language, { label: string; close: string; title: strin
   es: { label: "ASK LEIS", close: "Cerrar", title: "Ask LEIS", lead: "Una capa de navegación para la comprensión, no un chatbot ni un modelo de IA.", modes: [["Solo LEIS", "Orientación pública sin IA externa."], ["Crear paquete de IA", "Recomendado · preparar contexto portátil para su propia IA."], ["IA conectada", "Futura capa de conexión opcional."]], question: "¿Qué le gustaría comprender?", placeholder: "Haga una pregunta real. Por ejemplo: ¿Qué debe permanecer visible cuando se entrega una decisión?", voice: "Usar voz", listening: "Escuchando…", voiceUnavailable: "La entrada de voz no está disponible en este navegador.", voiceNote: "El audio no se almacena. En este campo queda solo el texto revisado.", build: "Crear paquete", copy: "Copiar paquete", copied: "Paquete copiado. Péguelo en la IA que elija.", packageTitle: "Su paquete de contexto LEIS portátil", packageLead: "Contiene su pregunta y el marco público de LEIS. No afirma acceso a archivos privados, un modelo oculto ni registros de investigación en vivo.", packageRules: "Mantenga visibles y separados la fuente, evidencia, contexto del creador e interpretación. Conserve la incertidumbre y las preguntas abiertas. No invente acceso a registros LEIS que no se proporcionaron.", publicTitle: "Orientación pública de LEIS", publicLead: "El portal público ayuda a localizar el marco, su linaje, el Seed público y señales de fuentes seleccionadas. Una respuesta más completa necesita las fuentes pertinentes y sus condiciones.", publicRoutes: "Empiece con el Seed público y después use la orientación, cronología y Pulso de la Tierra para rastrear lo que es público.", connectedTitle: "La IA conectada aún no está activa", connectedLead: "Esta versión pública no envía su pregunta a un proveedor de IA. LEIS mantiene la comprensión portátil; usted decide si y dónde usar IA.", noPrivate: "Aquí no se accede ni se almacena ningún archivo privado, carpeta personal o grabación de audio." },
 };
 
+const askSendCopy: Record<Language, { send: string; received: string }> = {
+  en: { send: "Send question", received: "Question received" },
+  cs: { send: "Odeslat otázku", received: "Otázka přijata" },
+  de: { send: "Frage senden", received: "Frage erhalten" },
+  fr: { send: "Envoyer la question", received: "Question reçue" },
+  es: { send: "Enviar pregunta", received: "Pregunta recibida" },
+};
+
 function LanguageDock({ language, onChange, label }: { language: Language; onChange: (language: Language) => void; label: string }) {
   const [open, setOpen] = useState(false);
   const dockRef = useRef<HTMLElement>(null);
@@ -388,7 +396,7 @@ const localizedMilestones: Record<Language, readonly (readonly [string, string, 
 const translationTables: Array<[string, Partial<Record<Language, unknown>>]> = [
   ["portal", portalCopy], ["sections", sectionCopy], ["participation", participationCopy], ["grant dossier", grantDossierCopy], ["public briefing", publicBriefCopy], ["LEIS loop", loopCopy], ["LEIS test", testCopy], ["Seed download", seedDownloadCopy], ["Reality sources", sourceRegistryCopy], ["understanding path", understandingPathCopy], ["principles", principleCopy],
   ["earth", earthCopy], ["globe", globeCopy], ["country profiles", countryBaselineCopy], ["document titles", documentTitles],
-  ["Prague context", pragueCopy], ["contact", contactCopy], ["orientation guide", guideCopy], ["Ask LEIS", askLeisCopy], ["timeline", localizedMilestones],
+  ["Prague context", pragueCopy], ["contact", contactCopy], ["orientation guide", guideCopy], ["Ask LEIS", askLeisCopy], ["Ask LEIS send", askSendCopy], ["timeline", localizedMilestones],
   ["localized page content", { en: true, ...localizedStatic }],
 ];
 
@@ -1501,10 +1509,11 @@ function AskLeis({ language, copy }: { language: Language; copy: (typeof askLeis
   const [voiceMessage, setVoiceMessage] = useState("");
   const [packageText, setPackageText] = useState("");
   const [copied, setCopied] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const recognitionRef = useRef<SpeechRecognizer | null>(null);
   const locale: Record<Language, string> = { en: "en-US", cs: "cs-CZ", de: "de-DE", fr: "fr-FR", es: "es-ES" };
   useEffect(() => () => recognitionRef.current?.stop(), []);
-  useEffect(() => { setVoiceMessage(""); setCopied(false); }, [language]);
+  useEffect(() => { setVoiceMessage(""); setCopied(false); setSubmitted(false); }, [language]);
   const buildPackage = () => {
     const userQuestion = question.trim() || copy.placeholder;
     setPackageText(`LEIS CONTEXT PACKAGE\n\nLANGUAGE: ${locale[language]}\n\nQUESTION\n${userQuestion}\n\nPUBLIC LEIS FRAME\n${copy.packageLead}\n\nWORKING RULES\n${copy.packageRules}\n\nAVAILABLE PUBLIC ROUTES\n- LEIS Root Seed and Seed Manifest\n- Public orientation and LEIS method\n- Public timeline and lineage labels\n- Curated public Earth Pulse signals\n\nREQUEST TO THE AI\nHelp explore the question without pretending to access private LEIS archives or hidden data. State uncertainty, separate quoted source claims from interpretation, and name what additional evidence would be needed.`);
@@ -1526,16 +1535,17 @@ function AskLeis({ language, copy }: { language: Language; copy: (typeof askLeis
     recognition.onerror = () => { setListening(false); setVoiceMessage(copy.voiceUnavailable); };
     recognitionRef.current = recognition; setVoiceMessage(""); setListening(true); recognition.start();
   };
+  const submitQuestion = () => { setSubmitted(true); if (mode === 1) buildPackage(); };
   const publicAnswer = question.trim() ? `${copy.publicLead} ${copy.publicRoutes}` : copy.publicLead;
   return <aside className={`leis-dock ${open ? "open" : ""}`} aria-label={copy.label}>
     {open && <section className="leis-dock-window ask-leis-window" role="dialog" aria-modal="false" aria-label={copy.title}>
       <button className="leis-dock-close" onClick={() => setOpen(false)} aria-label={copy.close}>×</button>
       <small>{copy.label} · LEIS BRAIN UI</small><h3>{copy.title}</h3><p>{copy.lead}</p>
       <div className="ask-mode-grid">{copy.modes.map(([title, detail], index) => <button type="button" key={title} className={mode === index ? "active" : ""} onClick={() => { setMode(index as AskMode); setCopied(false); }}><b>{title}</b><span>{detail}</span></button>)}</div>
-      <label className="ask-question"><span>{copy.question}</span><textarea value={question} onChange={(event) => { setQuestion(event.target.value); setCopied(false); }} placeholder={copy.placeholder}/></label>
-      <div className="ask-actions"><button type="button" className={`ask-voice ${listening ? "listening" : ""}`} onClick={toggleVoice} aria-pressed={listening}><i aria-hidden="true">{listening ? "●" : "◉"}</i>{listening ? copy.listening : copy.voice}</button>{mode === 1 && <button type="button" className="primary" onClick={buildPackage}>{copy.build}</button>}</div>
+      <label className="ask-question"><span>{copy.question}</span><textarea value={question} onChange={(event) => { setQuestion(event.target.value); setCopied(false); setSubmitted(false); }} onKeyDown={(event) => { if ((event.ctrlKey || event.metaKey) && event.key === "Enter") { event.preventDefault(); submitQuestion(); } }} placeholder={copy.placeholder}/></label>
+      <div className="ask-actions"><button type="button" className={`ask-voice ${listening ? "listening" : ""}`} onClick={toggleVoice} aria-pressed={listening}><i aria-hidden="true">{listening ? "●" : "◉"}</i>{listening ? copy.listening : copy.voice}</button><button type="button" className="primary ask-send" onClick={submitQuestion}>{askSendCopy[language].send} ↵</button></div>
       <p className="ask-voice-note">{voiceMessage || copy.voiceNote}</p>
-      {mode === 0 && <article className="ask-result"><p className="eyebrow">{copy.publicTitle}</p><p>{publicAnswer}</p><a href="#seed" onClick={() => setOpen(false)}>LEIS Root Seed →</a><a href="#timeline" onClick={() => setOpen(false)}>LEIS timeline →</a></article>}
+      {mode === 0 && <article className="ask-result" aria-live="polite"><p className="eyebrow">{submitted ? `${askSendCopy[language].received} · ${copy.publicTitle}` : copy.publicTitle}</p><p>{publicAnswer}</p><a href="#seed" onClick={() => setOpen(false)}>LEIS Root Seed →</a><a href="#timeline" onClick={() => setOpen(false)}>LEIS timeline →</a></article>}
       {mode === 1 && packageText && <article className="ask-result"><p className="eyebrow">{copy.packageTitle}</p><p>{copy.packageLead}</p><textarea readOnly value={packageText} aria-label={copy.packageTitle}/><button type="button" className="quiet" onClick={copyPackage}>{copied ? copy.copied : copy.copy}</button></article>}
       {mode === 2 && <article className="ask-result"><p className="eyebrow">{copy.connectedTitle}</p><p>{copy.connectedLead}</p></article>}
       <em>{copy.noPrivate}</em>
