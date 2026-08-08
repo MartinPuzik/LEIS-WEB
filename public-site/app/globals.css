@@ -58,7 +58,7 @@
 .earth-experience .globe-stage>p{top:16px!important;bottom:auto!important;padding:7px 11px!important;border:1px solid #5be5ef57!important;border-radius:999px!important;background:#0716228f!important;color:#a5e9ee!important;font-size:.6rem!important;letter-spacing:.08em!important}
 @media(max-width:760px){.earth-experience,.earth-experience .globe-stage{min-height:470px!important}.earth-experience .globe-map-shell{height:470px!important}.earth-experience .globe-stage>p{top:7px!important;font-size:.52rem!important}}
 /* Stable map interaction: one source hub per desk; scrolling always remains page navigation. */
-.earth-experience .globe-stage>p{font-size:0!important}.earth-experience .globe-stage>p:after{content:"DRAG TO ROTATE · CLICK A SOURCE HUB · SCROLL TO CONTINUE";font-size:.6rem!important;letter-spacing:.08em!important}
+.earth-experience .globe-stage>p{font-size:.6rem!important;letter-spacing:.08em!important}
 .globe-focus-window:has(.focus-origin){display:flex!important;flex-direction:column!important;justify-content:flex-start!important;min-height:0!important}
 .globe-focus-window .focus-origin{order:0!important;display:block!important;margin:0 0 12px!important;line-height:1.35!important;white-space:normal!important}
 .globe-focus-window:has(.focus-origin) h3{order:1!important;margin:0 0 18px!important}
@@ -119,23 +119,29 @@
   letter-spacing:2px!important;
   text-shadow:0 0 15px #57ddec8c;
 }
+.omega-mark{background:none!important;filter:none!important}
 .omega-mark span{
   display:grid;
   place-items:center;
   width:48px;
   height:48px;
-  border:1px solid #7eeff4;
-  border-radius:50%;
+  border:0;
+  border-radius:0;
   font-family:Georgia,serif;
   font-size:34px;
   line-height:1;
   color:#d7ffff;
-  background:radial-gradient(circle at 45% 38%,#3f90ac99,#071827 70%);
-  box-shadow:inset 0 0 18px #b4fbff42,0 0 22px #4fe7ef77;
+  background:transparent;
+  box-shadow:none;
   transition:transform .28s ease,box-shadow .28s ease;
 }
-.omega-mark:hover span{transform:rotate(-10deg) scale(1.08);box-shadow:inset 0 0 22px #d2ffff66,0 0 30px #6debf6}
-.omega-mark b{font-size:12px!important;letter-spacing:3px!important;margin:0!important}
+.omega-mark:hover span{transform:rotate(-10deg) scale(1.08);box-shadow:0 0 24px #6debf655}
+.omega-mark b{display:none!important}
+
+/* Render the mark through a Unicode code point rather than source text, so
+   it remains a single clean Omega in every locale and browser encoding. */
+.omega-mark span{font-size:0!important;color:transparent!important}
+.omega-mark span::after{content:"\03A9";font-family:Georgia,"Times New Roman",serif;font-size:34px;line-height:1;color:#d7ffff;text-shadow:0 0 13px #67edf5}
 
 /* The navigation remains light and floating rather than enclosed in a second box. */
 nav div{padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
@@ -150,12 +156,54 @@ nav div a.active{color:#e6ffff!important;background:linear-gradient(105deg,#39df
   background-clip:text;
   color:transparent!important;
 }
+
+/* Grant headings often wrap to two lines in translated versions. Give their
+   descenders and the supporting paragraph deliberate breathing room. */
+.grants h2{line-height:1.04!important;margin-bottom:30px!important;padding-bottom:.06em}
+
+/* Large multilingual headings need true breathing room: Czech, German,
+   French and Spanish descenders must never collide with the next layer. */
+.hero h1,.orientation h2,.timeline h2,.earth h2,.grants h2,.media h2,.participate h2{
+  line-height:1.1!important;
+  padding:.07em 0 .18em!important;
+  overflow:visible!important;
+  text-wrap:balance;
+  overflow-wrap:anywhere;
+}
+.orientation h2,.timeline h2,.earth h2,.grants h2,.media h2,.participate h2{margin-bottom:28px!important}
+@media(max-width:760px){
+  .hero h1,.orientation h2,.timeline h2,.earth h2,.grants h2,.media h2,.participate h2{
+    line-height:1.13!important;
+    letter-spacing:-.055em!important;
+  }
+}
 .principles article,.media-grid article,.grant-grid article{
   background:linear-gradient(140deg,#0c2636 0%,#0b2034 58%,#1b173b 165%)!important;
 }
 .primary{background:linear-gradient(105deg,#c6fbff 0%,#8ceff4 49%,#b2a5ff 130%)!important}
 .primary{font:inherit;cursor:pointer}
 .copy-status{color:#9df6f2;font-size:.82rem}
+.source-language-note{max-width:720px;margin:28px 0 0;color:#8fb4bd!important;font-size:.8rem!important;line-height:1.55!important}
+.earth-lead{font-size:18px!important}.earth-lead:after{display:none!important}
+
+/* The public support case stays readable as one coherent path, not a sales pitch. */
+.grant-dossier{margin:42px 0 30px;padding:28px;border:1px solid #286279;border-radius:22px;background:linear-gradient(135deg,#0c2a3adc 0%,#071521e8 59%,#151434e0 135%);box-shadow:inset 0 1px 0 #b7ffff13,0 22px 58px #0004}
+.grant-dossier-intro{max-width:760px}.grant-dossier h3{margin:8px 0 12px;color:var(--leis-moon-strong);font-size:clamp(1.7rem,3.8vw,2.7rem);line-height:1.08;letter-spacing:-.04em}.grant-dossier-intro>p:last-child{margin:0;color:var(--leis-moon-muted);font-size:1rem;line-height:1.62}
+.grant-dossier-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:28px}.grant-dossier-grid>article{padding:20px;border:1px solid #2a6578;border-radius:17px;background:#06192591}.grant-dossier-grid>article>.eyebrow{margin:0 0 14px}.dossier-row{display:grid;grid-template-columns:29px minmax(0,1fr);gap:10px;padding:13px 0;border-top:1px solid #5ddfe521}.dossier-row:first-of-type{border-top:0;padding-top:0}.dossier-row>b{color:#8cf0f5;font-size:.74rem;letter-spacing:.07em}.dossier-row strong{display:block;color:var(--leis-moon);font-size:1rem;line-height:1.3}.dossier-row p{margin:4px 0 0;color:var(--leis-moon-muted);font-size:.88rem;line-height:1.52}.grant-next-step{display:inline-block;margin:0 0 0 14px;color:#9aeef3;font-size:.82rem;font-weight:700;vertical-align:middle}
+@media(max-width:760px){.grant-dossier{margin-top:32px;padding:20px}.grant-dossier-grid{grid-template-columns:1fr;gap:12px;margin-top:22px}.grant-dossier-grid>article{padding:17px}.grant-next-step{display:block;margin:13px 0 0}.dossier-row{padding:12px 0}}
+
+/* Accessible without changing the portal's atmospheric character. */
+:focus-visible{outline:2px solid #b9ffff!important;outline-offset:4px!important}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.stars,.seed,.axis .pulse,.hotspot,.depth-star,.globe-map-shell *,nav div{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* Floating portal language selector: it opens upward and stays out of Ask LEIS. */
+.language-dock{position:fixed;left:24px;bottom:22px;z-index:72;display:flex;flex-direction:column;align-items:flex-start;gap:10px;pointer-events:none}
+.language-dock>*{pointer-events:auto}.language-trigger{display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:8px 15px 8px 10px;border:1px solid #71e5eea8;border-radius:999px;background:linear-gradient(135deg,#0a3042df,#091722e8);backdrop-filter:blur(16px) saturate(1.1);box-shadow:0 14px 42px #0009,0 0 24px #57dfe238;color:#c9f4f6;font:inherit;font-weight:700;cursor:pointer;transition:transform .22s ease,box-shadow .22s ease}
+.language-trigger:hover,.language-dock.open .language-trigger{transform:translateY(-2px);box-shadow:0 17px 46px #000a,0 0 30px #65eaf06e}.language-trigger span{display:grid;place-items:center;width:27px;height:27px;border:1px solid #9df8fc;border-radius:50%;color:#aef8fb;font-size:17px;line-height:1;background:#a7ffff13}
+.language-menu{display:grid;gap:6px;width:186px;max-height:0;overflow:hidden;opacity:0;transform:translateY(9px) scale(.97);transition:max-height .25s ease,opacity .2s ease,transform .25s ease;padding:0;border:0;border-radius:17px;background:transparent}
+.language-dock.open .language-menu{max-height:310px;opacity:1;transform:translateY(0);padding:9px;border:1px solid #67dfe9a8;background:linear-gradient(145deg,#103c50e8,#07121edc);backdrop-filter:blur(19px);box-shadow:0 20px 65px #000b,0 0 30px #58e3eb30}
+.language-menu button{width:100%;border:1px solid transparent;border-radius:11px;padding:10px 12px;background:transparent;color:#b7dce1;text-align:left;font:inherit;font-size:.84rem;cursor:pointer;transition:background .2s ease,color .2s ease,border-color .2s ease}.language-menu button:hover,.language-menu button.active{border-color:#78e8efa1;background:linear-gradient(105deg,#34dfe022,#a994ff25);color:#e4ffff}
+@media(max-width:640px){.language-dock{left:12px;bottom:14px}.language-trigger{min-height:42px;padding-right:12px}.language-menu{width:170px}}
 .media-grid article{display:flex;flex-direction:column;align-items:flex-start}
 .media-grid article>b{color:#86edf4;font-size:.68rem;letter-spacing:.12em}
 .card-link{margin-top:auto;padding-top:18px;border:0;background:transparent;color:#9cf6fa;font:inherit;font-size:.88rem;font-weight:700;text-decoration:none;cursor:pointer;transition:color .2s ease,transform .2s ease}
@@ -177,7 +225,7 @@ nav div a.active{color:#e6ffff!important;background:linear-gradient(105deg,#39df
 /* A quiet, always-available human entry point into the portal. */
 .leis-dock{position:fixed;right:24px;bottom:22px;z-index:70;display:flex;flex-direction:column;align-items:flex-end;gap:11px;pointer-events:none}
 .leis-dock>*{pointer-events:auto}.leis-dock-trigger{display:inline-flex;align-items:center;gap:9px;min-height:46px;padding:8px 16px 8px 9px;border:1px solid #7aeaf2b8;border-radius:999px;background:linear-gradient(135deg,#0b3446dc,#081622e8);backdrop-filter:blur(15px);box-shadow:0 14px 42px #0009,0 0 24px #55dfe138;color:#d1f8fa;font-weight:760;cursor:pointer;transition:transform .25s ease,box-shadow .25s ease}
-.leis-dock-trigger:hover{transform:translateY(-3px);box-shadow:0 17px 48px #0009,0 0 32px #55dfe178}.leis-dock-trigger span{display:grid;place-items:center;width:30px;height:30px;border:1px solid #9cfbff;border-radius:50%;background:#baffff16;color:#8ef5fa;font-size:20px;line-height:1;box-shadow:0 0 15px #54e6ee78}
+.leis-dock-trigger:hover{transform:translateY(-3px);box-shadow:0 17px 48px #0009,0 0 32px #55dfe178}.leis-dock-trigger span{display:grid;place-items:center;width:30px;height:30px;border:0;border-radius:0;background:transparent;color:transparent;font-size:0;line-height:1;box-shadow:none}.leis-dock-trigger span::after{content:"\03A9";font-family:Georgia,"Times New Roman",serif;color:#bffdff;font-size:25px;line-height:1;text-shadow:0 0 13px #58eaf2}
 .leis-dock-window{position:relative;width:min(360px,calc(100vw - 34px));padding:23px 24px 20px;border:1px solid #72e7efa8;border-radius:20px;background:linear-gradient(145deg,#113c50da,#07111cd9);backdrop-filter:blur(18px) saturate(1.08);box-shadow:0 24px 80px #000b,0 0 40px #55dfe13b;animation:dock-rise .28s cubic-bezier(.2,.8,.2,1)}
 .leis-dock-window small{display:block;margin:0 0 10px;color:#81edf3;font-size:.62rem;letter-spacing:.13em}.leis-dock-window h3{margin:0 26px 9px 0;color:var(--leis-moon-strong);font-size:1.45rem;line-height:1.12}.leis-dock-window p{margin:0;color:var(--leis-moon-muted);font-size:.88rem;line-height:1.55}.leis-dock-window>a{display:inline-block;margin-top:14px;color:#9bf5fa;font-size:.86rem;font-weight:760;text-decoration:none}.leis-dock-window>a:hover{text-decoration:underline}.leis-dock-window em{display:block;margin-top:14px;color:#83aab2;font-size:.66rem;line-height:1.35;font-style:normal}.leis-dock-close{position:absolute;right:12px;top:8px;border:0;background:transparent;color:#c4f8fa;font-size:25px;cursor:pointer}.leis-dock-choices{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}.leis-dock-choices button{border:1px solid #5ddde67d;border-radius:999px;padding:7px 9px;background:#0a26358a;color:#b5dde1;font-size:.72rem;cursor:pointer}.leis-dock-choices button:hover,.leis-dock-choices button.active{border-color:#98f6fb;color:#e0fcfd;background:#1a58698c}@keyframes dock-rise{from{opacity:0;transform:translateY(13px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(max-width:640px){.leis-dock{right:14px;bottom:14px}.leis-dock-trigger{min-height:45px}.leis-dock-window{padding:20px}.leis-dock-choices{display:grid;grid-template-columns:1fr 1fr}.leis-dock-choices button:last-child{grid-column:span 2}}
@@ -194,6 +242,7 @@ nav div a.active{color:#e6ffff!important;background:linear-gradient(105deg,#39df
 .globe-atmosphere-control,.globe-zoom-controls{z-index:21!important;pointer-events:auto!important;touch-action:manipulation!important}
 .mobile-map-status{position:absolute;inset:0;z-index:5;display:none;place-content:center;text-align:center;gap:8px;color:#b7e8ec;pointer-events:none;background:radial-gradient(circle at 50% 49%,#123f5870 0,transparent 38%)}
 .mobile-map-status span{font-size:3rem;color:#78e8ef;animation:weather-live 1.7s ease-in-out infinite}.mobile-map-status b{font-size:.84rem;letter-spacing:.06em}.mobile-map-status small{color:#83aeb9;font-size:.71rem}
+.mobile-map-status.fallback{display:grid;pointer-events:auto}.mobile-map-status button{justify-self:center;margin-top:5px;padding:9px 13px;border:1px solid #7ae9f2;border-radius:999px;background:#0d3044de;color:#d7fbff;font:inherit;font-size:.76rem;font-weight:700;cursor:pointer;box-shadow:0 0 22px #44d8e432}.mobile-map-status button:hover,.mobile-map-status button:focus-visible{background:#15495f;color:#fff;outline:2px solid #c2ffff;outline-offset:3px}
 @media(max-width:760px){
   .earth-experience .globe-stage{min-height:500px!important}
   .earth-experience .globe-map-shell{height:min(66svh,560px)!important;min-height:440px!important}
@@ -204,10 +253,35 @@ nav div a.active{color:#e6ffff!important;background:linear-gradient(105deg,#39df
   .globe-zoom-controls{right:10px!important;bottom:12px!important}
 }
 
-/* The Earth Pulse introduction is a short orientation, not a technical note. */
-.earth-lead{font-size:0!important}
-.earth-lead:after{content:"Explore public AI signals by place. Tap a glowing hub or a newsroom card to open its source, a short summary and LEIS context. The moving lines show a source connection — not a measure of impact.";display:block;max-width:760px;color:var(--leis-moon-muted);font-size:18px;line-height:1.6}
-@media(max-width:760px){.earth-lead:after{font-size:16px;line-height:1.55}}
+/* The Earth Pulse introduction comes from the selected language, not a CSS fallback. */
+.earth-lead{max-width:760px}
+
+/* The entry navigation floats directly in the space: no dark bar, container
+   outline or dividing rule behind it. The active destination remains clear. */
+nav,nav::before,nav::after{
+  background:transparent!important;
+  backdrop-filter:none!important;
+  border:0!important;
+  border-bottom:0!important;
+  box-shadow:none!important;
+}
+nav div{background:transparent!important;border:0!important;box-shadow:none!important}
+
+/* A compact interactive view of LEIS as a method rather than a slogan. */
+.leis-loop{margin-top:44px;padding:28px;border:1px solid #316c81;border-radius:22px;background:linear-gradient(145deg,#0a2738cc,#07131ed9 63%,#171433bd);box-shadow:inset 0 1px 0 #c9ffff12,0 18px 54px #0004}.leis-loop-heading{max-width:760px}.leis-loop h3{margin:8px 0 10px;color:var(--leis-moon-strong);font-size:clamp(1.65rem,3.4vw,2.55rem);line-height:1.1;letter-spacing:-.04em}.leis-loop-heading>p:last-child{margin:0;color:var(--leis-moon-muted);line-height:1.6}.leis-loop-track{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;margin:26px 0 18px}.leis-loop-track button{display:grid;gap:8px;min-height:96px;padding:13px 11px;border:1px solid #2f687d;border-radius:13px;background:#091d2b9c;color:#a9d1d9;text-align:left;font:inherit;font-size:.76rem;line-height:1.25;cursor:pointer;transition:transform .2s ease,background .2s ease,border-color .2s ease,color .2s ease}.leis-loop-track button span{display:grid;place-items:center;width:22px;height:22px;border:1px solid #6adfe7;border-radius:50%;color:#91f3f7;font-size:.64rem}.leis-loop-track button:hover,.leis-loop-track button.active{border-color:#a4f7fa;background:linear-gradient(145deg,#15546a,#142746);color:#ecffff;transform:translateY(-3px);box-shadow:0 9px 26px #49e8f229}.leis-loop-track button.active span{background:#c1ffff;color:#07151e;box-shadow:0 0 16px #69ecf5}.leis-loop-reading{min-height:170px;padding:22px 23px;border-left:2px solid #83eff3;border-radius:0 15px 15px 0;background:linear-gradient(90deg,#0f3345bb,#09152277)}.leis-loop-reading>span{color:#83edf4;font-size:.67rem;letter-spacing:.12em}.leis-loop-reading h4{margin:8px 0;color:var(--leis-moon-strong);font-size:clamp(1.3rem,2.5vw,1.75rem)}.leis-loop-reading p{max-width:760px;margin:0;color:var(--leis-moon-muted);line-height:1.62}.leis-loop-reading .leis-loop-question{margin-top:13px;color:#b9e5e8}.leis-loop-question b{color:#9cf6fa}@media(max-width:900px){.leis-loop-track{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:620px){.leis-loop{margin-top:31px;padding:20px}.leis-loop-track{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:20px}.leis-loop-track button{min-height:82px}.leis-loop-reading{min-height:0;padding:18px}}
+
+/* The public test keeps the promise concrete: provenance, explanation and reality. */
+.leis-test{margin-top:22px;padding:28px 0 3px}.leis-test h3{max-width:730px;margin:8px 0 9px;color:var(--leis-moon-strong);font-size:clamp(1.6rem,3.3vw,2.45rem);line-height:1.1;letter-spacing:-.04em}.leis-test-lead{max-width:740px;margin:0;color:var(--leis-moon-muted);line-height:1.62}.leis-test>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-top:23px}.leis-test article{padding:20px;border:1px solid #2d687b;border-radius:16px;background:linear-gradient(145deg,#0a26378f,#091522af)}.leis-test article b{color:#8cf4f8;font-size:.72rem;letter-spacing:.1em}.leis-test article h4{margin:13px 0 8px;color:var(--leis-moon-strong);font-size:1.12rem;line-height:1.2}.leis-test article p{margin:0;color:var(--leis-moon-muted);font-size:.9rem;line-height:1.56}.leis-test-note{margin:18px 0 0;padding-left:16px;border-left:2px solid #84edf3;color:#b8e5e8;line-height:1.6}@media(max-width:760px){.leis-test>div{grid-template-columns:1fr;gap:10px}.leis-test article{padding:18px}}
+
+/* A seed is a safe, legible public handover — not a technical download wall. */
+.seed-download{position:relative;margin:74px auto 0;padding:42px;max-width:1160px;border:1px solid #3a8595;border-radius:26px;background:radial-gradient(circle at 86% 18%,#4ae3e522,transparent 23%),linear-gradient(145deg,#0b3041e8,#08131fcf 66%,#191638cb);box-shadow:inset 0 1px 0 #d0ffff1c,0 28px 75px #0006}.seed-download-intro{max-width:780px}.seed-download h2{margin:9px 0 12px;color:var(--leis-moon-strong);font-size:clamp(2rem,4vw,3.35rem);line-height:1.05;letter-spacing:-.05em}.seed-download-intro>p:not(.eyebrow){margin:0;color:var(--leis-moon-muted);line-height:1.62}.seed-download .seed-verified{margin-top:17px;color:#9af3f6;font-size:.78rem;font-weight:700;letter-spacing:.04em}.seed-download .seed-language{margin-top:6px;color:#93b7c1;font-size:.83rem}.seed-download .actions{margin-top:23px}.seed-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-top:32px}.seed-steps article{padding:20px;border:1px solid #2c687b;border-radius:16px;background:#071b2a9b}.seed-steps b{display:grid;place-items:center;width:26px;height:26px;border:1px solid #76e7ed;border-radius:50%;color:#98f5f8;font-size:.69rem}.seed-steps h3{margin:12px 0 7px;color:var(--leis-moon-strong);font-size:1.12rem}.seed-steps p{margin:0;color:var(--leis-moon-muted);font-size:.9rem;line-height:1.55}.seed-safety{margin:21px 0 0;padding:14px 16px;border-left:2px solid #c5b0ff;border-radius:0 12px 12px 0;background:#11142d9c;color:#c8dfe2;line-height:1.55}@media(max-width:760px){.seed-download{margin:52px 18px 0;padding:28px 22px}.seed-steps{grid-template-columns:1fr;gap:10px;margin-top:24px}.seed-steps article{padding:18px}}
+
+/* Present only when a keyboard user asks for it. */
+.skip-link{position:fixed;z-index:120;left:18px;top:-64px;padding:11px 15px;border:1px solid #8cf5fa;border-radius:999px;background:#092234;color:#eaffff;text-decoration:none;box-shadow:0 0 26px #62e9f566;transition:top .18s ease}.skip-link:focus{top:16px}
 
 /* A contact path stays human and local until the visitor deliberately opens mail. */
 .contact-path{max-width:760px;margin:0 auto 96px;padding:46px;border:1px solid #3e83958a;border-radius:26px;background:linear-gradient(135deg,#0c2b3bb8,#08121c94);box-shadow:0 22px 70px #0006,0 0 35px #55e7ec1b}.contact-path h2{margin:9px 0 12px;color:var(--leis-moon-strong);font-size:clamp(2rem,4.2vw,3.4rem);letter-spacing:-.05em}.contact-path>p:not(.eyebrow){max-width:650px;margin:0 0 25px;color:var(--leis-moon-muted);line-height:1.6}.contact-path form{display:grid;gap:15px;margin-top:25px}.contact-topics{display:flex;flex-wrap:wrap;gap:8px}.contact-topics button{border:1px solid #5bdde78c;border-radius:999px;padding:8px 11px;background:#0a26358c;color:#a9dce1;cursor:pointer}.contact-topics button.active,.contact-topics button:hover{background:#1b596bba;border-color:#9ef6fa;color:#ebffff}.contact-path label{display:grid;gap:7px;color:#b8e3e7;font-size:.8rem}.contact-path label small{color:#7da5af}.contact-path input,.contact-path textarea{width:100%;border:1px solid #4e9faf86;border-radius:11px;padding:11px 12px;background:#061622c9;color:#e1f8fa;font:inherit;outline:none}.contact-path textarea{min-height:112px;resize:vertical}.contact-path input:focus,.contact-path textarea:focus{border-color:#8cf3f7;box-shadow:0 0 0 3px #6beaf21c}.contact-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap}.contact-actions .quiet{border:0;background:transparent;color:#a8dbe0;cursor:pointer}.contact-actions .quiet:hover{text-decoration:underline}@media(max-width:700px){.contact-path{margin:0 22px 74px;padding:30px 22px}.contact-actions{align-items:flex-start;gap:13px;flex-direction:column}}
+
+/* A public briefing makes the press and research route usable without asking
+   visitors to decode the rest of the portal first. */
+.public-brief{margin:38px 0 42px;padding:28px;border:1px solid #2b667c;border-radius:22px;background:linear-gradient(145deg,#0d2a3bdc,#081621e8 65%,#171435d9);box-shadow:inset 0 1px 0 #d0ffff14,0 24px 60px #0004}.public-brief-intro{max-width:780px}.public-brief h3{margin:8px 0 12px;color:var(--leis-moon-strong);font-size:clamp(1.75rem,3.8vw,2.75rem);line-height:1.08;letter-spacing:-.04em}.public-brief-intro>p:last-child{margin:0;color:var(--leis-moon-muted);font-size:1rem;line-height:1.62}.public-brief-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin-top:27px}.public-brief-grid article{min-height:152px;padding:19px;border:1px solid #2a6578;border-radius:16px;background:linear-gradient(145deg,#0b26368f,#08152299)}.public-brief-grid b{color:#8bf0f5;font-size:.7rem;letter-spacing:.09em}.public-brief-grid h4{margin:13px 0 7px;color:var(--leis-moon);font-size:1.06rem;line-height:1.26}.public-brief-grid p{margin:0;color:var(--leis-moon-muted);font-size:.89rem;line-height:1.55}.brief-link{margin-top:22px;border:0;background:transparent;color:#9bf5fa;font:inherit;font-size:.9rem;font-weight:760;cursor:pointer}.brief-link:hover,.brief-link:focus-visible{color:#c3b8ff;text-decoration:underline;outline:0}@media(max-width:760px){.public-brief{margin:31px 0 36px;padding:20px}.public-brief-grid{grid-template-columns:1fr;gap:10px;margin-top:20px}.public-brief-grid article{min-height:0;padding:17px}}

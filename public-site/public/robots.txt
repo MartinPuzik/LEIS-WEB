@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://leis-understanding-system.puzik.chatgpt.site/sitemap.xml

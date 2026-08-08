@@ -1,0 +1,22 @@
+# LEIS public portal
+
+Read `AGENTS.md` before making product changes. It is the source of truth for
+authorship, public claims, language completeness and visual direction.
+
+Stack: React 19 + TypeScript + Vinext/Vite + Cloudflare Sites. Main public UI:
+`app/page.tsx`; styling: `app/globals.css`.
+
+Work in complete, coherent feature groups. Do not make a string of tiny visual
+patches. Use targeted file context, show a compact diff, then run
+`npx vinext build --verbose` once for the completed group.
+
+Do not add packages or external services unless explicitly requested. Keep the
+public site privacy-preserving and do not reveal archive contents.
+
+Any public visible text must be translated in EN, CS, DE, FR and ES. Do not
+release a partial locale. Preserve original language titles and URLs for public
+sources.
+
+LEIS is free, not an AI product and not a paywall. Martin Pužík is the founder,
+creator and constitution author. M.A.J. Pužík provides technical activation and
+development support; do not misrepresent authorship.

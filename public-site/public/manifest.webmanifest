@@ -1,0 +1,29 @@
+{
+  "name": "LEIS — Understanding that can travel",
+  "short_name": "LEIS",
+  "id": "/",
+  "lang": "en",
+  "dir": "ltr",
+  "description": "A reality-oriented framework for recognition, lineage and reconstructable understanding.",
+  "start_url": "/",
+  "scope": "/",
+  "orientation": "any",
+  "display": "standalone",
+  "background_color": "#030d17",
+  "theme_color": "#061522",
+  "categories": ["education", "productivity", "social"],
+  "shortcuts": [
+    { "name": "Start here", "url": "/#orientation" },
+    { "name": "Living timeline", "url": "/#timeline" },
+    { "name": "Earth Pulse", "url": "/#earth" },
+    { "name": "Support LEIS", "url": "/#grants" }
+  ],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

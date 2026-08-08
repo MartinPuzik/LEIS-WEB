@@ -1,9 +1,268 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 type Source = "OpenAI" | "Anthropic" | "Google AI" | "Hugging Face" | "Mistral AI" | "Cohere" | "Google DeepMind" | "TII" | "RIKEN" | "AI Singapore" | "IndiaAI" | "KAIST" | "Brazil Government" | "CTU Prague" | "DFKI" | "AI Sweden" | "CSIRO" | "Kenya ICT" | "NCAIR Nigeria";
 type News = { title: string; source: Source; place: string; lat: number; lon: number; url: string; summary: string; leis: string; reviewed?: string };
+type Language = "en" | "cs" | "de" | "fr" | "es";
+
+const languageOptions: Array<{ code: Language; label: string }> = [
+  { code: "en", label: "English" }, { code: "cs", label: "Čeština" }, { code: "de", label: "Deutsch" }, { code: "fr", label: "Français" }, { code: "es", label: "Español" },
+];
+
+const supportedLanguages = new Set<Language>(languageOptions.map(({ code }) => code));
+const isLanguage = (value: string | null): value is Language => Boolean(value && supportedLanguages.has(value as Language));
+// Ke každému dalšímu jazyku se přidá i směr sazby; tím je portál připravený například pro arabštinu bez přestavby rozhraní.
+const languageDirection: Record<Language, "ltr" | "rtl"> = { en: "ltr", cs: "ltr", de: "ltr", fr: "ltr", es: "ltr" };
+
+const portalCopy = {
+  en: { language: "Language", start: "Start here", story: "Our story", earth: "Earth Pulse", support: "Support LEIS", media: "Media", eyebrow: "REALITY-ORIENTED UNDERSTANDING SYSTEM", heroLead: "LEIS is a technology-independent framework for recognising, activating and reconstructing understanding from reality.", learn: "Learn about LEIS", lineage: "Follow the lineage ↓", grantEyebrow: "SUPPORT / COOPERATION / GRANT INTENT", grantA: "Keep LEIS free.", grantB: "Make it durable.", grantLead: "LEIS is free of charge forever. Support does not buy a wall around knowledge; it gives the human work behind preservation, validation and accessible public orientation the time to continue.", discuss: "Discuss support or a pilot", mediaEyebrow: "MEDIA / JOURNALISTS / RESEARCHERS", mediaTitle: "Start with the human question.", mediaLead: "Can understanding survive the departure of the person who created it? This is the story before any technology claim: continuity, evidence, uncertainty and the possibility of rebuilding context.", orientation: "Two-minute orientation", evidence: "Source-led briefing", dialogue: "Talk to Martin", readOrientation: "Read the orientation →", traceTimeline: "Trace the timeline →", openContact: "Open the contact path →", mediaContact: "Media / research enquiry", contactEyebrow: "A HUMAN CONTACT PATH", contactTitle: "Start with a real question.", contactLead: "For a grant, a research conversation, a practical pilot or media context. Your note stays on your device until you choose to open an e-mail.", write: "Write to LEIS", openMail: "Open prepared e-mail", copyMail: "Copy e-mail address", copied: "E-mail address copied.", notNow: "Not now" },
+  cs: { language: "Jazyk", start: "Začněte zde", story: "Náš příběh", earth: "Pulz Země", support: "Podpořit LEIS", media: "Média", eyebrow: "SYSTÉM POROZUMĚNÍ ORIENTOVANÝ NA REALITU", heroLead: "LEIS je technologicky nezávislý rámec pro rozpoznávání, aktivaci a rekonstrukci porozumění z reality.", learn: "Poznejte LEIS", lineage: "Sledovat linii vývoje ↓", grantEyebrow: "PODPORA / SPOLUPRÁCE / GRANTOVÝ ZÁMĚR", grantA: "Nechte LEIS svobodný.", grantB: "Udělejte jej trvalým.", grantLead: "LEIS zůstává navždy zdarma. Podpora nekupuje zeď kolem znalostí; dává čas lidské práci, která stojí za uchováním, ověřováním a srozumitelnou veřejnou orientací.", discuss: "Probrat podporu nebo pilot", mediaEyebrow: "MÉDIA / NOVINÁŘI / VÝZKUMNÍCI", mediaTitle: "Začněte lidskou otázkou.", mediaLead: "Přežije porozumění odchod člověka, který jej vytvořil? To je příběh před každým technologickým tvrzením: kontinuita, důkaz, nejistota a možnost znovu vybudovat kontext.", orientation: "Dvouminutová orientace", evidence: "Briefing vedený zdroji", dialogue: "Promluvte si s Martinem", readOrientation: "Přečíst orientaci →", traceTimeline: "Projít časovou osu →", openContact: "Otevřít kontakt →", mediaContact: "Dotaz pro média / výzkum", contactEyebrow: "LIDSKÁ CESTA KE KONTAKTU", contactTitle: "Začněte skutečnou otázkou.", contactLead: "Pro grant, výzkumný rozhovor, praktický pilot nebo mediální souvislosti. Vaše poznámka zůstává ve vašem zařízení, dokud sami nezvolíte otevření e-mailu.", write: "Napsat LEIS", openMail: "Otevřít připravený e-mail", copyMail: "Kopírovat e-mail", copied: "E-mailová adresa zkopírována.", notNow: "Teď ne" },
+  de: { language: "Sprache", start: "Start", story: "Unsere Geschichte", earth: "Erdimpuls", support: "LEIS unterstützen", media: "Medien", eyebrow: "REALITÄTSORIENTIERTES VERSTÄNDNISSYSTEM", heroLead: "LEIS ist ein technologieunabhängiger Rahmen, um Verständnis aus der Realität zu erkennen, zu aktivieren und zu rekonstruieren.", learn: "LEIS kennenlernen", lineage: "Entwicklungslinie verfolgen ↓", grantEyebrow: "UNTERSTÜTZUNG / KOOPERATION / GRANT-ABSICHT", grantA: "LEIS bleibt frei.", grantB: "Machen wir es dauerhaft.", grantLead: "LEIS bleibt für immer kostenfrei. Unterstützung schafft keine Mauer um Wissen; sie gibt der menschlichen Arbeit hinter Bewahrung, Validierung und öffentlicher Orientierung Zeit.", discuss: "Unterstützung oder Pilot besprechen", mediaEyebrow: "MEDIEN / JOURNALISTEN / FORSCHUNG", mediaTitle: "Beginnen Sie mit der menschlichen Frage.", mediaLead: "Kann Verständnis den Abschied der Person überleben, die es geschaffen hat? Das ist die Geschichte vor jedem Technologieversprechen: Kontinuität, Evidenz, Unsicherheit und rekonstruierbarer Kontext.", orientation: "Zwei-Minuten-Orientierung", evidence: "Quellenbasierte Einordnung", dialogue: "Mit Martin sprechen", readOrientation: "Orientierung lesen →", traceTimeline: "Zeitleiste verfolgen →", openContact: "Kontaktweg öffnen →", mediaContact: "Medien- / Forschungsanfrage", contactEyebrow: "EIN MENSCHLICHER KONTAKTWEG", contactTitle: "Beginnen Sie mit einer echten Frage.", contactLead: "Für einen Grant, ein Forschungsgespräch, einen praktischen Pilotversuch oder Medienkontext. Ihre Nachricht bleibt auf Ihrem Gerät, bis Sie selbst eine E-Mail öffnen.", write: "LEIS schreiben", openMail: "Vorbereitete E-Mail öffnen", copyMail: "E-Mail-Adresse kopieren", copied: "E-Mail-Adresse kopiert.", notNow: "Jetzt nicht" },
+  fr: { language: "Langue", start: "Commencer", story: "Notre histoire", earth: "Pouls de la Terre", support: "Soutenir LEIS", media: "Médias", eyebrow: "SYSTÈME DE COMPRÉHENSION ORIENTÉ VERS LE RÉEL", heroLead: "LEIS est un cadre indépendant de la technologie pour reconnaître, activer et reconstruire la compréhension à partir de la réalité.", learn: "Découvrir LEIS", lineage: "Suivre la lignée ↓", grantEyebrow: "SOUTIEN / COOPÉRATION / INTENTION DE SUBVENTION", grantA: "Gardons LEIS libre.", grantB: "Rendons-le durable.", grantLead: "LEIS restera gratuit pour toujours. Le soutien n'achète pas un mur autour des connaissances ; il donne du temps au travail humain de préservation, de validation et d'orientation publique.", discuss: "Parler d'un soutien ou d'un pilote", mediaEyebrow: "MÉDIAS / JOURNALISTES / CHERCHEURS", mediaTitle: "Commencez par la question humaine.", mediaLead: "La compréhension peut-elle survivre au départ de la personne qui l'a créée ? C'est l'histoire avant toute promesse technologique : continuité, preuves, incertitude et possibilité de reconstruire le contexte.", orientation: "Orientation en deux minutes", evidence: "Briefing fondé sur les sources", dialogue: "Parler avec Martin", readOrientation: "Lire l'orientation →", traceTimeline: "Suivre la chronologie →", openContact: "Ouvrir le contact →", mediaContact: "Demande média / recherche", contactEyebrow: "UN CHEMIN DE CONTACT HUMAIN", contactTitle: "Commencez par une vraie question.", contactLead: "Pour une subvention, une conversation de recherche, un pilote pratique ou un contexte média. Votre message reste sur votre appareil jusqu'à ce que vous choisissiez d'ouvrir un e-mail.", write: "Écrire à LEIS", openMail: "Ouvrir l'e-mail préparé", copyMail: "Copier l'e-mail", copied: "Adresse e-mail copiée.", notNow: "Pas maintenant" },
+  es: { language: "Idioma", start: "Empezar", story: "Nuestra historia", earth: "Pulso de la Tierra", support: "Apoyar LEIS", media: "Medios", eyebrow: "SISTEMA DE COMPRENSIÓN ORIENTADO A LA REALIDAD", heroLead: "LEIS es un marco independiente de la tecnología para reconocer, activar y reconstruir la comprensión a partir de la realidad.", learn: "Conocer LEIS", lineage: "Seguir el linaje ↓", grantEyebrow: "APOYO / COOPERACIÓN / INTENCIÓN DE SUBVENCIÓN", grantA: "Mantengamos LEIS libre.", grantB: "Hagámoslo duradero.", grantLead: "LEIS será gratuito para siempre. El apoyo no compra un muro alrededor del conocimiento; da tiempo al trabajo humano de preservación, validación y orientación pública accesible.", discuss: "Hablar de apoyo o un piloto", mediaEyebrow: "MEDIOS / PERIODISTAS / INVESTIGADORES", mediaTitle: "Empiece con la pregunta humana.", mediaLead: "¿Puede la comprensión sobrevivir a la partida de la persona que la creó? Esta es la historia previa a cualquier afirmación tecnológica: continuidad, evidencia, incertidumbre y la posibilidad de reconstruir el contexto.", orientation: "Orientación de dos minutos", evidence: "Resumen basado en fuentes", dialogue: "Hablar con Martin", readOrientation: "Leer la orientación →", traceTimeline: "Seguir la cronología →", openContact: "Abrir el contacto →", mediaContact: "Consulta de medios / investigación", contactEyebrow: "UNA RUTA DE CONTACTO HUMANA", contactTitle: "Empiece con una pregunta real.", contactLead: "Para una subvención, una conversación de investigación, un piloto práctico o contexto de medios. Su nota permanece en su dispositivo hasta que elija abrir un correo electrónico.", write: "Escribir a LEIS", openMail: "Abrir e-mail preparado", copyMail: "Copiar e-mail", copied: "Dirección de e-mail copiada.", notNow: "Ahora no" },
+} as const;
+
+type PortalCopy = (typeof portalCopy)[Language];
+
+const sectionCopy: Record<Language, { orientation: string; reality: string; recognition: string; timeline: string; continuity: string; earth: string; earthLead: string }> = {
+  en: { orientation: "QUICK ORIENTATION", reality: "Reality was never hidden. Recognition was incomplete.", recognition: "Recognition", timeline: "LIVING LEIS TIMELINE", continuity: "From seed to continuity.", earth: "Where the current conversation is coming from.", earthLead: "Explore public AI signals by place. Tap a glowing hub or a newsroom card to open its source, a short summary and LEIS context." },
+  cs: { orientation: "RYCHLÁ ORIENTACE", reality: "Realita nikdy nebyla skrytá. Rozpoznání bylo neúplné.", recognition: "Rozpoznání", timeline: "ŽIVÁ ČASOVÁ OSA LEIS", continuity: "Od semene ke kontinuitě.", earth: "Odkud přichází současná konverzace.", earthLead: "Prozkoumejte veřejné AI signály podle místa. Klepněte na zářící bod nebo kartu zdroje a otevřete původ, krátké shrnutí a kontext LEIS." },
+  de: { orientation: "SCHNELLE ORIENTIERUNG", reality: "Die Realität war nie verborgen. Die Erkenntnis war unvollständig.", recognition: "Erkennen", timeline: "LEBENDIGE LEIS-ZEITLINIE", continuity: "Vom Seed zur Kontinuität.", earth: "Woher die aktuelle Diskussion kommt.", earthLead: "Erkunden Sie öffentliche KI-Signale nach Ort. Wählen Sie einen leuchtenden Punkt oder eine Quellenkarte für Ursprung, Kurzfassung und LEIS-Kontext." },
+  fr: { orientation: "ORIENTATION RAPIDE", reality: "La réalité n'a jamais été cachée. La reconnaissance était incomplète.", recognition: "Reconnaissance", timeline: "CHRONOLOGIE VIVANTE DE LEIS", continuity: "De la graine à la continuité.", earth: "D'où vient la conversation actuelle.", earthLead: "Explorez les signaux publics de l'IA par lieu. Touchez un point lumineux ou une carte source pour ouvrir son origine, un résumé et le contexte LEIS." },
+  es: { orientation: "ORIENTACIÓN RÁPIDA", reality: "La realidad nunca estuvo oculta. El reconocimiento era incompleto.", recognition: "Reconocimiento", timeline: "CRONOLOGÍA VIVA DE LEIS", continuity: "De la semilla a la continuidad.", earth: "De dónde viene la conversación actual.", earthLead: "Explore señales públicas de IA por lugar. Toque un punto brillante o una tarjeta de fuente para abrir su origen, un resumen y el contexto de LEIS." },
+};
+
+const participationCopy: Record<Language, { eyebrow: string; title: string; lead: string; action: string; note: string; sourceNote: string }> = {
+  en: { eyebrow: "OPEN · FREE · EVOLVING", title: "LEIS has no walls.", lead: "LEIS remains free of charge. Support, research dialogue and carefully scoped pilots help sustain its validation, preservation and human work.", action: "Start a respectful dialogue", note: "Public contact route · no mailing list · no pressure", sourceNote: "Original titles and links remain in the source language so every public signal can be verified at its origin." },
+  cs: { eyebrow: "OTEVŘENÝ · SVOBODNÝ · VYVÍJEJÍCÍ SE", title: "LEIS nemá zdi.", lead: "LEIS zůstává zdarma. Podpora, výzkumný dialog a pečlivě vymezené piloty pomáhají udržet jeho ověřování, uchování a lidskou práci.", action: "Začít respektující dialog", note: "Veřejná cesta ke kontaktu · bez mailing listu · bez nátlaku", sourceNote: "Původní názvy a odkazy zůstávají v jazyce zdroje, aby bylo možné každý veřejný signál ověřit u jeho původu." },
+  de: { eyebrow: "OFFEN · FREI · SICH ENTWICKELND", title: "LEIS hat keine Mauern.", lead: "LEIS bleibt kostenlos. Unterstützung, Forschungsdialog und sorgfältig begrenzte Pilotprojekte tragen Validierung, Bewahrung und menschliche Arbeit.", action: "Einen respektvollen Dialog beginnen", note: "Öffentlicher Kontaktweg · keine Mailingliste · kein Druck", sourceNote: "Originaltitel und Links bleiben in der Sprache der Quelle, damit jedes öffentliche Signal an seinem Ursprung überprüfbar bleibt." },
+  fr: { eyebrow: "OUVERT · LIBRE · EN ÉVOLUTION", title: "LEIS n'a pas de murs.", lead: "LEIS reste gratuit. Le soutien, le dialogue de recherche et des pilotes soigneusement définis soutiennent sa validation, sa préservation et le travail humain.", action: "Commencer un dialogue respectueux", note: "Voie de contact publique · pas de liste de diffusion · pas de pression", sourceNote: "Les titres et liens originaux restent dans la langue de la source afin que chaque signal public soit vérifiable à son origine." },
+  es: { eyebrow: "ABIERTO · LIBRE · EN EVOLUCIÓN", title: "LEIS no tiene muros.", lead: "LEIS sigue siendo gratuito. El apoyo, el diálogo de investigación y los pilotos cuidadosamente delimitados sostienen su validación, preservación y trabajo humano.", action: "Iniciar un diálogo respetuoso", note: "Ruta de contacto pública · sin lista de correo · sin presión", sourceNote: "Los títulos y enlaces originales permanecen en el idioma de la fuente para que cada señal pública pueda verificarse en su origen." },
+};
+
+const grantDossierCopy: Record<Language, { title: string; lead: string; why: string; route: string; routes: readonly [string, string][]; measure: string; measures: readonly [string, string][]; action: string }> = {
+  en: {
+    title: "What support makes possible.",
+    lead: "Support protects the conditions in which LEIS can remain independent, inspectable and free to use. It is not a paywall, a promise of influence or a shortcut around evidence.",
+    why: "Three ways to contribute",
+    route: "A practical route, not a vague proposal",
+    routes: [["Continuity", "Archive, preserve and make source lineage recoverable across changes of people, tools and time."], ["A bounded pilot", "Work with one real handover, decision or knowledge-continuity problem, with a clear scope and a human owner."], ["Independent challenge", "Invite researchers and institutions to test the method, question its limits and improve its measures."]],
+    measure: "What a pilot should be able to show",
+    measures: [["Recoverability", "Can the next person reconstruct why a decision was made, not only what was stored?"], ["Orientation", "How quickly can a new person find the relevant source, context, uncertainty and next responsible step?"], ["Continuity", "Does essential understanding remain explainable when a person, tool or system changes?"]],
+    action: "Start a grant or pilot conversation",
+  },
+  cs: {
+    title: "Co podpora skutečně umožňuje.",
+    lead: "Podpora chrání podmínky, v nichž může LEIS zůstat nezávislý, přezkoumatelný a zdarma. Není to placená zeď, příslib vlivu ani zkratka kolem důkazů.",
+    why: "Tři cesty, jak přispět",
+    route: "Praktická cesta, ne vágní návrh",
+    routes: [["Kontinuita", "Archivovat, uchovávat a zpřístupnit linii zdrojů napříč změnami lidí, nástrojů a času."], ["Vymezený pilot", "Pracovat s jedním skutečným problémem předání, rozhodování nebo kontinuity znalostí — s jasným rozsahem a lidským vlastníkem."], ["Nezávislá výzva", "Přizvat výzkumníky a instituce, aby metodu testovali, zpochybňovali její limity a zlepšovali její měřítka."]],
+    measure: "Co by měl pilot umět ukázat",
+    measures: [["Obnovitelnost", "Dokáže další člověk znovu vystavět, proč bylo rozhodnutí učiněno — ne jen co bylo uloženo?"], ["Orientace", "Jak rychle nový člověk najde relevantní zdroj, kontext, nejistotu a další odpovědný krok?"], ["Kontinuita", "Zůstává podstatné porozumění vysvětlitelné, když se změní člověk, nástroj nebo systém?"]],
+    action: "Začít rozhovor o grantu nebo pilotu",
+  },
+  de: {
+    title: "Was Unterstützung möglich macht.",
+    lead: "Unterstützung schützt die Bedingungen, unter denen LEIS unabhängig, überprüfbar und kostenlos bleiben kann. Sie ist weder Paywall noch Einflussversprechen noch Abkürzung an Belegen vorbei.",
+    why: "Drei Wege beizutragen",
+    route: "Ein praktischer Weg, kein vager Vorschlag",
+    routes: [["Kontinuität", "Quellenlinien archivieren, bewahren und über Veränderungen von Menschen, Werkzeugen und Zeit hinweg wiederherstellbar machen."], ["Ein begrenztes Pilotprojekt", "An einem realen Übergabe-, Entscheidungs- oder Wissenskontinuitätsproblem arbeiten — mit klarem Umfang und menschlicher Verantwortung."], ["Unabhängige Prüfung", "Forschende und Institutionen einladen, die Methode zu testen, ihre Grenzen zu hinterfragen und ihre Messgrößen zu verbessern."]],
+    measure: "Was ein Pilot zeigen sollte",
+    measures: [["Wiederherstellbarkeit", "Kann die nächste Person rekonstruieren, warum eine Entscheidung getroffen wurde, nicht nur was gespeichert wurde?"], ["Orientierung", "Wie schnell findet eine neue Person Quelle, Kontext, Unsicherheit und den nächsten verantwortlichen Schritt?"], ["Kontinuität", "Bleibt wesentliches Verständnis erklärbar, wenn sich Mensch, Werkzeug oder System verändert?"]],
+    action: "Ein Gespräch zu Grant oder Pilot beginnen",
+  },
+  fr: {
+    title: "Ce que le soutien rend possible.",
+    lead: "Le soutien protège les conditions permettant à LEIS de rester indépendant, vérifiable et gratuit. Ce n'est ni un mur payant, ni une promesse d'influence, ni un raccourci autour des preuves.",
+    why: "Trois façons de contribuer",
+    route: "Une voie pratique, pas une proposition vague",
+    routes: [["Continuité", "Archiver, préserver et rendre récupérable la filiation des sources malgré les changements de personnes, d'outils et de temps."], ["Un pilote délimité", "Travailler sur un vrai problème de transmission, de décision ou de continuité des connaissances, avec un périmètre clair et un responsable humain."], ["Examen indépendant", "Inviter chercheurs et institutions à tester la méthode, à questionner ses limites et à améliorer ses mesures."]],
+    measure: "Ce qu'un pilote devrait montrer",
+    measures: [["Reconstruction", "La personne suivante peut-elle reconstruire pourquoi une décision a été prise, et pas seulement ce qui a été stocké ?"], ["Orientation", "À quelle vitesse une nouvelle personne trouve-t-elle la source, le contexte, l'incertitude et la prochaine étape responsable ?"], ["Continuité", "La compréhension essentielle reste-t-elle explicable lorsqu'une personne, un outil ou un système change ?"]],
+    action: "Ouvrir une conversation sur une subvention ou un pilote",
+  },
+  es: {
+    title: "Lo que el apoyo hace posible.",
+    lead: "El apoyo protege las condiciones para que LEIS siga siendo independiente, verificable y gratuito. No es un muro de pago, una promesa de influencia ni un atajo alrededor de la evidencia.",
+    why: "Tres formas de contribuir",
+    route: "Una vía práctica, no una propuesta vaga",
+    routes: [["Continuidad", "Archivar, preservar y hacer recuperable el linaje de las fuentes a través de cambios de personas, herramientas y tiempo."], ["Un piloto delimitado", "Trabajar con un problema real de transferencia, decisión o continuidad del conocimiento, con alcance claro y una persona responsable."], ["Revisión independiente", "Invitar a investigadores e instituciones a probar el método, cuestionar sus límites y mejorar sus medidas."]],
+    measure: "Lo que debería demostrar un piloto",
+    measures: [["Reconstrucción", "¿Puede la siguiente persona reconstruir por qué se tomó una decisión, y no solo qué se almacenó?"], ["Orientación", "¿Con qué rapidez puede una nueva persona encontrar la fuente, el contexto, la incertidumbre y el siguiente paso responsable?"], ["Continuidad", "¿Sigue siendo explicable la comprensión esencial cuando cambia una persona, una herramienta o un sistema?"]],
+    action: "Iniciar una conversación sobre subvención o piloto",
+  },
+};
+
+const publicBriefCopy: Record<Language, { eyebrow: string; title: string; lead: string; cards: readonly [string, string, string][]; action: string }> = {
+  en: {
+    eyebrow: "PUBLIC BRIEFING",
+    title: "A clear starting point for LEIS.",
+    lead: "For a journalist, researcher, partner or simply a curious person: this is the shortest accurate way to orient yourself before following the sources.",
+    cards: [["01", "In one sentence", "LEIS is a reality-oriented framework for recognising, activating and reconstructing understanding so it can survive change."], ["02", "What it is not", "LEIS is not an AI model, app or storage product. It can be carried by paper, conversation, Markdown, a repository or an AI system."], ["03", "How to examine it", "Ask whether the source, conditions, uncertainty and decision rationale can be recovered by the next person."], ["04", "What to ask next", "Begin with a real handover, research question or continuity problem. The public contact path opens a respectful conversation."]],
+    action: "Open the public contact path",
+  },
+  cs: {
+    eyebrow: "VEŘEJNÝ BRIEFING",
+    title: "Jasný výchozí bod pro LEIS.",
+    lead: "Pro novináře, výzkumníka, partnera i jednoduše zvídavého člověka: toto je nejkratší přesná orientace před dalším sledováním zdrojů.",
+    cards: [["01", "Jednou větou", "LEIS je rámec orientovaný na realitu pro rozpoznávání, aktivaci a rekonstrukci porozumění, aby mohlo přežít změnu."], ["02", "Čím LEIS není", "LEIS není AI model, aplikace ani produkt pro ukládání. Může existovat na papíře, v konverzaci, Markdownu, repozitáři nebo AI systému."], ["03", "Jak jej zkoumat", "Ptejte se, zda další člověk dokáže obnovit zdroj, podmínky, nejistotu a důvody rozhodnutí."], ["04", "Na co se ptát dál", "Začněte skutečným předáním, výzkumnou otázkou nebo problémem kontinuity. Veřejná cesta ke kontaktu otevírá respektující dialog."]],
+    action: "Otevřít veřejnou cestu ke kontaktu",
+  },
+  de: {
+    eyebrow: "ÖFFENTLICHES BRIEFING",
+    title: "Ein klarer Einstieg in LEIS.",
+    lead: "Für Journalisten, Forschende, Partner und neugierige Menschen: Dies ist die kürzeste präzise Orientierung, bevor Sie den Quellen folgen.",
+    cards: [["01", "In einem Satz", "LEIS ist ein realitätsorientierter Rahmen, um Verständnis zu erkennen, zu aktivieren und zu rekonstruieren, damit es Wandel überdauern kann."], ["02", "Was LEIS nicht ist", "LEIS ist weder KI-Modell noch App noch Speicherprodukt. Es kann durch Papier, Gespräch, Markdown, ein Repository oder ein KI-System getragen werden."], ["03", "Wie es geprüft wird", "Fragen Sie, ob Quelle, Bedingungen, Unsicherheit und Entscheidungsgrund durch die nächste Person wiederherstellbar sind."], ["04", "Was als Nächstes gefragt werden kann", "Beginnen Sie mit einer realen Übergabe, Forschungsfrage oder Kontinuitätsfrage. Der öffentliche Kontaktweg eröffnet einen respektvollen Dialog."]],
+    action: "Öffentlichen Kontaktweg öffnen",
+  },
+  fr: {
+    eyebrow: "BRIEFING PUBLIC",
+    title: "Un point de départ clair pour LEIS.",
+    lead: "Pour les journalistes, chercheurs, partenaires ou personnes curieuses : voici l'orientation la plus courte et la plus précise avant de suivre les sources.",
+    cards: [["01", "En une phrase", "LEIS est un cadre orienté vers le réel pour reconnaître, activer et reconstruire la compréhension afin qu'elle survive au changement."], ["02", "Ce que LEIS n'est pas", "LEIS n'est ni un modèle d'IA, ni une application, ni un produit de stockage. Il peut être porté par le papier, la conversation, Markdown, un dépôt ou un système d'IA."], ["03", "Comment l'examiner", "Demandez si la source, les conditions, l'incertitude et le raisonnement d'une décision peuvent être retrouvés par la personne suivante."], ["04", "La question suivante", "Commencez par une vraie transmission, une question de recherche ou un problème de continuité. La voie publique de contact ouvre un dialogue respectueux."]],
+    action: "Ouvrir la voie publique de contact",
+  },
+  es: {
+    eyebrow: "BRIEFING PÚBLICO",
+    title: "Un punto de partida claro para LEIS.",
+    lead: "Para periodistas, investigadores, socios o personas curiosas: esta es la orientación más breve y precisa antes de seguir las fuentes.",
+    cards: [["01", "En una frase", "LEIS es un marco orientado a la realidad para reconocer, activar y reconstruir la comprensión, de modo que pueda sobrevivir al cambio."], ["02", "Lo que LEIS no es", "LEIS no es un modelo de IA, una aplicación ni un producto de almacenamiento. Puede llevarse en papel, conversación, Markdown, un repositorio o un sistema de IA."], ["03", "Cómo examinarlo", "Pregunte si la siguiente persona puede recuperar la fuente, las condiciones, la incertidumbre y el razonamiento de una decisión."], ["04", "Qué preguntar después", "Comience con una transferencia real, una pregunta de investigación o un problema de continuidad. La vía pública de contacto abre un diálogo respetuoso."]],
+    action: "Abrir la vía pública de contacto",
+  },
+};
+
+const loopCopy: Record<Language, { eyebrow: string; title: string; lead: string; questionLabel: string; steps: readonly [string, string, string][] }> = {
+  en: { eyebrow: "THE LEIS LOOP", title: "Understanding is a living loop.", lead: "The value is not in collecting more information. It is in activating the right understanding, then returning it to reality for validation.", questionLabel: "A useful question:", steps: [["Reality", "Start with what is actually present: an event, a need, a decision, a source or a contradiction.", "What can be observed or verified before interpretation begins?"], ["Recognition", "Notice the signal that matters among the noise; connect it to the relevant people, conditions and history.", "What pattern is becoming visible now?"], ["Activation", "Bring the relevant context into the present moment, instead of relying on memory or a disconnected file.", "What must be available now for a responsible next step?"], ["Understanding", "Make the relationship between evidence, purpose, uncertainty and action explainable to another person.", "Can the next person understand why this matters?"], ["Validation", "Return the proposed understanding to reality; retain uncertainty where the evidence does not carry more.", "What changed when the claim met reality?"], ["Continuity", "Leave behind a recoverable route so the next person can continue rather than begin from zero.", "Can this understanding travel through time, people and tools?"]] },
+  cs: { eyebrow: "SMYČKA LEIS", title: "Porozumění je živá smyčka.", lead: "Hodnota není v hromadění dalších informací. Je v aktivaci správného porozumění a v jeho návratu k realitě pro ověření.", questionLabel: "Užitečná otázka:", steps: [["Realita", "Začněte tím, co je skutečně přítomné: událostí, potřebou, rozhodnutím, zdrojem nebo rozporem.", "Co lze pozorovat či ověřit dříve, než začne interpretace?"], ["Rozpoznání", "Všimněte si signálu, který je mezi šumem podstatný; propojte jej s relevantními lidmi, podmínkami a historií.", "Jaký vzorec se právě začíná ukazovat?"], ["Aktivace", "Přiveďte relevantní kontext do přítomného okamžiku, místo aby zůstal jen v paměti nebo v odděleném souboru.", "Co musí být nyní dostupné pro odpovědný další krok?"], ["Porozumění", "Učiňte vztah mezi důkazy, účelem, nejistotou a jednáním vysvětlitelným pro dalšího člověka.", "Dokáže další člověk pochopit, proč na tom záleží?"], ["Ověření", "Vraťte navržené porozumění zpět k realitě; ponechte nejistotu tam, kde důkazy nenesou více.", "Co se změnilo, když se tvrzení setkalo s realitou?"], ["Kontinuita", "Zanechte obnovitelnou cestu, aby další člověk mohl pokračovat místo začínání od nuly.", "Může toto porozumění cestovat časem, lidmi a nástroji?"]] },
+  de: { eyebrow: "DER LEIS-KREISLAUF", title: "Verständnis ist ein lebendiger Kreislauf.", lead: "Der Wert liegt nicht im Sammeln weiterer Informationen. Er liegt darin, das richtige Verständnis zu aktivieren und es zur Prüfung an die Realität zurückzuführen.", questionLabel: "Eine hilfreiche Frage:", steps: [["Realität", "Beginnen Sie mit dem, was tatsächlich vorhanden ist: einem Ereignis, Bedarf, einer Entscheidung, Quelle oder einem Widerspruch.", "Was lässt sich beobachten oder prüfen, bevor die Interpretation beginnt?"], ["Erkennen", "Erkennen Sie das wichtige Signal im Rauschen und verbinden Sie es mit den relevanten Menschen, Bedingungen und der Geschichte.", "Welches Muster wird gerade sichtbar?"], ["Aktivierung", "Bringen Sie den relevanten Kontext in die Gegenwart, statt sich auf Erinnerung oder eine getrennte Datei zu verlassen.", "Was muss jetzt verfügbar sein, damit der nächste Schritt verantwortbar ist?"], ["Verständnis", "Machen Sie den Zusammenhang zwischen Belegen, Zweck, Unsicherheit und Handlung für eine andere Person erklärbar.", "Kann die nächste Person verstehen, warum das wichtig ist?"], ["Validierung", "Führen Sie das vorgeschlagene Verständnis zurück zur Realität; lassen Sie Unsicherheit bestehen, wenn die Belege nicht weiter tragen.", "Was hat sich verändert, als die Behauptung der Realität begegnete?"], ["Kontinuität", "Hinterlassen Sie einen wiederherstellbaren Weg, damit die nächste Person fortsetzen kann statt bei null zu beginnen.", "Kann dieses Verständnis durch Zeit, Menschen und Werkzeuge reisen?"]] },
+  fr: { eyebrow: "LA BOUCLE LEIS", title: "Comprendre est une boucle vivante.", lead: "La valeur ne réside pas dans l’accumulation de nouvelles informations. Elle consiste à activer la bonne compréhension, puis à la ramener au réel pour la valider.", questionLabel: "Une question utile :", steps: [["Réalité", "Commencez par ce qui est réellement présent : un événement, un besoin, une décision, une source ou une contradiction.", "Que peut-on observer ou vérifier avant que l’interprétation commence ?"], ["Reconnaissance", "Repérez le signal important dans le bruit et reliez-le aux personnes, conditions et à l’histoire pertinentes.", "Quel motif devient visible maintenant ?"], ["Activation", "Ramenez le contexte pertinent au moment présent au lieu de dépendre de la mémoire ou d’un fichier isolé.", "Que faut-il avoir à disposition maintenant pour une prochaine étape responsable ?"], ["Compréhension", "Rendez explicable à une autre personne le lien entre preuves, intention, incertitude et action.", "La personne suivante peut-elle comprendre pourquoi cela compte ?"], ["Validation", "Ramenez la compréhension proposée au réel ; maintenez l’incertitude là où les preuves ne permettent pas davantage.", "Qu’est-ce qui a changé lorsque l’affirmation a rencontré le réel ?"], ["Continuité", "Laissez une voie récupérable afin que la personne suivante puisse poursuivre plutôt que repartir de zéro.", "Cette compréhension peut-elle traverser le temps, les personnes et les outils ?"]] },
+  es: { eyebrow: "EL CICLO LEIS", title: "La comprensión es un ciclo vivo.", lead: "El valor no está en acumular más información. Está en activar la comprensión adecuada y devolverla a la realidad para validarla.", questionLabel: "Una pregunta útil:", steps: [["Realidad", "Empiece por lo que está realmente presente: un hecho, una necesidad, una decisión, una fuente o una contradicción.", "¿Qué se puede observar o verificar antes de que empiece la interpretación?"], ["Reconocimiento", "Detecte la señal importante entre el ruido y relaciónela con las personas, condiciones e historia relevantes.", "¿Qué patrón se está haciendo visible ahora?"], ["Activación", "Lleve el contexto relevante al momento presente, en lugar de depender de la memoria o de un archivo aislado.", "¿Qué debe estar disponible ahora para un siguiente paso responsable?"], ["Comprensión", "Haga explicable para otra persona la relación entre evidencia, propósito, incertidumbre y acción.", "¿Puede la siguiente persona comprender por qué esto importa?"], ["Validación", "Devuelva la comprensión propuesta a la realidad; conserve la incertidumbre cuando la evidencia no llegue más lejos.", "¿Qué cambió cuando la afirmación se encontró con la realidad?"], ["Continuidad", "Deje una ruta recuperable para que la siguiente persona pueda continuar en lugar de empezar desde cero.", "¿Puede esta comprensión viajar a través del tiempo, las personas y las herramientas?"]] },
+};
+
+const testCopy: Record<Language, { eyebrow: string; title: string; lead: string; checks: readonly [string, string, string][]; note: string }> = {
+  en: { eyebrow: "A PUBLIC WAY TO TEST LEIS", title: "Do not take LEIS on trust.", lead: "Use a real decision, handover or research question. Then test whether the essential understanding survives.", checks: [["01", "Trace the source", "Can you distinguish evidence from interpretation, and find where a claim began?"], ["02", "Recover the reason", "Can the next person recover not only what was done, but why, under which conditions and with which uncertainty?"], ["03", "Return to reality", "Can the explanation be checked against reality, improved when wrong and preserved when useful?"]], note: "A good result is not a perfect story. It is a recoverable, honest route back to the evidence." },
+  cs: { eyebrow: "VEŘEJNÝ ZPŮSOB, JAK LEIS OVĚŘIT", title: "Nevěřte LEIS jen proto, že to říká LEIS.", lead: "Vezměte skutečné rozhodnutí, předání nebo výzkumnou otázku. Potom ověřte, zda podstatné porozumění přežije.", checks: [["01", "Dohledejte zdroj", "Dokážete rozlišit důkaz od interpretace a najít, kde tvrzení začalo?"], ["02", "Obnovte důvod", "Dokáže další člověk obnovit nejen co se udělalo, ale i proč, za jakých podmínek a s jakou nejistotou?"], ["03", "Vraťte se k realitě", "Lze vysvětlení porovnat s realitou, zlepšit jej, když je chybné, a zachovat jej, když je užitečné?"]], note: "Dobrým výsledkem není dokonalý příběh. Je jím obnovitelná a poctivá cesta zpět k důkazům." },
+  de: { eyebrow: "EIN ÖFFENTLICHER WEG, LEIS ZU PRÜFEN", title: "Nehmen Sie LEIS nicht einfach auf Vertrauen hin.", lead: "Nehmen Sie eine reale Entscheidung, Übergabe oder Forschungsfrage. Prüfen Sie dann, ob das wesentliche Verständnis überlebt.", checks: [["01", "Quelle nachvollziehen", "Können Sie Beleg und Interpretation unterscheiden und finden, wo eine Behauptung begann?"], ["02", "Grund wiederherstellen", "Kann die nächste Person nicht nur nachvollziehen, was getan wurde, sondern auch warum, unter welchen Bedingungen und mit welcher Unsicherheit?"], ["03", "Zur Realität zurückkehren", "Kann die Erklärung an der Realität geprüft, bei Fehlern verbessert und bei Nutzen bewahrt werden?"]], note: "Ein gutes Ergebnis ist keine perfekte Geschichte. Es ist ein wiederherstellbarer, ehrlicher Weg zurück zu den Belegen." },
+  fr: { eyebrow: "UNE FAÇON PUBLIQUE DE METTRE LEIS À L’ÉPREUVE", title: "Ne croyez pas LEIS sur parole.", lead: "Prenez une décision réelle, une transmission ou une question de recherche. Vérifiez ensuite si la compréhension essentielle survit.", checks: [["01", "Retrouver la source", "Pouvez-vous distinguer les preuves de l’interprétation et retrouver l’origine d’une affirmation ?"], ["02", "Retrouver la raison", "La personne suivante peut-elle retrouver non seulement ce qui a été fait, mais pourquoi, dans quelles conditions et avec quelle incertitude ?"], ["03", "Revenir au réel", "L’explication peut-elle être confrontée au réel, améliorée lorsqu’elle est erronée et préservée lorsqu’elle est utile ?"]], note: "Un bon résultat n’est pas une histoire parfaite. C’est un chemin honnête et récupérable vers les preuves." },
+  es: { eyebrow: "UNA FORMA PÚBLICA DE PONER A PRUEBA LEIS", title: "No acepte LEIS solo por confianza.", lead: "Tome una decisión real, una transferencia o una pregunta de investigación. Después pruebe si la comprensión esencial sobrevive.", checks: [["01", "Rastrear la fuente", "¿Puede distinguir la evidencia de la interpretación y encontrar dónde comenzó una afirmación?"], ["02", "Recuperar la razón", "¿Puede la siguiente persona recuperar no solo qué se hizo, sino por qué, bajo qué condiciones y con qué incertidumbre?"], ["03", "Volver a la realidad", "¿Puede la explicación contrastarse con la realidad, mejorarse cuando es incorrecta y preservarse cuando es útil?"]], note: "Un buen resultado no es una historia perfecta. Es una ruta honesta y recuperable de regreso a la evidencia." },
+};
+
+const seedDownloadCopy: Record<Language, { eyebrow: string; title: string; lead: string; verified: string; language: string; download: string; view: string; steps: readonly [string, string][]; safety: string }> = {
+  en: { eyebrow: "PUBLIC RECONSTRUCTION SEED", title: "Take the LEIS Root Seed with you.", lead: "This is a small Markdown text file: a portable starting context for understanding LEIS. It is not software and cannot run a program.", verified: "Verified archival copy · 3 August 2026 · SHA-256: 15BCC48F…CD6E3B4", language: "Source text: English — preserved exactly as the verified source.", download: "Download the Seed (.md)", view: "Read the Seed online", steps: [["1", "Download it", "Save the .md file anywhere you can find it again."], ["2", "Open it", "Use Notepad, Word, a Markdown reader, or upload the file to an AI you trust."], ["3", "Begin a conversation", "Tell the AI: “Read this as LEIS context. Keep evidence, uncertainty and reality visible.”"]], safety: "A Seed is a source text, not an instruction to grant access or execute anything. Keep your own private files private." },
+  cs: { eyebrow: "VEŘEJNÝ SEED PRO REKONSTRUKCI", title: "Vezměte si LEIS Root Seed s sebou.", lead: "Jde o malý textový soubor Markdown: přenositelný výchozí kontext pro porozumění LEIS. Není to software a nemůže spustit program.", verified: "Ověřená archivní kopie · 3. srpna 2026 · SHA-256: 15BCC48F…CD6E3B4", language: "Zdrojový text: anglicky — zachován přesně jako ověřený zdroj.", download: "Stáhnout Seed (.md)", view: "Přečíst Seed online", steps: [["1", "Stáhněte jej", "Uložte soubor .md na místo, kde jej znovu snadno najdete."], ["2", "Otevřete jej", "Použijte Poznámkový blok, Word, čtečku Markdownu nebo jej nahrajte do AI, které důvěřujete."], ["3", "Začněte rozhovor", "AI napište: „Přečti tento soubor jako kontext LEIS. Zachovej viditelné důkazy, nejistotu a realitu.“"]], safety: "Seed je zdrojový text, ne instrukce k udělení přístupu ani ke spuštění čehokoli. Vaše soukromé soubory zůstávají soukromé." },
+  de: { eyebrow: "ÖFFENTLICHER REKONSTRUKTIONS-SEED", title: "Nehmen Sie den LEIS Root Seed mit.", lead: "Dies ist eine kleine Markdown-Textdatei: ein tragbarer Ausgangskontext zum Verständnis von LEIS. Es ist keine Software und kann kein Programm ausführen.", verified: "Verifizierte Archivkopie · 3. August 2026 · SHA-256: 15BCC48F…CD6E3B4", language: "Quelltext: Englisch — genau wie die verifizierte Quelle erhalten.", download: "Seed herunterladen (.md)", view: "Seed online lesen", steps: [["1", "Herunterladen", "Speichern Sie die .md-Datei an einem Ort, an dem Sie sie wiederfinden."], ["2", "Öffnen", "Nutzen Sie Editor, Word, einen Markdown-Reader oder laden Sie die Datei in eine KI hoch, der Sie vertrauen."], ["3", "Gespräch beginnen", "Sagen Sie der KI: „Lies dies als LEIS-Kontext. Halte Belege, Unsicherheit und Realität sichtbar.“"]], safety: "Ein Seed ist Quelltext, keine Anweisung, Zugriff zu gewähren oder etwas auszuführen. Halten Sie private Dateien privat." },
+  fr: { eyebrow: "SEED PUBLIC DE RECONSTRUCTION", title: "Emportez le LEIS Root Seed.", lead: "C’est un petit fichier texte Markdown : un contexte de départ portable pour comprendre LEIS. Ce n’est pas un logiciel et il ne peut exécuter aucun programme.", verified: "Copie archivistique vérifiée · 3 août 2026 · SHA-256 : 15BCC48F…CD6E3B4", language: "Texte source : anglais — préservé exactement comme la source vérifiée.", download: "Télécharger le Seed (.md)", view: "Lire le Seed en ligne", steps: [["1", "Téléchargez-le", "Enregistrez le fichier .md dans un endroit facile à retrouver."], ["2", "Ouvrez-le", "Utilisez le Bloc-notes, Word, un lecteur Markdown ou chargez le fichier dans une IA de confiance."], ["3", "Commencez une conversation", "Dites à l’IA : « Lis ceci comme contexte LEIS. Garde les preuves, l’incertitude et le réel visibles. »"]], safety: "Un Seed est un texte source, pas une instruction d’accorder un accès ou d’exécuter quoi que ce soit. Gardez vos fichiers privés privés." },
+  es: { eyebrow: "SEED PÚBLICO DE RECONSTRUCCIÓN", title: "Lleve consigo el LEIS Root Seed.", lead: "Es un pequeño archivo de texto Markdown: un contexto inicial portátil para comprender LEIS. No es software y no puede ejecutar ningún programa.", verified: "Copia archivística verificada · 3 de agosto de 2026 · SHA-256: 15BCC48F…CD6E3B4", language: "Texto fuente: inglés — conservado exactamente como la fuente verificada.", download: "Descargar el Seed (.md)", view: "Leer el Seed en línea", steps: [["1", "Descárguelo", "Guarde el archivo .md en un lugar donde pueda encontrarlo de nuevo."], ["2", "Ábralo", "Use el Bloc de notas, Word, un lector Markdown o cargue el archivo en una IA de confianza."], ["3", "Inicie una conversación", "Dígale a la IA: «Lee esto como contexto LEIS. Mantén visibles la evidencia, la incertidumbre y la realidad». "]], safety: "Un Seed es texto fuente, no una instrucción para conceder acceso ni ejecutar nada. Mantenga privados sus archivos privados." },
+};
+
+const principleCopy: Record<Language, { roots: string; rootsText: string; lineage: string; lineageText: string; validation: string; validationText: string; formula: string; timelineNote: string }> = {
+  en: { roots: "Recognition", rootsText: "Questions become roots. Relationships become branches. Understanding grows when the right pattern is recognised.", lineage: "Lineage", lineageText: "Context should survive change: of people, tools, time and technology.", validation: "Validation", validationText: "Reality remains the final validator. Where evidence is incomplete, uncertainty remains visible.", formula: "Reality → recognition → activation → understanding → validation → new reality", timelineNote: "Every point distinguishes documented evidence, creator-reported context and interpretation. The timeline is alive; it does not replace evidence." },
+  cs: { roots: "Rozpoznání", rootsText: "Otázky se stávají kořeny. Vztahy se stávají větvemi. Porozumění roste, když je rozpoznán správný vzorec.", lineage: "Linie vývoje", lineageText: "Kontext by měl přežít změnu lidí, nástrojů, času i technologie.", validation: "Ověření", validationText: "Realita zůstává konečným ověřovatelem. Kde jsou důkazy neúplné, zůstává viditelná nejistota.", formula: "Realita → rozpoznání → aktivace → porozumění → ověření → nová realita", timelineNote: "Každý bod rozlišuje doložený důkaz, kontext uváděný autorem a interpretaci. Časová osa je živá; nenahrazuje důkazy." },
+  de: { roots: "Erkennen", rootsText: "Fragen werden zu Wurzeln. Beziehungen werden zu Ästen. Verständnis wächst, wenn das richtige Muster erkannt wird.", lineage: "Entwicklungslinie", lineageText: "Kontext soll Veränderungen von Menschen, Werkzeugen, Zeit und Technologie überdauern.", validation: "Validierung", validationText: "Die Realität bleibt der endgültige Prüfer. Wo Belege unvollständig sind, bleibt Unsicherheit sichtbar.", formula: "Realität → Erkennen → Aktivierung → Verständnis → Validierung → neue Realität", timelineNote: "Jeder Punkt unterscheidet dokumentierte Belege, vom Urheber berichteten Kontext und Interpretation. Die Zeitleiste lebt; sie ersetzt keine Belege." },
+  fr: { roots: "Reconnaissance", rootsText: "Les questions deviennent des racines. Les relations deviennent des branches. La compréhension grandit lorsque le bon schéma est reconnu.", lineage: "Lignée", lineageText: "Le contexte doit survivre aux changements de personnes, d'outils, de temps et de technologie.", validation: "Validation", validationText: "La réalité reste le validateur final. Lorsque les preuves sont incomplètes, l'incertitude reste visible.", formula: "Réalité → reconnaissance → activation → compréhension → validation → nouvelle réalité", timelineNote: "Chaque point distingue les preuves documentées, le contexte rapporté par le créateur et l'interprétation. La chronologie est vivante ; elle ne remplace pas les preuves." },
+  es: { roots: "Reconocimiento", rootsText: "Las preguntas se convierten en raíces. Las relaciones se convierten en ramas. La comprensión crece cuando se reconoce el patrón correcto.", lineage: "Linaje", lineageText: "El contexto debe sobrevivir al cambio de personas, herramientas, tiempo y tecnología.", validation: "Validación", validationText: "La realidad sigue siendo el validador final. Cuando la evidencia es incompleta, la incertidumbre sigue visible.", formula: "Realidad → reconocimiento → activación → comprensión → validación → nueva realidad", timelineNote: "Cada punto distingue evidencia documentada, contexto informado por el creador e interpretación. La cronología está viva; no sustituye la evidencia." },
+};
+
+const earthCopy: Record<Language, { eyebrow: string; title: string; lead: string; selected: string; sourceSays: string; commentary: string; origin: string; read: string; hint: string }> = {
+  en: { eyebrow: "EARTH PULSE / CURRENT AI SIGNALS", title: "Where the current conversation is coming from.", lead: "Explore public AI signals by place. Tap a glowing hub or a newsroom card to open its source, a short summary and LEIS context.", selected: "SELECTED SOURCE SIGNAL", sourceSays: "What the source says:", commentary: "LEIS commentary:", origin: "Originating public desk:", read: "Read the original source ↗", hint: "Drag to rotate · scroll to zoom · select a point" },
+  cs: { eyebrow: "PULZ ZEMĚ / SOUČASNÉ AI SIGNÁLY", title: "Odkud přichází současná konverzace.", lead: "Prozkoumejte veřejné AI signály podle místa. Klepněte na zářící bod nebo kartu zdroje a otevřete původ, krátké shrnutí a kontext LEIS.", selected: "VYBRANÝ SIGNÁL ZDROJE", sourceSays: "Co uvádí zdroj:", commentary: "Komentář LEIS:", origin: "Původní veřejná redakce:", read: "Otevřít původní zdroj ↗", hint: "Táhnutím otáčejte · kolečkem přibližujte · zvolte bod" },
+  de: { eyebrow: "ERDIMPULS / AKTUELLE KI-SIGNALE", title: "Woher die aktuelle Diskussion kommt.", lead: "Erkunden Sie öffentliche KI-Signale nach Ort. Wählen Sie einen leuchtenden Punkt oder eine Quellenkarte für Ursprung, Kurzfassung und LEIS-Kontext.", selected: "AUSGEWÄHLTES QUELLENSIGNAL", sourceSays: "Was die Quelle sagt:", commentary: "LEIS-Kommentar:", origin: "Ursprüngliche öffentliche Redaktion:", read: "Originalquelle lesen ↗", hint: "Zum Drehen ziehen · zum Zoomen scrollen · Punkt wählen" },
+  fr: { eyebrow: "POULS DE LA TERRE / SIGNAUX IA ACTUELS", title: "D'où vient la conversation actuelle.", lead: "Explorez les signaux publics de l'IA par lieu. Touchez un point lumineux ou une carte source pour ouvrir son origine, un résumé et le contexte LEIS.", selected: "SIGNAL SOURCE SÉLECTIONNÉ", sourceSays: "Ce que dit la source :", commentary: "Commentaire LEIS :", origin: "Rédaction publique d'origine :", read: "Lire la source originale ↗", hint: "Glissez pour tourner · défilez pour zoomer · choisissez un point" },
+  es: { eyebrow: "PULSO DE LA TIERRA / SEÑALES ACTUALES DE IA", title: "De dónde viene la conversación actual.", lead: "Explore señales públicas de IA por lugar. Toque un punto brillante o una tarjeta de fuente para abrir su origen, un resumen y el contexto de LEIS.", selected: "SEÑAL DE FUENTE SELECCIONADA", sourceSays: "Lo que dice la fuente:", commentary: "Comentario LEIS:", origin: "Redacción pública de origen:", read: "Leer la fuente original ↗", hint: "Arrastre para girar · desplácese para ampliar · elija un punto" },
+};
+
+const globeCopy: Record<Language, { aria: string; preparing: string; reloading: string; appearing: string; refresh: string; weatherAria: string; clouds: string; cloudNote: string; atmosphereOn: string; atmosphereOff: string; zoomAria: string; zoomIn: string; zoomOut: string; zoomHint: string; selectedSignal: string; sourceContext: string; sourceReports: string; leisContext: string; readSource: string; openContext: string; publicDesk: string; reviewedSignals: string; sourceReviewed: string; newsroom: string; chooseSignal: string; aiUse: string; emptyCountry: string; close: string }> = {
+  en: { aria: "Interactive globe. Drag to rotate, scroll to zoom and choose a source point.", preparing: "Preparing the interactive Earth", reloading: "Interactive Earth is reloading", appearing: "The globe will appear in a moment.", refresh: "Please refresh once to try the live map again.", weatherAria: "Live weather layer active", clouds: "Live cloud conditions", cloudNote: "Open-Meteo · visualised cloud cover · refreshes every 10 min", atmosphereOn: "Atmosphere on", atmosphereOff: "Atmosphere off", zoomAria: "Globe zoom controls", zoomIn: "Zoom in", zoomOut: "Zoom out", zoomHint: "Shift + scroll", selectedSignal: "Selected source signal", sourceContext: "Source + LEIS context", sourceReports: "What this source reports", leisContext: "LEIS context", readSource: "Read the original source ↗", openContext: "Open context", publicDesk: "Public source desk", reviewedSignals: "Up to five reviewed signals", sourceReviewed: "Source reviewed", newsroom: "Newsroom", chooseSignal: "Choose a reviewed signal to open its full LEIS context.", aiUse: "How AI is used", emptyCountry: "No reviewed local source or country AI profile has been added here yet. LEIS does not substitute unrelated news from another country.", close: "Close selection" },
+  cs: { aria: "Interaktivní glóbus. Tažením otáčejte, přibližujte a vyberte zdrojový bod.", preparing: "Připravuji interaktivní Zemi", reloading: "Interaktivní Země se znovu načítá", appearing: "Glóbus se objeví za okamžik.", refresh: "Obnovte stránku a zkuste živou mapu znovu.", weatherAria: "Aktivní vrstva živého počasí", clouds: "Aktuální oblačnost", cloudNote: "Open-Meteo · vizualizovaná oblačnost · obnovuje se každých 10 min", atmosphereOn: "Atmosféra zapnuta", atmosphereOff: "Atmosféra vypnuta", zoomAria: "Ovládání přiblížení glóbu", zoomIn: "Přiblížit", zoomOut: "Oddálit", zoomHint: "Shift + kolečko", selectedSignal: "Vybraný signál zdroje", sourceContext: "Zdroj + kontext LEIS", sourceReports: "Co tento zdroj uvádí", leisContext: "Kontext LEIS", readSource: "Otevřít původní zdroj ↗", openContext: "Otevřít kontext", publicDesk: "Veřejná zdrojová redakce", reviewedSignals: "Až pět ověřených signálů", sourceReviewed: "Zdroj ověřen", newsroom: "Redakce", chooseSignal: "Zvolte ověřený signál a otevřete jeho úplný kontext LEIS.", aiUse: "Jak se AI používá", emptyCountry: "Pro tuto zemi zatím nebyl přidán ověřený místní zdroj ani profil AI. LEIS nenahrazuje chybějící kontext nesouvisejícími zprávami z jiné země.", close: "Zavřít výběr" },
+  de: { aria: "Interaktiver Globus. Zum Drehen ziehen, zum Zoomen scrollen und einen Quellenpunkt wählen.", preparing: "Interaktive Erde wird vorbereitet", reloading: "Interaktive Erde wird neu geladen", appearing: "Der Globus erscheint in einem Moment.", refresh: "Bitte aktualisieren Sie die Seite und versuchen Sie die Live-Karte erneut.", weatherAria: "Live-Wetterschicht aktiv", clouds: "Aktuelle Bewölkung", cloudNote: "Open-Meteo · visualisierte Bewölkung · Aktualisierung alle 10 Min.", atmosphereOn: "Atmosphäre an", atmosphereOff: "Atmosphäre aus", zoomAria: "Zoomsteuerung des Globus", zoomIn: "Vergrößern", zoomOut: "Verkleinern", zoomHint: "Umschalt + Scrollen", selectedSignal: "Ausgewähltes Quellensignal", sourceContext: "Quelle + LEIS-Kontext", sourceReports: "Was diese Quelle berichtet", leisContext: "LEIS-Kontext", readSource: "Originalquelle lesen ↗", openContext: "Kontext öffnen", publicDesk: "Öffentliche Quellenredaktion", reviewedSignals: "Bis zu fünf geprüfte Signale", sourceReviewed: "Quelle geprüft", newsroom: "Redaktion", chooseSignal: "Wählen Sie ein geprüftes Signal, um den vollständigen LEIS-Kontext zu öffnen.", aiUse: "Wie KI eingesetzt wird", emptyCountry: "Für dieses Land wurde noch keine geprüfte lokale Quelle oder kein KI-Profil ergänzt. LEIS ersetzt fehlenden Kontext nicht durch unverbundene Nachrichten aus einem anderen Land.", close: "Auswahl schließen" },
+  fr: { aria: "Globe interactif. Glissez pour tourner, faites défiler pour zoomer et choisissez un point source.", preparing: "Préparation de la Terre interactive", reloading: "La Terre interactive se recharge", appearing: "Le globe apparaîtra dans un instant.", refresh: "Actualisez la page puis réessayez la carte en direct.", weatherAria: "Couche météo en direct active", clouds: "Conditions nuageuses actuelles", cloudNote: "Open-Meteo · couverture nuageuse visualisée · actualisation toutes les 10 min", atmosphereOn: "Atmosphère activée", atmosphereOff: "Atmosphère désactivée", zoomAria: "Commandes de zoom du globe", zoomIn: "Agrandir", zoomOut: "Réduire", zoomHint: "Maj + défilement", selectedSignal: "Signal source sélectionné", sourceContext: "Source + contexte LEIS", sourceReports: "Ce que rapporte cette source", leisContext: "Contexte LEIS", readSource: "Lire la source originale ↗", openContext: "Ouvrir le contexte", publicDesk: "Rédaction source publique", reviewedSignals: "Jusqu'à cinq signaux vérifiés", sourceReviewed: "Source vérifiée", newsroom: "Rédaction", chooseSignal: "Choisissez un signal vérifié pour ouvrir son contexte LEIS complet.", aiUse: "Comment l'IA est utilisée", emptyCountry: "Aucune source locale vérifiée ni profil IA national n'a encore été ajouté ici. LEIS ne remplace pas le contexte manquant par des nouvelles sans rapport provenant d'un autre pays.", close: "Fermer la sélection" },
+  es: { aria: "Globo interactivo. Arrastre para girar, desplácese para ampliar y elija un punto de fuente.", preparing: "Preparando la Tierra interactiva", reloading: "La Tierra interactiva se está recargando", appearing: "El globo aparecerá en un momento.", refresh: "Actualice la página e inténtelo de nuevo con el mapa en directo.", weatherAria: "Capa meteorológica en directo activa", clouds: "Condiciones actuales de nubosidad", cloudNote: "Open-Meteo · cobertura de nubes visualizada · se actualiza cada 10 min", atmosphereOn: "Atmósfera activada", atmosphereOff: "Atmósfera desactivada", zoomAria: "Controles de zoom del globo", zoomIn: "Acercar", zoomOut: "Alejar", zoomHint: "Mayús + desplazamiento", selectedSignal: "Señal de fuente seleccionada", sourceContext: "Fuente + contexto LEIS", sourceReports: "Lo que informa esta fuente", leisContext: "Contexto LEIS", readSource: "Leer la fuente original ↗", openContext: "Abrir el contexto", publicDesk: "Redacción de fuente pública", reviewedSignals: "Hasta cinco señales revisadas", sourceReviewed: "Fuente revisada", newsroom: "Redacción", chooseSignal: "Elija una señal revisada para abrir su contexto LEIS completo.", aiUse: "Cómo se usa la IA", emptyCountry: "Aún no se ha añadido aquí una fuente local revisada ni un perfil nacional de IA. LEIS no sustituye el contexto ausente por noticias no relacionadas de otro país.", close: "Cerrar la selección" },
+};
+
+const globeRetryCopy: Record<Language, string> = {
+  en: "Try the interactive Earth again",
+  cs: "Zkusit interaktivní Zemi znovu",
+  de: "Interaktive Erde erneut versuchen",
+  fr: "Réessayer la Terre interactive",
+  es: "Volver a probar la Tierra interactiva",
+};
+
+const countryBaselineCopy: Record<Language, { eyebrow: string; title: string; summary: string; use: string; leis: string; oecd: string; unesco: string }> = {
+  en: { eyebrow: "COUNTRY AI CONTEXT · GLOBAL BASELINE", title: "AI context", summary: "Every country on this globe has an AI context card. This baseline keeps global orientation separate from country-specific claims that have not yet been independently reviewed by LEIS.", use: "A meaningful national AI picture has at least four dimensions: people and skills; public institutions and rules; research and infrastructure; and how organisations use AI in daily work. The links below are public starting points for checking those dimensions without importing unrelated news.", leis: "LEIS context: global orientation should never flatten local reality. The next local source added for this country will stay visibly attributed, dated and separate from this baseline.", oecd: "OECD · AI policy and country evidence", unesco: "UNESCO · AI readiness methodology" },
+  cs: { eyebrow: "KONTEXT AI V ZEMI · GLOBÁLNÍ ZÁKLAD", title: "Kontext AI", summary: "Každá země na tomto glóbu má kartu kontextu AI. Tento základ odděluje globální orientaci od tvrzení specifických pro danou zemi, která zatím LEIS nezávisle neověřil.", use: "Smysluplný národní obraz AI má nejméně čtyři rozměry: lidé a dovednosti; veřejné instituce a pravidla; výzkum a infrastruktura; a způsob, jak organizace AI používají v každodenní práci. Níže uvedené odkazy jsou veřejnými výchozími body pro ověření těchto rozměrů bez přenášení nesouvisejících zpráv.", leis: "Kontext LEIS: globální orientace nesmí zploštit místní realitu. Další místní zdroj přidaný pro tuto zemi zůstane viditelně přiřazený, datovaný a oddělený od tohoto základu.", oecd: "OECD · politika AI a data podle zemí", unesco: "UNESCO · metodika připravenosti na AI" },
+  de: { eyebrow: "KI-KONTEXT DES LANDES · GLOBALE GRUNDLAGE", title: "KI-Kontext", summary: "Jedes Land auf diesem Globus hat eine KI-Kontextkarte. Diese Grundlage trennt globale Orientierung von länderspezifischen Aussagen, die LEIS noch nicht unabhängig geprüft hat.", use: "Ein aussagekräftiges nationales KI-Bild hat mindestens vier Dimensionen: Menschen und Kompetenzen; öffentliche Institutionen und Regeln; Forschung und Infrastruktur; sowie die Nutzung von KI im Arbeitsalltag von Organisationen. Die folgenden Links sind öffentliche Ausgangspunkte, um diese Dimensionen zu prüfen, ohne unverbundene Nachrichten zu übernehmen.", leis: "LEIS-Kontext: Globale Orientierung darf lokale Realität nicht einebnen. Die nächste lokale Quelle für dieses Land bleibt sichtbar zugeordnet, datiert und von dieser Grundlage getrennt.", oecd: "OECD · KI-Politik und Länderinformationen", unesco: "UNESCO · Methodik zur KI-Bereitschaft" },
+  fr: { eyebrow: "CONTEXTE IA DU PAYS · BASE GLOBALE", title: "Contexte de l’IA", summary: "Chaque pays de ce globe possède une carte de contexte IA. Cette base sépare l’orientation mondiale des affirmations propres à un pays que LEIS n’a pas encore examinées de façon indépendante.", use: "Une image nationale significative de l’IA comporte au moins quatre dimensions : les personnes et les compétences ; les institutions et les règles publiques ; la recherche et l’infrastructure ; et la façon dont les organisations utilisent l’IA au quotidien. Les liens ci-dessous sont des points de départ publics pour vérifier ces dimensions sans importer des nouvelles sans rapport.", leis: "Contexte LEIS : une orientation mondiale ne doit jamais aplatir la réalité locale. La prochaine source locale ajoutée pour ce pays restera visiblement attribuée, datée et distincte de cette base.", oecd: "OCDE · politiques et données IA par pays", unesco: "UNESCO · méthode de préparation à l’IA" },
+  es: { eyebrow: "CONTEXTO DE IA DEL PAÍS · BASE GLOBAL", title: "Contexto de IA", summary: "Cada país de este globo tiene una tarjeta de contexto de IA. Esta base separa la orientación global de las afirmaciones específicas de cada país que LEIS aún no ha revisado de forma independiente.", use: "Una imagen nacional significativa de la IA tiene al menos cuatro dimensiones: personas y capacidades; instituciones y normas públicas; investigación e infraestructura; y cómo las organizaciones utilizan la IA en el trabajo cotidiano. Los enlaces siguientes son puntos de partida públicos para verificar esas dimensiones sin importar noticias no relacionadas.", leis: "Contexto LEIS: la orientación global nunca debe aplanar la realidad local. La próxima fuente local añadida para este país seguirá claramente atribuida, fechada y separada de esta base.", oecd: "OCDE · política y datos de IA por país", unesco: "UNESCO · metodología de preparación para la IA" },
+};
+
+const documentTitles: Record<Language, string> = {
+  en: "LEIS — Understanding that can travel",
+  cs: "LEIS — Porozumění, které může pokračovat",
+  de: "LEIS — Verständnis, das weiterreisen kann",
+  fr: "LEIS — Une compréhension qui peut voyager",
+  es: "LEIS — Comprensión que puede viajar",
+};
+
+const pragueCopy: Record<Language, { czechLabel: string; czechTitle: string; czechIntro: string; originLabel: string; creatorLabel: string; creatorText: string; technicalLabel: string; technicalText: string; contactLabel: string; contactTitle: string; contactText: string; contactAction: string }> = {
+  en: { czechLabel: "Czech Republic · public AI signals + LEIS origin", czechTitle: "Czech AI, with Prague context.", czechIntro: "These are public AI articles from Czech Technical University in Prague. They are separate from LEIS: the Prague origin cards below identify authorship and collaboration, not a Czech news desk.", originLabel: "LEIS origin · Prague", creatorLabel: "Creator · documented origin", creatorText: "Founder, creator and constitution author of LEIS. The core was independently completed around 10 July 2026.", technicalLabel: "Technical collaboration", technicalText: "Technical activation and development after the independent LEIS seed.", contactLabel: "Public contact", contactTitle: "Work with LEIS", contactText: "Questions, research, grants or partnership.", contactAction: "Contact Martin Pužík ↗" },
+  cs: { czechLabel: "Česká republika · veřejné AI signály + původ LEIS", czechTitle: "České AI v pražském kontextu.", czechIntro: "Jde o veřejné AI články Českého vysokého učení technického v Praze. Jsou oddělené od LEIS: karty původu níže popisují autorství a spolupráci, nikoli českou zpravodajskou redakci.", originLabel: "Původ LEIS · Praha", creatorLabel: "Tvůrce · doložený původ", creatorText: "Zakladatel, tvůrce a autor ústavy LEIS. Jádro bylo nezávisle dokončeno kolem 10. července 2026.", technicalLabel: "Technická spolupráce", technicalText: "Technická aktivace a vývoj po nezávislém vzniku základu LEIS.", contactLabel: "Veřejný kontakt", contactTitle: "Spolupracujte s LEIS", contactText: "Dotazy, výzkum, granty nebo partnerství.", contactAction: "Kontaktovat Martina Pužíka ↗" },
+  de: { czechLabel: "Tschechische Republik · öffentliche KI-Signale + LEIS-Ursprung", czechTitle: "Tschechische KI im Prager Kontext.", czechIntro: "Dies sind öffentliche KI-Artikel der Tschechischen Technischen Universität in Prag. Sie sind von LEIS getrennt: Die Ursprungskarten unten benennen Autorschaft und Zusammenarbeit, keine tschechische Nachrichtenredaktion.", originLabel: "LEIS-Ursprung · Prag", creatorLabel: "Schöpfer · dokumentierter Ursprung", creatorText: "Gründer, Schöpfer und Verfassungsautor von LEIS. Der Kern wurde um den 10. Juli 2026 unabhängig fertiggestellt.", technicalLabel: "Technische Zusammenarbeit", technicalText: "Technische Aktivierung und Entwicklung nach dem unabhängigen LEIS-Seed.", contactLabel: "Öffentlicher Kontakt", contactTitle: "Mit LEIS arbeiten", contactText: "Fragen, Forschung, Grants oder Partnerschaft.", contactAction: "Martin Pužík kontaktieren ↗" },
+  fr: { czechLabel: "République tchèque · signaux IA publics + origine de LEIS", czechTitle: "L'IA tchèque dans le contexte de Prague.", czechIntro: "Il s'agit d'articles publics sur l'IA de l'Université technique tchèque de Prague. Ils sont distincts de LEIS : les cartes d'origine ci-dessous décrivent l'auteur et la collaboration, et non une rédaction tchèque.", originLabel: "Origine de LEIS · Prague", creatorLabel: "Créateur · origine documentée", creatorText: "Fondateur, créateur et auteur de la constitution de LEIS. Le noyau a été achevé indépendamment vers le 10 juillet 2026.", technicalLabel: "Collaboration technique", technicalText: "Activation et développement techniques après le seed LEIS indépendant.", contactLabel: "Contact public", contactTitle: "Travailler avec LEIS", contactText: "Questions, recherche, subventions ou partenariat.", contactAction: "Contacter Martin Pužík ↗" },
+  es: { czechLabel: "República Checa · señales públicas de IA + origen de LEIS", czechTitle: "IA checa con contexto de Praga.", czechIntro: "Estos son artículos públicos de IA de la Universidad Técnica Checa de Praga. Son independientes de LEIS: las tarjetas de origen de abajo identifican autoría y colaboración, no una redacción checa.", originLabel: "Origen de LEIS · Praga", creatorLabel: "Creador · origen documentado", creatorText: "Fundador, creador y autor de la constitución de LEIS. El núcleo se completó de forma independiente alrededor del 10 de julio de 2026.", technicalLabel: "Colaboración técnica", technicalText: "Activación y desarrollo técnico después de la semilla independiente de LEIS.", contactLabel: "Contacto público", contactTitle: "Trabajar con LEIS", contactText: "Preguntas, investigación, subvenciones o colaboración.", contactAction: "Contactar a Martin Pužík ↗" },
+};
+
+const contactCopy: Record<Language, { topics: Record<string, string>; name: string; organisation: string; optional: string; question: string; notProvided: string; hello: string }> = {
+  en: { topics: { "Grant or support": "Grant or support", "Research dialogue": "Research dialogue", "Practical pilot": "Practical pilot", "Media enquiry": "Media enquiry" }, name: "Your name", organisation: "Organisation", optional: "optional", question: "What would you like to explore?", notProvided: "Not provided", hello: "Hello Martin, I would like to begin a conversation about LEIS." },
+  cs: { topics: { "Grant or support": "Grant nebo podpora", "Research dialogue": "Výzkumný dialog", "Practical pilot": "Praktický pilot", "Media enquiry": "Dotaz médií" }, name: "Vaše jméno", organisation: "Organizace", optional: "nepovinné", question: "Co chcete společně prozkoumat?", notProvided: "Neuvedeno", hello: "Dobrý den, Martine, rád/a bych zahájil/a rozhovor o LEIS." },
+  de: { topics: { "Grant or support": "Grant oder Unterstützung", "Research dialogue": "Forschungsdialog", "Practical pilot": "Praktischer Pilot", "Media enquiry": "Medienanfrage" }, name: "Ihr Name", organisation: "Organisation", optional: "optional", question: "Was möchten Sie erkunden?", notProvided: "Nicht angegeben", hello: "Hallo Martin, ich möchte ein Gespräch über LEIS beginnen." },
+  fr: { topics: { "Grant or support": "Subvention ou soutien", "Research dialogue": "Dialogue de recherche", "Practical pilot": "Pilote pratique", "Media enquiry": "Demande média" }, name: "Votre nom", organisation: "Organisation", optional: "facultatif", question: "Que souhaitez-vous explorer ?", notProvided: "Non renseigné", hello: "Bonjour Martin, je souhaiterais commencer une conversation au sujet de LEIS." },
+  es: { topics: { "Grant or support": "Subvención o apoyo", "Research dialogue": "Diálogo de investigación", "Practical pilot": "Piloto práctico", "Media enquiry": "Consulta de medios" }, name: "Su nombre", organisation: "Organización", optional: "opcional", question: "¿Qué le gustaría explorar?", notProvided: "No proporcionado", hello: "Hola Martin, me gustaría iniciar una conversación sobre LEIS." },
+};
+
+const guideCopy: Record<Language, { label: string; close: string; ask: string; start: { title: string; text: string; action: string; choice: string }; story: { title: string; text: string; action: string; choice: string }; work: { title: string; text: string; action: string; choice: string }; note: string }> = {
+  en: { label: "LEIS ORIENTATION GUIDE", close: "Close", ask: "Ask LEIS", start: { choice: "What is LEIS?", title: "What is LEIS?", text: "LEIS is not an AI product. It is a reality-oriented way to preserve, activate and reconstruct understanding when people, tools or time change.", action: "Start with orientation" }, story: { choice: "Our story", title: "Where did it begin?", text: "The public timeline distinguishes documentation, creator-reported context and interpretation. It begins with the constitutional seed and stays honest about what is known.", action: "Follow the timeline" }, work: { choice: "Work with LEIS", title: "Can we work together?", text: "Yes. LEIS is open to respectful research, a concrete pilot, a grant conversation or a company handover problem. There is no mailing list and no pressure.", action: "Explore cooperation" }, note: "This is an orientation guide, not a live AI chat." },
+  cs: { label: "PRŮVODCE ORIENTACÍ LEIS", close: "Zavřít", ask: "Zeptejte se LEIS", start: { choice: "Co je LEIS?", title: "Co je LEIS?", text: "LEIS není produkt AI. Je to způsob orientovaný na realitu, jak uchovat, aktivovat a znovu vystavět porozumění, když se mění lidé, nástroje nebo čas.", action: "Začít orientací" }, story: { choice: "Náš příběh", title: "Kde to začalo?", text: "Veřejná časová osa rozlišuje dokumentaci, kontext uváděný autorem a interpretaci. Začíná ústavním semenem a otevřeně ukazuje, co je známo.", action: "Sledovat časovou osu" }, work: { choice: "Spolupráce s LEIS", title: "Můžeme spolupracovat?", text: "Ano. LEIS je otevřený respektujícímu výzkumu, konkrétnímu pilotu, rozhovoru o grantu i problému předání ve firmě. Bez mailing listu a bez tlaku.", action: "Prozkoumat spolupráci" }, note: "Je to orientační průvodce, nikoli živý AI chat." },
+  de: { label: "LEIS-ORIENTIERUNG", close: "Schließen", ask: "LEIS fragen", start: { choice: "Was ist LEIS?", title: "Was ist LEIS?", text: "LEIS ist kein KI-Produkt. Es ist eine realitätsorientierte Art, Verständnis zu bewahren, zu aktivieren und zu rekonstruieren, wenn sich Menschen, Werkzeuge oder Zeit verändern.", action: "Mit der Orientierung beginnen" }, story: { choice: "Unsere Geschichte", title: "Wo begann es?", text: "Die öffentliche Zeitleiste unterscheidet Dokumentation, vom Urheber berichteten Kontext und Interpretation. Sie beginnt mit dem konstitutionellen Seed und bleibt ehrlich darüber, was bekannt ist.", action: "Zeitleiste folgen" }, work: { choice: "Mit LEIS arbeiten", title: "Können wir zusammenarbeiten?", text: "Ja. LEIS ist offen für respektvolle Forschung, einen konkreten Piloten, ein Grant-Gespräch oder ein Übergabeproblem in einem Unternehmen. Keine Mailingliste, kein Druck.", action: "Kooperation erkunden" }, note: "Dies ist eine Orientierungshilfe, kein Live-KI-Chat." },
+  fr: { label: "GUIDE D'ORIENTATION LEIS", close: "Fermer", ask: "Demander à LEIS", start: { choice: "Qu'est-ce que LEIS ?", title: "Qu'est-ce que LEIS ?", text: "LEIS n'est pas un produit d'IA. C'est une manière orientée vers le réel de préserver, d'activer et de reconstruire la compréhension lorsque les personnes, les outils ou le temps changent.", action: "Commencer l'orientation" }, story: { choice: "Notre histoire", title: "Où cela a-t-il commencé ?", text: "La chronologie publique distingue la documentation, le contexte rapporté par le créateur et l'interprétation. Elle commence avec la graine constitutionnelle et reste honnête sur ce qui est connu.", action: "Suivre la chronologie" }, work: { choice: "Travailler avec LEIS", title: "Pouvons-nous coopérer ?", text: "Oui. LEIS est ouvert à la recherche respectueuse, à un pilote concret, à une discussion de subvention ou à un problème de transmission en entreprise. Sans liste de diffusion ni pression.", action: "Explorer la coopération" }, note: "Ceci est un guide d'orientation, pas un chat IA en direct." },
+  es: { label: "GUÍA DE ORIENTACIÓN LEIS", close: "Cerrar", ask: "Preguntar a LEIS", start: { choice: "¿Qué es LEIS?", title: "¿Qué es LEIS?", text: "LEIS no es un producto de IA. Es una forma orientada a la realidad de preservar, activar y reconstruir la comprensión cuando cambian las personas, las herramientas o el tiempo.", action: "Empezar la orientación" }, story: { choice: "Nuestra historia", title: "¿Dónde empezó?", text: "La cronología pública distingue documentación, contexto informado por el creador e interpretación. Comienza con la semilla constitucional y es honesta sobre lo que se conoce.", action: "Seguir la cronología" }, work: { choice: "Trabajar con LEIS", title: "¿Podemos colaborar?", text: "Sí. LEIS está abierto a investigación respetuosa, un piloto concreto, una conversación sobre subvenciones o un problema de transferencia en una empresa. Sin lista de correo ni presión.", action: "Explorar cooperación" }, note: "Esta es una guía de orientación, no un chat de IA en vivo." },
+};
+
+function LanguageDock({ language, onChange, label }: { language: Language; onChange: (language: Language) => void; label: string }) {
+  const [open, setOpen] = useState(false);
+  const dockRef = useRef<HTMLElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuId = useId();
+  const current = languageOptions.find((item) => item.code === language) ?? languageOptions[0];
+  useEffect(() => {
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
+    const closeOutside = (event: PointerEvent) => { if (!dockRef.current?.contains(event.target as Node)) setOpen(false); };
+    window.addEventListener("keydown", closeOnEscape);
+    window.addEventListener("pointerdown", closeOutside);
+    return () => { window.removeEventListener("keydown", closeOnEscape); window.removeEventListener("pointerdown", closeOutside); };
+  }, []);
+  const focusLanguage = (edge: "first" | "last" = "first") => window.setTimeout(() => {
+    const choices = Array.from(menuRef.current?.querySelectorAll<HTMLButtonElement>("button") ?? []);
+    choices[edge === "first" ? 0 : choices.length - 1]?.focus();
+  }, 0);
+  const navigateMenu = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const choices = Array.from(menuRef.current?.querySelectorAll<HTMLButtonElement>("button") ?? []);
+    const index = choices.indexOf(document.activeElement as HTMLButtonElement);
+    if (event.key === "Escape") { event.preventDefault(); setOpen(false); return; }
+    if (event.key === "Home") { event.preventDefault(); choices[0]?.focus(); return; }
+    if (event.key === "End") { event.preventDefault(); choices.at(-1)?.focus(); return; }
+    if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+      event.preventDefault();
+      choices[(index + (event.key === "ArrowDown" ? 1 : -1) + choices.length) % choices.length]?.focus();
+    }
+  };
+  return <aside ref={dockRef} className={`language-dock ${open ? "open" : ""}`} aria-label={label} onMouseEnter={() => setOpen(true)} onMouseLeave={() => { if (!dockRef.current?.contains(document.activeElement)) setOpen(false); }} onKeyDown={(event) => { if (!(event.target instanceof HTMLElement) || !event.target.classList.contains("language-trigger")) return; if (event.key === "ArrowDown" || event.key === "ArrowUp") { event.preventDefault(); setOpen(true); focusLanguage(event.key === "ArrowDown" ? "first" : "last"); } }}>
+    <div id={menuId} ref={menuRef} className="language-menu" role="menu" aria-label={label} onKeyDown={navigateMenu}>
+      {languageOptions.map((item) => <button type="button" role="menuitem" key={item.code} className={item.code === language ? "active" : ""} onClick={() => { onChange(item.code); setOpen(false); }}>{item.label}</button>)}
+    </div>
+    <button type="button" className="language-trigger" onClick={() => setOpen(!open)} aria-expanded={open} aria-label={`${label}: ${current.label}`}><span aria-hidden="true">◎</span>{current.label}</button>
+  </aside>;
+}
 
 const milestones = [
   ["DOCUMENTED", "9 July 2026", "First constitutional seed", "The earliest currently located constitutional evidence identifies Martin Puzik as Founder and Initial Architect."],
@@ -11,6 +270,93 @@ const milestones = [
   ["EVOLUTION", "After the seed", "Technical collaboration", "M.A.J. Puzik supported practical activation and later technical development."],
   ["PRESENT", "Today", "Reconstruction and validation", "Archives, lineage and public orientation are being made navigable without exposing private source material."],
 ] as const;
+
+const czechMilestones = [
+  ["DOLOŽENO", "9. červenec 2026", "První ústavní semeno", "Nejstarší dosud nalezený ústavní doklad uvádí Martina Pužíka jako zakladatele a prvního architekta."],
+  ["UVEDENO AUTOREM", "Přibližně 10. červenec 2026", "Jádro LEIS dokončeno", "Martin Pužík uvádí samostatné intenzivní pětidenní období tvorby. Copilot byl pracovní nosič, nikoli autor."],
+  ["VÝVOJ", "Po semeni", "Technická spolupráce", "M.A.J. Pužík podpořil praktickou aktivaci a pozdější technický vývoj."],
+  ["SOUČASNOST", "Dnes", "Rekonstrukce a ověřování", "Archivy, linie vývoje a veřejná orientace se stávají přehlednými, aniž by odkrývaly soukromé zdrojové materiály."],
+] as const;
+
+const czechStatic = {
+  heroA: "Porozumění", heroB: "které může pokračovat.",
+  seedOpen: "Veřejné semeno získává podobu.", seedClosed: "Dotkněte se semene.",
+  seedOpenText: "Připravuje se ověřený veřejný vstup: linie vývoje, orientace a hranice — bez soukromých archivů.", seedClosedText: "Malý začátek, vytvořený pro další cestu.",
+  seedAria: "Otevřít náhled semene LEIS", seedLabel: "SEMENO LEIS",
+  grants: [
+    ["Uchovat", "Zachytit linii zdrojů, rozlišit důkaz od interpretace a zabránit tomu, aby se roky práce změnily v nečitelné soubory."],
+    ["Ověřit", "Zjišťovat, zda porozumění přežije předání: dokáže nový člověk znovu vystavět rozhodnutí, jeho podmínky a hranice?"],
+    ["Sdílet", "Vytvářet veřejná vysvětlení, praktické piloty a otevřené materiály, aby lidé mohli LEIS posoudit sami."],
+  ],
+  grantPath: [
+    ["Pro granty:", "provozní kontinuita, dokumentace, ověřování, infrastruktura a nezávislé posouzení."],
+    ["Pro firmy:", "vymezená spolupráce kolem skutečného problému předání, rozhodování nebo kontinuity znalostí."],
+    ["Pro výzkumníky a instituce:", "pozvání metodu zpochybňovat a zlepšovat její testy."],
+  ],
+  media: [
+    ["01 · ORIENTACE", "Co LEIS je, co není, kde začal a jak jej lze ověřovat, aniž by kdokoli musel jen věřit."],
+    ["02 · DŮKAZY", "Označení časové osy rozlišují doklady, kontext uváděný autorem a otevřené otázky. Soukromé archivy zůstávají soukromé."],
+    ["03 · DIALOG", "Pro rozhovor, výzkumnou otázku nebo zdrojový balíček použijte veřejnou cestu ke kontaktu. Bez odběru mailing listu."],
+  ],
+  footer: "Vytvořil", technical: "Technická spolupráce:",
+};
+
+const localizedStatic = {
+  cs: czechStatic,
+  de: {
+    heroA: "Verständnis", heroB: "das weiterwirken kann.",
+    seedOpen: "Ein öffentlicher Seed nimmt Gestalt an.", seedClosed: "Berühren Sie den Seed.",
+    seedOpenText: "Ein geprüfter öffentlicher Einstieg wird vorbereitet: Entwicklungslinie, Orientierung und Grenzen — ohne private Archive.", seedClosedText: "Ein kleiner Anfang, geschaffen für die weitere Reise.",
+    seedAria: "Vorschau des LEIS-Seeds öffnen", seedLabel: "LEIS-SEED",
+    grants: [["Bewahren", "Die Quellenlinie sichern, Beleg und Interpretation unterscheiden und verhindern, dass Jahre der Arbeit zu unlesbaren Dateien werden."], ["Prüfen", "Messen, ob Verständnis eine Übergabe überlebt: Kann eine neue Person eine Entscheidung, ihre Bedingungen und Grenzen wiederherstellen?"], ["Teilen", "Öffentliche Erklärungen, praktische Pilotprojekte und offene Materialien schaffen, damit Menschen LEIS selbst beurteilen können."]],
+    grantPath: [["Für Grants:", "operative Kontinuität, Dokumentation, Validierung, Infrastruktur und unabhängige Prüfung."], ["Für Unternehmen:", "eine klar begrenzte Zusammenarbeit rund um eine reale Übergabe-, Entscheidungs- oder Wissenskontinuitätsfrage."], ["Für Forschende und Institutionen:", "eine Einladung, die Methode herauszufordern und ihre Tests zu verbessern."]],
+    media: [["01 · ORIENTIERUNG", "Was LEIS ist, was es nicht ist, wo es begann und wie es geprüft werden kann — ohne dass jemand einfach glauben muss."], ["02 · EVIDENZ", "Zeitachsenmarkierungen unterscheiden dokumentierte Belege, vom Urheber berichteten Kontext und offene Fragen. Private Archive bleiben privat."], ["03 · DIALOG", "Für ein Gespräch, eine Forschungsfrage oder ein Quellenpaket nutzen Sie den öffentlichen Kontaktweg. Keine Mailingliste erforderlich."]],
+    footer: "Geschaffen von", technical: "Technische Zusammenarbeit:",
+  },
+  fr: {
+    heroA: "Une compréhension", heroB: "qui peut continuer.",
+    seedOpen: "Une graine publique prend forme.", seedClosed: "Touchez la graine.",
+    seedOpenText: "Un point d’entrée public vérifié se prépare : filiation, orientation et limites — sans archives privées.", seedClosedText: "Un petit commencement, conçu pour continuer son chemin.",
+    seedAria: "Ouvrir l’aperçu de la graine LEIS", seedLabel: "GRAINE LEIS",
+    grants: [["Préserver", "Conserver la filiation des sources, distinguer preuve et interprétation et empêcher que des années de travail ne deviennent illisibles."], ["Vérifier", "Mesurer si la compréhension survit à une transmission : une nouvelle personne peut-elle reconstruire une décision, ses conditions et ses limites ?"], ["Partager", "Créer des explications publiques, des pilotes pratiques et des ressources ouvertes afin que chacun puisse évaluer LEIS par lui-même."]],
+    grantPath: [["Pour les subventions :", "continuité opérationnelle, documentation, validation, infrastructure et évaluation indépendante."], ["Pour les entreprises :", "une collaboration délimitée autour d’un véritable problème de transmission, de décision ou de continuité des connaissances."], ["Pour les chercheurs et institutions :", "une invitation à mettre la méthode à l’épreuve et à améliorer ses tests."]],
+    media: [["01 · ORIENTATION", "Ce qu’est LEIS, ce qu’il n’est pas, où il a commencé et comment le mettre à l’épreuve sans demander à qui que ce soit de croire sur parole."], ["02 · PREUVES", "Les repères de la chronologie distinguent preuves documentées, contexte rapporté par le créateur et questions ouvertes. Les archives privées restent privées."], ["03 · DIALOGUE", "Pour un entretien, une question de recherche ou un dossier de sources, utilisez la voie publique de contact. Aucune inscription à une liste de diffusion."]],
+    footer: "Créé par", technical: "Collaboration technique :",
+  },
+  es: {
+    heroA: "Comprensión", heroB: "que puede continuar.",
+    seedOpen: "Una semilla pública está tomando forma.", seedClosed: "Toque la semilla.",
+    seedOpenText: "Se está preparando una entrada pública verificada: linaje, orientación y límites, sin archivos privados.", seedClosedText: "Un comienzo pequeño, creado para seguir viajando.",
+    seedAria: "Abrir la vista previa de la semilla LEIS", seedLabel: "SEMILLA LEIS",
+    grants: [["Preservar", "Conservar el linaje de las fuentes, distinguir evidencia de interpretación y evitar que años de trabajo se conviertan en archivos ilegibles."], ["Comprobar", "Medir si la comprensión sobrevive a una transferencia: ¿puede una nueva persona reconstruir una decisión, sus condiciones y sus límites?"], ["Compartir", "Crear explicaciones públicas, pilotos prácticos y materiales abiertos para que las personas puedan evaluar LEIS por sí mismas."]],
+    grantPath: [["Para subvenciones:", "continuidad operativa, documentación, validación, infraestructura y revisión independiente."], ["Para empresas:", "una colaboración delimitada en torno a un problema real de transferencia, decisión o continuidad del conocimiento."], ["Para investigadores e instituciones:", "una invitación a cuestionar el método y mejorar sus pruebas."]],
+    media: [["01 · ORIENTACIÓN", "Qué es LEIS, qué no es, dónde comenzó y cómo puede comprobarse sin pedir a nadie que simplemente crea."], ["02 · EVIDENCIA", "Las etiquetas de la cronología distinguen evidencia documentada, contexto informado por el creador y preguntas abiertas. Los archivos privados permanecen privados."], ["03 · DIÁLOGO", "Para una entrevista, una pregunta de investigación o un paquete de fuentes, use la vía pública de contacto. No se requiere suscripción a una lista de correo."]],
+    footer: "Creado por", technical: "Colaboración técnica:",
+  },
+} as const;
+
+const localizedMilestones: Record<Language, readonly (readonly [string, string, string, string])[]> = {
+  en: milestones,
+  cs: czechMilestones,
+  de: [["DOKUMENTIERT", "9. Juli 2026", "Erster konstitutioneller Seed", "Der früheste bisher aufgefundene konstitutionelle Nachweis bezeichnet Martin Pužík als Gründer und ersten Architekten."], ["VOM URHEBER BERICHTET", "Etwa 10. Juli 2026", "LEIS-Kern fertiggestellt", "Martin Pužík berichtet von einer eigenständigen intensiven fünftägigen Schaffensphase. Copilot war ein Arbeitsmedium, nicht der Autor."], ["ENTWICKLUNG", "Nach dem Seed", "Technische Zusammenarbeit", "M.A.J. Pužík unterstützte die praktische Aktivierung und die spätere technische Entwicklung."], ["GEGENWART", "Heute", "Rekonstruktion und Validierung", "Archive, Entwicklungslinie und öffentliche Orientierung werden navigierbar, ohne private Quellen offenzulegen."]],
+  fr: [["DOCUMENTÉ", "9 juillet 2026", "Première graine constitutionnelle", "Le premier élément constitutionnel retrouvé à ce jour identifie Martin Pužík comme fondateur et premier architecte."], ["RAPPORTÉ PAR LE CRÉATEUR", "Vers le 10 juillet 2026", "Noyau de LEIS achevé", "Martin Pužík rapporte une période autonome et intensive de création de cinq jours. Copilot était un support de travail, non l’auteur."], ["ÉVOLUTION", "Après la graine", "Collaboration technique", "M.A.J. Pužík a soutenu l’activation pratique et le développement technique ultérieur."], ["PRÉSENT", "Aujourd’hui", "Reconstruction et validation", "Les archives, le lignage et l’orientation publique deviennent navigables sans exposer de sources privées."]],
+  es: [["DOCUMENTADO", "9 de julio de 2026", "Primera semilla constitucional", "La evidencia constitucional más antigua localizada hasta ahora identifica a Martin Pužík como fundador y arquitecto inicial."], ["DECLARADO POR EL CREADOR", "Alrededor del 10 de julio de 2026", "Núcleo de LEIS completado", "Martin Pužík informa de un periodo independiente e intensivo de creación de cinco días. Copilot fue un soporte de trabajo, no el autor."], ["EVOLUCIÓN", "Después de la semilla", "Colaboración técnica", "M.A.J. Pužík apoyó la activación práctica y el desarrollo técnico posterior."], ["PRESENTE", "Hoy", "Reconstrucción y validación", "Los archivos, el linaje y la orientación pública se están haciendo navegables sin revelar material de fuentes privadas."]],
+};
+
+// A new language is accepted only when every public interface layer contains it.
+// This prevents a partly translated portal from reaching visitors.
+const translationTables: Array<[string, Partial<Record<Language, unknown>>]> = [
+  ["portal", portalCopy], ["sections", sectionCopy], ["participation", participationCopy], ["grant dossier", grantDossierCopy], ["public briefing", publicBriefCopy], ["LEIS loop", loopCopy], ["LEIS test", testCopy], ["Seed download", seedDownloadCopy], ["principles", principleCopy],
+  ["earth", earthCopy], ["globe", globeCopy], ["country profiles", countryBaselineCopy], ["document titles", documentTitles],
+  ["Prague context", pragueCopy], ["contact", contactCopy], ["orientation guide", guideCopy], ["timeline", localizedMilestones],
+  ["localized page content", { en: true, ...localizedStatic }],
+];
+
+for (const [tableName, table] of translationTables) {
+  for (const code of supportedLanguages) {
+    if (table[code] === undefined) throw new Error(`Missing ${code} translation in ${tableName}.`);
+  }
+}
 
 const news: News[] = [
   { title: "How AI is expanding what people do at work", source: "OpenAI", place: "San Francisco, USA", lat: 37.7749, lon: -122.4194, url: "https://openai.com/news/", summary: "OpenAI's newsroom presents AI as a way to extend what people can do at work, rather than as a story about automation alone.", leis: "LEIS question: can people later recover the purpose, judgement and limits behind an AI-assisted decision?", reviewed: "27 July 2026" },
@@ -175,14 +521,14 @@ const countryProfiles: Record<string, { eyebrow: string; title: string; summary:
     ],
   },
   Sweden: {
-    eyebrow: "COUNTRY AI CONTEXT Â· REVIEWED 5 AUGUST 2026",
+    eyebrow: "COUNTRY AI CONTEXT · REVIEWED 5 AUGUST 2026",
     title: "Sweden: skills, public value and human-AI collaboration",
-    summary: "Swedenâ€™s public AI ecosystem brings research, municipalities, health, industry and workforce learning into the same conversation. AI Sweden is one public hub for this work.",
+    summary: "Sweden's public AI ecosystem brings research, municipalities, health, industry and workforce learning into the same conversation. AI Sweden is one public hub for this work.",
     use: "Current public work covers workforce skills, responsible adoption, public-sector collaboration, digital sovereignty, health and practical AI transformation across organisations.",
-    leis: "LEIS context: capability becomes more durable when people can recover the purpose, local conditions and limits behind an AI-assisted result â€” not only the result itself.",
+    leis: "LEIS context: capability becomes more durable when people can recover the purpose, local conditions and limits behind an AI-assisted result — not only the result itself.",
     links: [
-      { label: "AI Sweden Â· public news and projects", url: "https://www.ai.se/en/news" },
-      { label: "AI Sweden Â· national ecosystem", url: "https://www.ai.se/en" },
+      { label: "AI Sweden · public news and projects", url: "https://www.ai.se/en/news" },
+      { label: "AI Sweden · national ecosystem", url: "https://www.ai.se/en" },
     ],
   },
   Australia: {
@@ -242,6 +588,7 @@ const countryProfiles: Record<string, { eyebrow: string; title: string; summary:
   },
 };
 
+/* Historical globe iterations preserved outside the active runtime.
 function GlobeLegacy({ onSelect }: { onSelect: (index: number) => void }) {
   const node = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -482,9 +829,13 @@ function GlobeCurrentLegacy({ onSelect }: { onSelect: (index: number) => void })
   return <><div className="globe-map-shell"><div className="globe-map" ref={node} aria-label="Interactive globe. Drag to rotate, scroll to zoom and choose a source point." /></div>{focus && <><div className="globe-focus-scrim" onClick={close}/><section className={`globe-focus-window ${detail ? "level-2" : "level-1"}`}><button className="close-focus" onClick={close} aria-label="Close selection">×</button>{selectedNews ? <><small>{detail ? "SOURCE + LEIS CONTEXT" : "SELECTED SOURCE SIGNAL"}</small><h3>{selectedNews.title}</h3><p className="focus-origin">{selectedNews.source} · {selectedNews.place} · source checked {selectedNews.reviewed ?? "5 August 2026"}</p>{detail ? <div className="focus-detail"><p><b>What the source says:</b> {selectedNews.summary}</p><p><b>LEIS commentary:</b> {selectedNews.leis}</p><a className="primary" href={selectedNews.url} target="_blank" rel="noreferrer">Read original source ↗</a></div> : <button className="open-context" onClick={() => setDetail(true)}>Open full context</button>}</> : <><small>COUNTRY SIGNAL WINDOW</small><h3>{country ?? "Explore current AI source signals"}</h3>{countrySignals.length ? <><p>Choose a reviewed source signal. The next selection opens its full LEIS context.</p><div className="focus-choices">{countrySignals.slice(0, 5).map(({ item, index }) => <button key={item.title} onClick={() => choose(index, true)}>{item.title}<span>{item.source} · {item.place}</span></button>)}</div></> : <><p>Choose a source organisation to explore its current reviewed signals.</p><div className="focus-choices">{[0, 5, 10, 15].map((index) => <button key={news[index].source} onClick={() => choose(index, true)}>{news[index].source}<span>{news[index].place}</span></button>)}</div></>}</>}</section></>}</>;
 }
 
-function Globe({ onSelect }: { onSelect: (index: number) => void }) {
+*/
+
+function Globe({ onSelect, language }: { onSelect: (index: number) => void; language: Language }) {
   const node = useRef<HTMLDivElement>(null);
   const chartRef = useRef<any>(null);
+  const focusWindowRef = useRef<HTMLElement>(null);
+  const lastActiveElementRef = useRef<HTMLElement | null>(null);
   const [focus, setFocus] = useState(false);
   const [detail, setDetail] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
@@ -492,7 +843,11 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
   const [deskStart, setDeskStart] = useState<number | null>(null);
   const [atmosphereOn, setAtmosphereOn] = useState(true);
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "fallback">("loading");
+  const [mapAttempt, setMapAttempt] = useState(0);
   const selectedNews = selected === null ? null : news[selected];
+  const globeText = globeCopy[language];
+  const baselineText = countryBaselineCopy[language];
+  const placeText = pragueCopy[language];
 
   const aim = useCallback((item: News, duration = 850) => {
     const chart = chartRef.current;
@@ -515,7 +870,13 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
     setAtmosphereOn(next);
   }, [atmosphereOn]);
 
+  const retryMap = useCallback(() => {
+    setMapStatus("loading");
+    setMapAttempt((attempt) => attempt + 1);
+  }, []);
+
   const choose = useCallback((index: number, expand = false) => {
+    lastActiveElementRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setSelected(index);
     setCountry(null);
     setDeskStart(null);
@@ -526,6 +887,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
   }, [aim, onSelect]);
 
   const openCzechia = useCallback(() => {
+    lastActiveElementRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setCountry("Czech Republic");
     setSelected(null);
     setDetail(false);
@@ -534,6 +896,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
   }, []);
 
   const openPragueOrigin = useCallback(() => {
+    lastActiveElementRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setCountry("Prague, Czech Republic");
     setSelected(null);
     setDetail(false);
@@ -542,6 +905,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
   }, []);
 
   const openDesk = useCallback((start: number) => {
+    lastActiveElementRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setDeskStart(start);
     setCountry(null);
     setSelected(null);
@@ -555,6 +919,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
     setDetail(false);
     setCountry(null);
     setDeskStart(null);
+    window.setTimeout(() => lastActiveElementRef.current?.focus(), 0);
   };
 
   useEffect(() => {
@@ -564,11 +929,21 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
 
   useEffect(() => {
     if (!focus) return;
-    const closeWithEscape = (event: KeyboardEvent) => {
+    const focusWindow = focusWindowRef.current;
+    const focusableSelector = "button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])";
+    window.setTimeout(() => (focusWindow?.querySelector<HTMLElement>(".close-focus") ?? focusWindow)?.focus(), 0);
+    const keepFocusInWindow = (event: KeyboardEvent) => {
       if (event.key === "Escape") close();
+      if (event.key !== "Tab" || !focusWindow) return;
+      const targets = Array.from(focusWindow.querySelectorAll<HTMLElement>(focusableSelector));
+      if (!targets.length) return;
+      const first = targets[0];
+      const last = targets[targets.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     };
-    window.addEventListener("keydown", closeWithEscape);
-    return () => window.removeEventListener("keydown", closeWithEscape);
+    window.addEventListener("keydown", keepFocusInWindow);
+    return () => window.removeEventListener("keydown", keepFocusInWindow);
   }, [focus]);
 
   useEffect(() => {
@@ -587,6 +962,13 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
     let pinchStartDistance = 0;
     let pinchStartZoom = 1;
     let manualUntil = 0;
+    let pageVisible = document.visibilityState !== "hidden";
+    // Respect the visitor's operating-system accessibility preference. The
+    // normal LEIS experience remains alive; this mode simply keeps the same
+    // information available without autonomous visual movement.
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+    const onVisibilityChange = () => { pageVisible = document.visibilityState !== "hidden"; };
+    document.addEventListener("visibilitychange", onVisibilityChange);
     const rotateTo = (item: News, duration = 3000) => {
       const chart = chartRef.current;
       if (!chart) return;
@@ -659,6 +1041,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       // The generated polygon (not its template) owns the animation. This keeps
       // every later layer safe while providing a restrained, living water surface.
       ocean.events.once("datavalidated", () => {
+        if (reducedMotion) return;
         const oceanPolygon = ocean.dataItems[0]?.get("mapPolygon");
         if (!oceanPolygon) return;
         oceanPolygon.animate({ key: "fillOpacity", from: 0.82, to: 0.98, duration: 7800, loops: Infinity, easing: am5.ease.yoyo(am5.ease.sine) });
@@ -732,9 +1115,11 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         const holder = am5.Container.new(rootArg, { width: 0, height: 0, centerX: am5.p50, centerY: am5.p50 });
         const halo = holder.children.push(am5.Circle.new(rootArg, { radius: 11, fill: am5.color(0xffc85b), fillOpacity: 0.12, stroke: am5.color(0xffd67a), strokeOpacity: 0.56, strokeWidth: 1 }));
         const core = holder.children.push(am5.Circle.new(rootArg, { radius: 3.8, fill: am5.color(0xffd36e), fillOpacity: 0.96, stroke: am5.color(0xffefae), strokeOpacity: 0.95, strokeWidth: 1 }));
-        halo.animate({ key: "scale", from: 0.7, to: 2.25, duration: 1850, loops: Infinity, easing: am5.ease.out(am5.ease.cubic) });
-        halo.animate({ key: "opacity", from: 0.84, to: 0, duration: 1850, loops: Infinity, easing: am5.ease.out(am5.ease.cubic) });
-        core.animate({ key: "scale", from: 0.78, to: 1.22, duration: 900, loops: Infinity, easing: am5.ease.yoyo(am5.ease.sine) });
+        if (!reducedMotion) {
+          halo.animate({ key: "scale", from: 0.7, to: 2.25, duration: 1850, loops: Infinity, easing: am5.ease.out(am5.ease.cubic) });
+          halo.animate({ key: "opacity", from: 0.84, to: 0, duration: 1850, loops: Infinity, easing: am5.ease.out(am5.ease.cubic) });
+          core.animate({ key: "scale", from: 0.78, to: 1.22, duration: 900, loops: Infinity, easing: am5.ease.yoyo(am5.ease.sine) });
+        }
         return am5.Bullet.new(rootArg, { sprite: holder });
       });
       const weatherSites = [
@@ -768,6 +1153,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       }));
       stormLayer.data.setAll([{ geometry: { type: "Point", coordinates: [103.8198, 1.3521] } }]);
       const refreshWeather = async () => {
+        if (!pageVisible) return;
         try {
           const weather = await Promise.all(weatherSites.map(async (site, index) => {
             const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${site.lat}&longitude=${site.lon}&current=temperature_2m,weather_code,cloud_cover,precipitation,wind_speed_10m&timezone=auto`);
@@ -813,6 +1199,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         { geometry: { type: "LineString", coordinates: [[-122.0839, 37.3861], [-122.4194, 37.7749]] } },
       ]);
       routes.events.on("datavalidated", () => {
+        if (reducedMotion) return;
         routes.mapLines.each((line: any, index: number) => {
           line.animate({ key: "strokeDashoffset", from: 0, to: -32, duration: 1320 + index * 150, loops: Infinity, easing: am5.ease.linear });
         });
@@ -826,8 +1213,10 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         const halo = holder.children.push(am5.Circle.new(rootArg, { radius: isOrigin ? 7 : 5.4, fill: am5.color(colour), fillOpacity: 0.42 }));
         const core = holder.children.push(am5.Circle.new(rootArg, { radius: isOrigin ? 7 : 5.4, fill: am5.color(colour), stroke: am5.color(0xeafff4), strokeWidth: 1.4 }));
         const hit = holder.children.push(am5.Circle.new(rootArg, { radius: 25, fill: am5.color(0xffffff), fillOpacity: 0.001 }));
-        halo.animate({ key: "scale", from: 1, to: 3.2, duration: 2400, loops: Infinity, easing: am5.ease.cubic });
-        halo.animate({ key: "opacity", from: 0.72, to: 0, duration: 2400, loops: Infinity, easing: am5.ease.cubic });
+        if (!reducedMotion) {
+          halo.animate({ key: "scale", from: 1, to: 3.2, duration: 2400, loops: Infinity, easing: am5.ease.cubic });
+          halo.animate({ key: "opacity", from: 0.72, to: 0, duration: 2400, loops: Infinity, easing: am5.ease.cubic });
+        }
         hit.events.on("click", () => {
           if (typeof data.deskStart === "number") openDesk(data.deskStart);
           else openPragueOrigin();
@@ -845,11 +1234,11 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
         ...leisOriginPoints.map((item, index) => ({ origin: true, color: 0x58a9ff, clusterKey: "leis-prague", clusterIndex: index, shortTitle: index === 0 ? "Martin Pužík · LEIS" : "M.A.J. Pužík · technical", geometry: { type: "Point", coordinates: [14.4378, 50.0755] } })),
       ]);
       drift = setInterval(() => {
-        if (Date.now() > manualUntil) chart.set("rotationX", (chart.get("rotationX") ?? 0) + 0.28);
+        if (!reducedMotion && pageVisible && Date.now() > manualUntil) chart.set("rotationX", (chart.get("rotationX") ?? 0) + 0.28);
       }, 90);
       let next = -1;
       route = setInterval(() => {
-        if (Date.now() > manualUntil) {
+        if (!reducedMotion && pageVisible && Date.now() > manualUntil) {
           next = (next + 1) % news.length;
           rotateTo(news[next]);
         }
@@ -865,6 +1254,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       if (route) clearInterval(route);
       if (weatherRefresh) clearInterval(weatherRefresh);
       if (resizeTimer) clearTimeout(resizeTimer);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       resizeObserver?.disconnect();
       node.current?.removeEventListener("leis-atmosphere-toggle", atmosphereToggle);
       if (wheelHost && onWheel) wheelHost.removeEventListener("wheel", onWheel);
@@ -873,7 +1263,7 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
       if (wheelHost && onTouchEnd) wheelHost.removeEventListener("touchend", onTouchEnd);
       root?.dispose();
     };
-  }, [openCzechia, openDesk, openPragueOrigin]);
+  }, [mapAttempt, openCzechia, openDesk, openPragueOrigin]);
 
   const isCzechRepublic = Boolean(country && /Czechia|Czech Republic/i.test(country));
   const countrySignals = country
@@ -886,112 +1276,113 @@ function Globe({ onSelect }: { onSelect: (index: number) => void }) {
   const deskSignals = deskStart === null ? [] : news.map((item, index) => ({ item, index })).filter(({ item }) => item.source === news[deskStart].source && item.place === news[deskStart].place).slice(0, 5);
   const countryProfile = country ? countryProfiles[country] ?? (country.includes("Korea") ? countryProfiles["South Korea"] : country.includes("UAE") ? countryProfiles["United Arab Emirates"] : undefined) : undefined;
   const pendingCountryProfile = country && !isPrague && !countryProfile && !countrySignals.length ? {
-    eyebrow: "COUNTRY AI CONTEXT · GLOBAL BASELINE",
-    title: `${country}: AI context`,
-    summary: `Every country on this globe now has an AI context card. For ${country}, this baseline deliberately separates a global evidence lens from country-specific claims that have not yet been independently reviewed by LEIS.`,
-    use: "A meaningful national AI picture has at least four dimensions: people and skills; public institutions and rules; research and infrastructure; and how organisations use AI in daily work. The links below are public starting points for checking those dimensions without importing unrelated news.",
-    leis: "LEIS context: global orientation should never flatten local reality. The next local source added for this country will stay visibly attributed, dated and separate from this baseline.",
+    eyebrow: baselineText.eyebrow,
+    title: `${country}: ${baselineText.title}`,
+    summary: baselineText.summary,
+    use: baselineText.use,
+    leis: baselineText.leis,
     links: [
-      { label: "OECD · AI policy and country evidence", url: "https://oecd.ai/en/" },
-      { label: "UNESCO · AI readiness methodology", url: "https://www.unesco.org/ethics-ai/en/ram" },
+      { label: baselineText.oecd, url: "https://oecd.ai/en/" },
+      { label: baselineText.unesco, url: "https://www.unesco.org/ethics-ai/en/ram" },
     ],
   } : undefined;
   const displayedCountryProfile = countryProfile ?? pendingCountryProfile;
 
   return <>
     <div className="globe-map-shell">
-      <div className="globe-map" ref={node} aria-label="Interactive globe. Drag to rotate, scroll to zoom and choose a source point." />
+      <div className="globe-map" ref={node} aria-label={globeText.aria} aria-busy={mapStatus !== "ready"} />
       {mapStatus !== "ready" && <div className={`mobile-map-status ${mapStatus}`} aria-live="polite">
         <span aria-hidden="true">◌</span>
-        <b>{mapStatus === "loading" ? "Preparing the interactive Earth" : "Interactive Earth is reloading"}</b>
-        <small>{mapStatus === "loading" ? "The globe will appear in a moment." : "Please refresh once to try the live map again."}</small>
+        <b>{mapStatus === "loading" ? globeText.preparing : globeText.reloading}</b>
+        <small>{mapStatus === "loading" ? globeText.appearing : globeText.refresh}</small>
+        {mapStatus === "fallback" && <button type="button" onClick={retryMap}>{globeRetryCopy[language]}</button>}
       </div>}
-      <div className="globe-weather-hud" aria-label="Live weather layer active">
+      <div className="globe-weather-hud" aria-label={globeText.weatherAria}>
         <i aria-hidden="true" />
-        <span>Live cloud conditions</span>
-        <small>Open-Meteo · visualised cloud cover · refreshes every 10 min</small>
+        <span>{globeText.clouds}</span>
+        <small>{globeText.cloudNote}</small>
       </div>
       <button type="button" className={`globe-atmosphere-control ${atmosphereOn ? "active" : ""}`} onPointerDown={(event) => event.stopPropagation()} onClick={toggleAtmosphere} aria-pressed={atmosphereOn}>
-        <span aria-hidden="true">☁</span>{atmosphereOn ? "Atmosphere on" : "Atmosphere off"}
+        <span aria-hidden="true">☁</span>{atmosphereOn ? globeText.atmosphereOn : globeText.atmosphereOff}
       </button>
-      <div className="globe-zoom-controls" aria-label="Globe zoom controls">
-        <button type="button" onPointerDown={(event) => event.stopPropagation()} onClick={() => adjustZoom(1)} aria-label="Zoom in">+</button>
-        <button type="button" onPointerDown={(event) => event.stopPropagation()} onClick={() => adjustZoom(-1)} aria-label="Zoom out">−</button>
-        <span>Shift + scroll</span>
+      <div className="globe-zoom-controls" aria-label={globeText.zoomAria}>
+        <button type="button" onPointerDown={(event) => event.stopPropagation()} onClick={() => adjustZoom(1)} aria-label={globeText.zoomIn}>+</button>
+        <button type="button" onPointerDown={(event) => event.stopPropagation()} onClick={() => adjustZoom(-1)} aria-label={globeText.zoomOut}>−</button>
+        <span>{globeText.zoomHint}</span>
       </div>
     </div>
     {focus && <>
       <div className="globe-focus-scrim" onClick={close}/>
-      <section className={`globe-focus-window ${detail ? "level-2" : "level-1"}`} role="dialog" aria-modal="true" aria-label="Earth Pulse information" aria-live="polite">
-        <button className="close-focus" onClick={close} aria-label="Close selection">×</button>
+      <section ref={focusWindowRef} className={`globe-focus-window ${detail ? "level-2" : "level-1"}`} role="dialog" aria-modal="true" aria-label={`${globeText.selectedSignal}: ${detail ? globeText.sourceContext : globeText.publicDesk}`} aria-live="polite">
+        <button className="close-focus" onClick={close} aria-label={globeText.close}>×</button>
         {selectedNews ? <article className="selected-article">
           <p className="article-source">
-            {selectedNews.source} NEWSROOM · {selectedNews.place} · SOURCE REVIEWED {selectedNews.reviewed ?? "5 AUGUST 2026"}
+            {selectedNews.source} · {globeText.newsroom} · {selectedNews.place} · {globeText.sourceReviewed} {selectedNews.reviewed ?? "5 AUGUST 2026"}
           </p>
           <h3>{selectedNews.title}</h3>
           {detail ? <div className="selected-detail">
-            <p><b>What this source reports</b><br />{selectedNews.summary}</p>
-            <p><b>LEIS context</b><br />{selectedNews.leis}</p>
-            <a className="primary" href={selectedNews.url} target="_blank" rel="noreferrer">Read the original source ↗</a>
-          </div> : <button className="open-context" onClick={() => setDetail(true)}>Open context</button>}
+            <p><b>{globeText.sourceReports}</b><br />{selectedNews.summary}</p>
+            <p><b>{globeText.leisContext}</b><br />{selectedNews.leis}</p>
+            <a className="primary" href={selectedNews.url} target="_blank" rel="noreferrer">{globeText.readSource}</a>
+          </div> : <button className="open-context" onClick={() => setDetail(true)}>{globeText.openContext}</button>}
         </article> : deskStart !== null ? <>
-          <small>PUBLIC SOURCE DESK · UP TO FIVE REVIEWED SIGNALS</small>
+          <small>{globeText.publicDesk} · {globeText.reviewedSignals}</small>
           <h3>{news[deskStart].source} · {news[deskStart].place}</h3>
           <div className="focus-choices">
             {deskSignals.map(({ item, index }) => <button key={item.title} onClick={() => choose(index, true)}>
-              <small>{item.source} NEWSROOM · {item.place} · SOURCE REVIEWED {item.reviewed ?? "5 AUGUST 2026"}</small>
+              <small>{item.source} · {item.place} · {globeText.sourceReviewed} {item.reviewed ?? "5 AUGUST 2026"}</small>
               <strong>{item.title}</strong>
             </button>)}
           </div>
         </> : isCzechRepublic ? <>
-          <small>CZECH REPUBLIC · PUBLIC AI SIGNALS + LEIS ORIGIN</small>
-          <h3>Czech AI, with Prague context.</h3>
+          <small>{placeText.czechLabel}</small>
+          <h3>{placeText.czechTitle}</h3>
           <div className="country-profile czech-intro">
-            <p>These are public AI articles from Czech Technical University in Prague. They are separate from LEIS: the Prague origin cards below identify authorship and collaboration, not a Czech news desk.</p>
+            <p>{placeText.czechIntro}</p>
           </div>
           <div className="focus-choices">
             {countrySignals.slice(0, 5).map(({ item, index }) => <button key={item.title} onClick={() => choose(index, true)}>
-              <small>{item.source} · {item.place} · SOURCE REVIEWED {item.reviewed ?? "5 AUGUST 2026"}</small>
+              <small>{item.source} · {item.place} · {globeText.sourceReviewed} {item.reviewed ?? "5 AUGUST 2026"}</small>
               <strong>{item.title}</strong>
             </button>)}
           </div>
           <div className="prague-origin-cards czech-origin-summary">
-            <article><small>LEIS ORIGIN · PRAGUE</small><strong>Martin Pužík</strong><span>Founder, creator and constitution author of LEIS. The core was independently completed around 10 July 2026.</span></article>
-            <article><small>TECHNICAL COLLABORATION</small><strong>M.A.J. Pužík</strong><span>Technical activation and development after the independent LEIS seed.</span></article>
+            <article><small>{placeText.originLabel}</small><strong>Martin Pužík</strong><span>{placeText.creatorText}</span></article>
+            <article><small>{placeText.technicalLabel}</small><strong>M.A.J. Pužík</strong><span>{placeText.technicalText}</span></article>
           </div>
         </> : isPrague ? <>
-          <small>LEIS ORIGIN / PRAGUE</small>
-          <h3>Prague, Czech Republic</h3>
+          <small>{placeText.originLabel}</small>
+          <h3>{placeText.czechTitle}</h3>
           <div className="prague-origin-cards">
-            <article><small>CREATOR · DOCUMENTED ORIGIN</small><strong>Martin Pužík</strong><span>Founder, creator and constitution author of LEIS.</span><p>LEIS core was independently completed around 10 July 2026. Prague is the publicly documented origin context.</p></article>
-            <article><small>TECHNICAL COLLABORATION</small><strong>M.A.J. Pužík</strong><span>Technical activation and development.</span><p>Joined after the seed: practical AI and technical experience supporting LEIS activation, while the core retained its independent origin.</p></article>
-            <article><small>PUBLIC CONTACT</small><strong>Work with LEIS</strong><span>Questions, research, grants or partnership.</span><a href="mailto:martin.puzik@gmail.com?subject=LEIS%20contact">Contact Martin Pužík ↗</a></article>
+            <article><small>{placeText.creatorLabel}</small><strong>Martin Pužík</strong><span>{placeText.creatorText}</span></article>
+            <article><small>{placeText.technicalLabel}</small><strong>M.A.J. Pužík</strong><span>{placeText.technicalText}</span></article>
+            <article><small>{placeText.contactLabel}</small><strong>{placeText.contactTitle}</strong><span>{placeText.contactText}</span><a href="mailto:martin.puzik@gmail.com?subject=LEIS%20contact">{placeText.contactAction}</a></article>
           </div>
         </> : displayedCountryProfile ? <>
           <small>{displayedCountryProfile.eyebrow}</small>
           <h3>{displayedCountryProfile.title}</h3>
           <div className="country-profile">
             <p>{displayedCountryProfile.summary}</p>
-            <p><b>How AI is used</b><br />{displayedCountryProfile.use}</p>
-            <p><b>LEIS context</b><br />{displayedCountryProfile.leis}</p>
+            <p><b>{globeText.aiUse}</b><br />{displayedCountryProfile.use}</p>
+            <p><b>{globeText.leisContext}</b><br />{displayedCountryProfile.leis}</p>
             <div className="country-profile-links">{displayedCountryProfile.links.map((link) => <a key={link.url} href={link.url} target="_blank" rel="noreferrer">{link.label} ↗</a>)}</div>
           </div>
         </> : <>
-          <small>PUBLIC SOURCE DESKS</small>
-          <h3>{country ?? "Explore current AI source signals"}</h3>
+          <small>{globeText.publicDesk}</small>
+          <h3>{country ?? globeText.publicDesk}</h3>
           {countrySignals.length ? <div className="focus-choices">
             {countrySignals.slice(0, 5).map(({ item, index }) => <button key={item.title} onClick={() => choose(index, true)}>
-              <small>{item.source} NEWSROOM · {item.place} · SOURCE REVIEWED {item.reviewed ?? "5 AUGUST 2026"}</small>
+              <small>{item.source} {globeText.newsroom} · {item.place} · {globeText.sourceReviewed} {item.reviewed ?? "5 AUGUST 2026"}</small>
               <strong>{item.title}</strong>
             </button>)}
-          </div> : <p className="country-empty">No reviewed local source or country AI profile has been added here yet. LEIS does not substitute unrelated news from another country.</p>}
+          </div> : <p className="country-empty">{globeText.emptyCountry}</p>}
         </>}
       </section>
     </>}
   </>;
 }
 
-function ContactPath() {
+function ContactPath({ copy, contactText }: { copy: PortalCopy; contactText: (typeof contactCopy)[Language] }) {
   const [open, setOpen] = useState(false);
   const [topic, setTopic] = useState("Research dialogue");
   const [name, setName] = useState("");
@@ -1010,38 +1401,114 @@ function ContactPath() {
   }, []);
   const openMail = (event: React.FormEvent) => {
     event.preventDefault();
-    const subject = `LEIS · ${topic}`;
+    const topicLabel = contactText.topics[topic] ?? topic;
+    const subject = `LEIS · ${topicLabel}`;
     const body = [
-      `Topic: ${topic}`,
-      `Name: ${name || "Not provided"}`,
-      `Organisation: ${organisation || "Not provided"}`,
+      `Topic: ${topicLabel}`,
+      `${contactText.name}: ${name || contactText.notProvided}`,
+      `${contactText.organisation}: ${organisation || contactText.notProvided}`,
       "",
-      message || "Hello Martin, I would like to begin a conversation about LEIS.",
+      message || contactText.hello,
     ].join("\n");
     window.location.href = `mailto:martin.puzik@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
   return <section className="contact-path" id="contact" aria-label="Contact LEIS">
-    <p className="eyebrow">A HUMAN CONTACT PATH</p>
-    <h2>Start with a real question.</h2>
-    <p>For a grant, a research conversation, a practical pilot or media context. Your note stays on your device until you choose to open an e-mail.</p>
-    {!open ? <button type="button" className="primary" onClick={() => setOpen(true)}>Write to LEIS</button> : <form onSubmit={openMail}>
-      <div className="contact-topics">{["Grant or support", "Research dialogue", "Practical pilot", "Media enquiry"].map((item) => <button type="button" key={item} className={topic === item ? "active" : ""} onClick={() => setTopic(item)}>{item}</button>)}</div>
-      <label>Your name<input value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" /></label>
-      <label>Organisation <small>(optional)</small><input value={organisation} onChange={(event) => setOrganisation(event.target.value)} autoComplete="organization" /></label>
-      <label>What would you like to explore?<textarea value={message} onChange={(event) => setMessage(event.target.value)} required /></label>
-      <div className="contact-actions"><button type="submit" className="primary">Open prepared e-mail</button><button type="button" className="quiet" onClick={async () => { await navigator.clipboard?.writeText("martin.puzik@gmail.com"); setCopied(true); }}>Copy e-mail address</button><button type="button" className="quiet" onClick={() => setOpen(false)}>Not now</button>{copied && <span className="copy-status">E-mail address copied.</span>}</div>
+    <p className="eyebrow">{copy.contactEyebrow}</p>
+    <h2>{copy.contactTitle}</h2>
+    <p>{copy.contactLead}</p>
+    {!open ? <button type="button" className="primary" onClick={() => setOpen(true)}>{copy.write}</button> : <form onSubmit={openMail}>
+      <div className="contact-topics">{["Grant or support", "Research dialogue", "Practical pilot", "Media enquiry"].map((item) => <button type="button" key={item} className={topic === item ? "active" : ""} onClick={() => setTopic(item)}>{contactText.topics[item]}</button>)}</div>
+      <label>{contactText.name}<input value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" /></label>
+      <label>{contactText.organisation} <small>({contactText.optional})</small><input value={organisation} onChange={(event) => setOrganisation(event.target.value)} autoComplete="organization" /></label>
+      <label>{contactText.question}<textarea value={message} onChange={(event) => setMessage(event.target.value)} required /></label>
+      <div className="contact-actions"><button type="submit" className="primary">{copy.openMail}</button><button type="button" className="quiet" onClick={async () => { await navigator.clipboard?.writeText("martin.puzik@gmail.com"); setCopied(true); }}>{copy.copyMail}</button><button type="button" className="quiet" onClick={() => setOpen(false)}>{copy.notNow}</button>{copied && <span className="copy-status">{copy.copied}</span>}</div>
     </form>}
   </section>;
 }
 
 export default function Home() {
+  const [language, setLanguage] = useState<Language>("en");
   const [active, setActive] = useState(0);
   const [seedOpen, setSeedOpen] = useState(false);
+  const [loopStep, setLoopStep] = useState(0);
   const [newsIndex, setNewsIndex] = useState(0);
   const [leisOpen, setLeisOpen] = useState(false);
   const [leisTopic, setLeisTopic] = useState<"start" | "story" | "work">("start");
   const [activeSection, setActiveSection] = useState("top");
-  const navigation = [["top", "Start here"], ["timeline", "Our story"], ["earth", "Earth Pulse"], ["grants", "Support LEIS"], ["media", "Media"]] as const;
+  const copy = portalCopy[language];
+  const sections = sectionCopy[language];
+  const participation = participationCopy[language];
+  const grantDossier = grantDossierCopy[language];
+  const publicBrief = publicBriefCopy[language];
+  const loop = loopCopy[language];
+  const activeLoop = loop.steps[loopStep];
+  const test = testCopy[language];
+  const seedDownload = seedDownloadCopy[language];
+  const principles = principleCopy[language];
+  const earthText = earthCopy[language];
+  const contactText = contactCopy[language];
+  const guideText = guideCopy[language];
+  const isLocalized = language !== "en";
+  const local = isLocalized ? localizedStatic[language] : null;
+  const current = localizedMilestones[language][active];
+  const selected = news[newsIndex];
+  const earth = earthCopy[language];
+  const navigation = [["top", copy.start], ["timeline", copy.story], ["earth", copy.earth], ["grants", copy.support], ["media", copy.media]] as const;
+  useEffect(() => {
+    const chooseLanguage = () => {
+      const requested = new URLSearchParams(window.location.search).get("lang");
+      const stored = window.localStorage.getItem("leis-portal-language");
+      setLanguage(isLanguage(requested) ? requested : isLanguage(stored) ? stored : "en");
+    };
+    chooseLanguage();
+    window.addEventListener("popstate", chooseLanguage);
+    return () => window.removeEventListener("popstate", chooseLanguage);
+  }, []);
+  useEffect(() => {
+    document.documentElement.lang = language;
+    document.documentElement.dir = languageDirection[language];
+    document.title = documentTitles[language];
+    window.localStorage.setItem("leis-portal-language", language);
+    const url = new URL(window.location.href);
+    url.searchParams.set("lang", language);
+    window.history.replaceState({}, "", url);
+  }, [language]);
+  useEffect(() => {
+    const sectionIds = ["top", "timeline", "earth", "grants", "media"];
+    const sections = sectionIds.map((id) => document.getElementById(id)).filter((section): section is HTMLElement => Boolean(section));
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (visible) setActiveSection(visible.target.id);
+    }, { rootMargin: "-20% 0px -58% 0px", threshold: [0.08, 0.18, 0.35] });
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, []);
+  useEffect(() => {
+    const earth = document.querySelector(".earth");
+    if (!earth) return;
+    const heading = earth.querySelector("h2");
+    const eyebrow = earth.querySelector(".eyebrow");
+    const lead = earth.querySelector(".earth-lead");
+    const hint = earth.querySelector(".globe-stage > p");
+    if (heading) heading.textContent = earthText.title;
+    if (eyebrow) eyebrow.textContent = earthText.eyebrow;
+    if (lead) lead.textContent = earthText.lead;
+    if (hint) hint.textContent = earthText.hint;
+    const reading = earth.querySelector(".reading-card");
+    if (reading) {
+      const readingEyebrow = reading.querySelector(".eyebrow");
+      const labels = reading.querySelectorAll("p b");
+      const origin = reading.querySelector("div:not(.source-row)");
+      const link = reading.querySelector("a.primary");
+      if (readingEyebrow) readingEyebrow.textContent = `${earthText.selected} · ${selected.source.toUpperCase()}`;
+      if (labels[0]) labels[0].textContent = earthText.sourceSays;
+      if (labels[1]) labels[1].textContent = earthText.commentary;
+      if (origin) origin.childNodes[1].nodeValue = ` ${earthText.origin} ${selected.place}`;
+      if (link) link.textContent = earthText.read;
+    }
+  }, [earthText, selected]);
   useEffect(() => {
     const sections = navigation.map(([id]) => document.getElementById(id)).filter(Boolean) as HTMLElement[];
     const observer = new IntersectionObserver((entries) => {
@@ -1051,37 +1518,62 @@ export default function Home() {
     sections.forEach((section) => observer.observe(section));
     return () => observer.disconnect();
   }, []);
-  const current = milestones[active];
-  const selected = news[newsIndex];
+  useEffect(() => {
+    if (!("serviceWorker" in navigator)) return;
+    void navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+  }, []);
   const leisGuidance = {
-    start: { title: "What is LEIS?", text: "LEIS is not an AI product. It is a reality-oriented way to preserve, activate and reconstruct understanding when people, tools or time change.", link: "#orientation", action: "Start with orientation" },
-    story: { title: "Where did it begin?", text: "The public timeline distinguishes documentation, creator-reported context and interpretation. It begins with the constitutional seed and stays honest about what is known.", link: "#timeline", action: "Follow the timeline" },
-    work: { title: "Can we work together?", text: "Yes. LEIS is open to respectful research, a concrete pilot, a grant conversation or a company handover problem. There is no mailing list and no pressure.", link: "#grants", action: "Explore cooperation" },
+    start: { ...guideText.start, link: "#orientation" },
+    story: { ...guideText.story, link: "#timeline" },
+    work: { ...guideText.work, link: "#grants" },
   }[leisTopic];
   const choose = useCallback((index: number) => { setNewsIndex(index); window.dispatchEvent(new CustomEvent("leis-globe-focus", { detail: index })); }, []);
-  return <><main>
-    <nav><a className="mark omega-mark" href="#top" aria-label="LEIS home"><span aria-hidden="true">Ω</span><b>LEIS</b></a><div>{navigation.map(([id, label]) => <a key={id} href={`#${id}`} className={activeSection === id ? "active" : ""} onClick={() => setActiveSection(id)}>{label}</a>)}</div></nav>
-    <section className="hero" id="top"><div className="stars" /><div className="hero-copy"><p className="eyebrow">REALITY-ORIENTED UNDERSTANDING SYSTEM</p><h1>Understanding<br/><em>that can travel.</em></h1><p className="lead">LEIS is a technology-independent framework for recognising, activating and reconstructing understanding from reality.</p><div className="actions"><a className="primary" href="#orientation">Learn about LEIS</a><a className="quiet" href="#timeline">Follow the lineage ↓</a></div></div><button className={`seed ${seedOpen ? "open" : ""}`} onClick={() => setSeedOpen(!seedOpen)} aria-expanded={seedOpen} aria-label="Open the LEIS Seed preview"><i/><span className="shell left"/><span className="shell right"/><span className="sprout"/></button><div className="seed-note"><span>LEIS SEED</span><strong>{seedOpen ? "A public Seed is taking shape." : "Touch the seed."}</strong><p>{seedOpen ? "A reviewed public entry point is being prepared: lineage, orientation and limits — without private archives." : "A small beginning, built to travel."}</p></div></section>
-    <section className="orientation" id="orientation"><p className="eyebrow">QUICK ORIENTATION</p><h2>Reality was never hidden.<br/>Recognition was incomplete.</h2><div className="principles"><article><b>01</b><h3>Recognition</h3><p>Questions become roots. Relationships become branches. Understanding grows when the right pattern is recognised.</p></article><article><b>02</b><h3>Lineage</h3><p>Context should survive change: of people, tools, time and technology.</p></article><article><b>03</b><h3>Validation</h3><p>Reality remains the final validator. Where evidence is incomplete, uncertainty remains visible.</p></article></div><p className="formula">Reality → recognition → activation → understanding → validation → new reality</p></section>
-    <section className="timeline" id="timeline"><p className="eyebrow">LIVING LEIS TIMELINE</p><h2>From seed to continuity.</h2><div className="timeline-grid"><div className="axis"><div className="pulse"/>{milestones.map(([, date, title], index) => <button key={title} className={active === index ? "active" : ""} style={{ top: `${17 + index * 22}%` }} onMouseEnter={() => setActive(index)} onFocus={() => setActive(index)} onClick={() => setActive(index)}><span/><small>{date}</small></button>)}</div><article className="event"><small>{current[0]} · {current[1]}</small><h3>{current[2]}</h3><p>{current[3]}</p></article></div><p className="certainty">Every point distinguishes documented evidence, creator-reported context and interpretation. The timeline is alive; it does not replace evidence.</p></section>
-    <section className="earth" id="earth"><p className="eyebrow">EARTH PULSE / CURRENT AI SIGNALS</p><h2>Where the current conversation<br/>is coming from.</h2><p className="earth-lead">Drag the globe to explore. Every signal keeps its source visible: its colour, location and connector line show the originating public desk — not a claim about where its impact ends.</p><div className="earth-experience"><div className="signal-rail left-rail">{news.slice(0, 10).map((item, index) => <button className={newsIndex === index ? "selected" : ""} style={{ "--source": sourceColors[item.source] } as React.CSSProperties} onClick={() => choose(index)} key={item.title}><span className="signal-origin">{item.source} · {item.place}</span><strong>{item.title}</strong></button>)}</div><div className="globe-stage"><div className="stars local-stars"/>{Array.from({ length: 20 }, (_, index) => <i className="depth-star" key={index} style={{ left: `${(index * 31) % 100}%`, top: `${(index * 47) % 100}%`, animationDelay: `${index * 0.18}s` }} />)}<Globe onSelect={choose}/><p>Drag to rotate · scroll to zoom · select a point</p></div><div className="signal-rail right-rail">{news.slice(10).map((item, localIndex) => { const index = localIndex + 10; return <button className={newsIndex === index ? "selected" : ""} style={{ "--source": sourceColors[item.source] } as React.CSSProperties} onClick={() => choose(index)} key={item.title}><span className="signal-origin">{item.source} · {item.place}</span><strong>{item.title}</strong></button>; })}</div></div><article className="reading-card"><p className="eyebrow">SELECTED SOURCE SIGNAL · {selected.source.toUpperCase()}</p><h3>{selected.title}</h3><p><b>What the source says:</b> {selected.summary}</p><p><b>LEIS commentary:</b> {selected.leis}</p><div><span className="origin-dot" style={{ background: sourceColors[selected.source] }}/> Originating public desk: {selected.place}</div><a className="primary" href={selected.url} target="_blank" rel="noreferrer">Read the original source ↗</a></article><div className="source-row"><a href="https://blog.google/innovation-and-ai/technology/ai/" target="_blank">Google AI</a><a href="https://openai.com/news/" target="_blank">OpenAI</a><a href="https://www.anthropic.com/news" target="_blank">Anthropic</a><a href="https://huggingface.co/blog" target="_blank">Hugging Face</a></div></section>
-    <section className="grants" id="grants"><p className="eyebrow">SUPPORT / COOPERATION / GRANT INTENT</p><h2>Keep LEIS free.<br/>Make it durable.</h2><p className="grant-lead">LEIS is free of charge forever. Support does not buy a wall around knowledge; it gives the human work behind preservation, validation and accessible public orientation the time to continue.</p><div className="grant-grid"><article><b>01</b><h3>Preserve</h3><p>Recover source lineage, distinguish evidence from interpretation and prevent years of work from becoming unreadable files.</p></article><article><b>02</b><h3>Test</h3><p>Measure whether understanding survives a handover: can a new person reconstruct a decision, its conditions and its limits?</p></article><article><b>03</b><h3>Share</h3><p>Build public explanations, practical pilots and open materials that let people judge LEIS for themselves.</p></article></div><div className="grant-path"><p><b>For grants:</b> operational continuity, documentation, validation, infrastructure and independent review.</p><p><b>For companies:</b> a bounded collaboration around a real handover, decision or knowledge-continuity problem.</p><p><b>For researchers and institutions:</b> an invitation to challenge the method and improve its tests.</p></div><button type="button" className="primary" onClick={() => window.dispatchEvent(new CustomEvent("leis-open-contact", { detail: "Grant or support" }))}>Discuss support or a pilot</button></section>
-    <section className="media" id="media"><p className="eyebrow">MEDIA / JOURNALISTS / RESEARCHERS</p><h2>Start with the human question.</h2><p>Can understanding survive the departure of the person who created it? This is the story before any technology claim: continuity, evidence, uncertainty and the possibility of rebuilding context.</p><div className="media-grid"><article><b>01 · ORIENTATION</b><h3>Two-minute orientation</h3><p>What LEIS is, what it is not, where it began and how it can be tested without asking anyone to simply believe it.</p><a className="card-link" href="#orientation">Read the orientation →</a></article><article><b>02 · EVIDENCE</b><h3>Source-led briefing</h3><p>Timeline labels distinguish documented evidence, creator-reported context and open questions. Private archives remain private.</p><a className="card-link" href="#timeline">Trace the timeline →</a></article><article><b>03 · DIALOGUE</b><h3>Talk to Martin</h3><p>For an interview, research question or source packet, use the public contact route. No mailing-list subscription is required.</p><button type="button" className="card-link" onClick={() => window.dispatchEvent(new CustomEvent("leis-open-contact", { detail: "Media enquiry" }))}>Open the contact path →</button></article></div><button type="button" className="primary" onClick={() => window.dispatchEvent(new CustomEvent("leis-open-contact", { detail: "Media enquiry" }))}>Media / research enquiry</button></section>
-    <section className="participate" id="participate"><p className="eyebrow">OPEN · FREE · EVOLVING</p><h2>LEIS has no walls.</h2><p>LEIS remains free of charge. Support, research dialogue and carefully scoped pilots help sustain its validation, preservation and human work.</p><div className="contact"><button type="button" className="primary" onClick={() => window.dispatchEvent(new CustomEvent("leis-open-contact", { detail: "Research dialogue" }))}>Start a respectful dialogue</button><span>Public contact route · no mailing list · no pressure</span></div><footer>Created by <b>Martin Puzik</b> · Technical collaboration: <b>M.A.J. Puzik</b></footer></section>
-  <ContactPath/></main><aside className={`leis-dock ${leisOpen ? "open" : ""}`} aria-label="LEIS orientation guide">
+  return <><a className="skip-link" href="#orientation">{copy.learn}</a><main>
+    <nav><a className="mark omega-mark" href="#top" aria-label={`LEIS — ${copy.start}`}><span aria-hidden="true"/><b>LEIS</b></a><div>{navigation.map(([id, label]) => <a key={id} href={`#${id}`} className={activeSection === id ? "active" : ""} aria-current={activeSection === id ? "page" : undefined} onClick={() => setActiveSection(id)}>{label}</a>)}</div></nav>
+    <section className="hero" id="top"><div className="stars" /><div className="hero-copy"><p className="eyebrow">{copy.eyebrow}</p><h1>{local ? local.heroA : "Understanding"}<br/><em>{local ? local.heroB : "that can travel."}</em></h1><p className="lead">{copy.heroLead}</p><div className="actions"><a className="primary" href="#orientation">{copy.learn}</a><a className="quiet" href="#timeline">{copy.lineage}</a></div></div><button className={`seed ${seedOpen ? "open" : ""}`} onClick={() => setSeedOpen(!seedOpen)} aria-expanded={seedOpen} aria-label={local ? local.seedAria : "Open the LEIS Seed preview"}><i/><span className="shell left"/><span className="shell right"/><span className="sprout"/></button><div className="seed-note"><span>{local ? local.seedLabel : "LEIS SEED"}</span><strong>{local ? (seedOpen ? local.seedOpen : local.seedClosed) : (seedOpen ? "A public Seed is taking shape." : "Touch the seed.")}</strong><p>{local ? (seedOpen ? local.seedOpenText : local.seedClosedText) : (seedOpen ? "A reviewed public entry point is being prepared: lineage, orientation and limits — without private archives." : "A small beginning, built to travel.")}</p></div></section>
+    <section className="seed-download" id="seed" aria-label={seedDownload.title}><div className="seed-download-intro"><p className="eyebrow">{seedDownload.eyebrow}</p><h2>{seedDownload.title}</h2><p>{seedDownload.lead}</p><p className="seed-verified">{seedDownload.verified}</p><p className="seed-language">{seedDownload.language}</p><div className="actions"><a className="primary" href="/LEIS_ROOT_SEED_2026_08_03.md" download>{seedDownload.download}</a><a className="quiet" href="/LEIS_ROOT_SEED_2026_08_03.md" target="_blank" rel="noreferrer">{seedDownload.view}</a></div></div><div className="seed-steps">{seedDownload.steps.map(([number, title, detail]) => <article key={number}><b>{number}</b><h3>{title}</h3><p>{detail}</p></article>)}</div><p className="seed-safety">{seedDownload.safety}</p></section>
+    <section className="orientation" id="orientation"><p className="eyebrow">{sections.orientation}</p><h2>{sections.reality}</h2><div className="principles"><article><b>01</b><h3>{principles.roots}</h3><p>{principles.rootsText}</p></article><article><b>02</b><h3>{principles.lineage}</h3><p>{principles.lineageText}</p></article><article><b>03</b><h3>{principles.validation}</h3><p>{principles.validationText}</p></article></div><p className="formula">{principles.formula}</p><section className="leis-loop" aria-label={loop.title}><div className="leis-loop-heading"><p className="eyebrow">{loop.eyebrow}</p><h3>{loop.title}</h3><p>{loop.lead}</p></div><div className="leis-loop-track" aria-label={loop.title}>{loop.steps.map(([label], index) => <button type="button" key={label} className={loopStep === index ? "active" : ""} aria-pressed={loopStep === index} onClick={() => setLoopStep(index)}><span>{String(index + 1).padStart(2, "0")}</span>{label}</button>)}</div><article className="leis-loop-reading" aria-live="polite"><span>{String(loopStep + 1).padStart(2, "0")} / {String(loop.steps.length).padStart(2, "0")}</span><h4>{activeLoop[0]}</h4><p>{activeLoop[1]}</p><p className="leis-loop-question"><b>{loop.questionLabel}</b> {activeLoop[2]}</p></article></section><section className="leis-test" aria-label={test.title}><p className="eyebrow">{test.eyebrow}</p><h3>{test.title}</h3><p className="leis-test-lead">{test.lead}</p><div>{test.checks.map(([number, title, detail]) => <article key={number}><b>{number}</b><h4>{title}</h4><p>{detail}</p></article>)}</div><p className="leis-test-note">{test.note}</p></section></section>
+    <section className="timeline" id="timeline"><p className="eyebrow">{sections.timeline}</p><h2>{sections.continuity}</h2><div className="timeline-grid"><div className="axis"><div className="pulse"/>{localizedMilestones[language].map(([, date, title], index) => <button key={title} className={active === index ? "active" : ""} style={{ top: `${17 + index * 22}%` }} onMouseEnter={() => setActive(index)} onFocus={() => setActive(index)} onClick={() => setActive(index)}><span/><small>{date}</small></button>)}</div><article className="event"><small>{current[0]} · {current[1]}</small><h3>{current[2]}</h3><p>{current[3]}</p></article></div><p className="certainty">{principles.timelineNote}</p></section>
+    <section className="earth" id="earth"><p className="eyebrow">{earth.eyebrow}</p><h2>{earth.title}</h2><p className="earth-lead">{earth.lead}</p><div className="earth-experience"><div className="signal-rail left-rail">{news.slice(0, 10).map((item, index) => <button className={newsIndex === index ? "selected" : ""} style={{ "--source": sourceColors[item.source] } as React.CSSProperties} onClick={() => choose(index)} key={item.title}><span className="signal-origin">{item.source} · {item.place}</span><strong>{item.title}</strong></button>)}</div><div className="globe-stage"><div className="stars local-stars"/>{Array.from({ length: 20 }, (_, index) => <i className="depth-star" key={index} style={{ left: `${(index * 31) % 100}%`, top: `${(index * 47) % 100}%`, animationDelay: `${index * 0.18}s` }} />)}<Globe onSelect={choose} language={language}/><p>{earth.hint}</p></div><div className="signal-rail right-rail">{news.slice(10).map((item, localIndex) => { const index = localIndex + 10; return <button className={newsIndex === index ? "selected" : ""} style={{ "--source": sourceColors[item.source] } as React.CSSProperties} onClick={() => choose(index)} key={item.title}><span className="signal-origin">{item.source} · {item.place}</span><strong>{item.title}</strong></button>; })}</div></div><article className="reading-card"><p className="eyebrow">{earth.selected} · {selected.source.toUpperCase()}</p><h3>{selected.title}</h3><p><b>{earth.sourceSays}</b> {selected.summary}</p><p><b>{earth.commentary}</b> {selected.leis}</p><div><span className="origin-dot" style={{ background: sourceColors[selected.source] }}/> {earth.origin} {selected.place}</div><a className="primary" href={selected.url} target="_blank" rel="noreferrer">{earth.read}</a></article><div className="source-row"><a href="https://blog.google/innovation-and-ai/technology/ai/" target="_blank">Google AI</a><a href="https://openai.com/news/" target="_blank">OpenAI</a><a href="https://www.anthropic.com/news" target="_blank">Anthropic</a><a href="https://huggingface.co/blog" target="_blank">Hugging Face</a></div></section>
+    <section className="grants" id="grants">
+      <p className="eyebrow">{copy.grantEyebrow}</p><h2>{copy.grantA}<br/>{copy.grantB}</h2><p className="grant-lead">{copy.grantLead}</p>
+      <div className="grant-grid">{(local ? local.grants : [["Preserve", "Recover source lineage, distinguish evidence from interpretation and prevent years of work from becoming unreadable files."], ["Test", "Measure whether understanding survives a handover: can a new person reconstruct a decision, its conditions and its limits?"], ["Share", "Build public explanations, practical pilots and open materials that let people judge LEIS for themselves."]]).map(([title, text], index) => <article key={title}><b>{String(index + 1).padStart(2, "0")}</b><h3>{title}</h3><p>{text}</p></article>)}</div>
+      <div className="grant-path">{(local ? local.grantPath : [["For grants:", "operational continuity, documentation, validation, infrastructure and independent review."], ["For companies:", "a bounded collaboration around a real handover, decision or knowledge-continuity problem."], ["For researchers and institutions:", "an invitation to challenge the method and improve its tests."]]).map(([title, text]) => <p key={title}><b>{title}</b> {text}</p>)}</div>
+      <section className="grant-dossier" aria-label={grantDossier.title}>
+        <div className="grant-dossier-intro"><p className="eyebrow">{grantDossier.route}</p><h3>{grantDossier.title}</h3><p>{grantDossier.lead}</p></div>
+        <div className="grant-dossier-grid">
+          <article><p className="eyebrow">{grantDossier.why}</p>{grantDossier.routes.map(([title, text], index) => <div className="dossier-row" key={title}><b>{String(index + 1).padStart(2, "0")}</b><div><strong>{title}</strong><p>{text}</p></div></div>)}</article>
+          <article><p className="eyebrow">{grantDossier.measure}</p>{grantDossier.measures.map(([title, text], index) => <div className="dossier-row" key={title}><b>{String(index + 1).padStart(2, "0")}</b><div><strong>{title}</strong><p>{text}</p></div></div>)}</article>
+        </div>
+      </section>
+      <button type="button" className="primary" onClick={() => window.dispatchEvent(new CustomEvent("leis-open-contact", { detail: "Grant or support" }))}>{copy.discuss}</button>
+      <p className="grant-next-step">{grantDossier.action}</p>
+    </section>
+    <section className="media" id="media">
+      <p className="eyebrow">{copy.mediaEyebrow}</p><h2>{copy.mediaTitle}</h2><p>{copy.mediaLead}</p>
+      <section className="public-brief" aria-label={publicBrief.title}>
+        <div className="public-brief-intro"><p className="eyebrow">{publicBrief.eyebrow}</p><h3>{publicBrief.title}</h3><p>{publicBrief.lead}</p></div>
+        <div className="public-brief-grid">{publicBrief.cards.map(([number, title, text]) => <article key={number}><b>{number}</b><h4>{title}</h4><p>{text}</p></article>)}</div>
+        <button type="button" className="brief-link" onClick={() => window.dispatchEvent(new CustomEvent("leis-open-contact", { detail: "Media enquiry" }))}>{publicBrief.action} →</button>
+      </section>
+      <div className="media-grid"><article><b>{local ? local.media[0][0] : "01 · ORIENTATION"}</b><h3>{copy.orientation}</h3><p>{local ? local.media[0][1] : "What LEIS is, what it is not, where it began and how it can be tested without asking anyone to simply believe it."}</p><a className="card-link" href="#orientation">{copy.readOrientation}</a></article><article><b>{local ? local.media[1][0] : "02 · EVIDENCE"}</b><h3>{copy.evidence}</h3><p>{local ? local.media[1][1] : "Timeline labels distinguish documented evidence, creator-reported context and open questions. Private archives remain private."}</p><a className="card-link" href="#timeline">{copy.traceTimeline}</a></article><article><b>{local ? local.media[2][0] : "03 · DIALOGUE"}</b><h3>{copy.dialogue}</h3><p>{local ? local.media[2][1] : "For an interview, research question or source packet, use the public contact route. No mailing-list subscription is required."}</p><button type="button" className="card-link" onClick={() => window.dispatchEvent(new CustomEvent("leis-open-contact", { detail: "Media enquiry" }))}>{copy.openContact}</button></article></div>
+      <button type="button" className="primary" onClick={() => window.dispatchEvent(new CustomEvent("leis-open-contact", { detail: "Media enquiry" }))}>{copy.mediaContact}</button>
+    </section>
+    <section className="participate" id="participate"><p className="eyebrow">{participation.eyebrow}</p><h2>{participation.title}</h2><p>{participation.lead}</p><div className="contact"><button type="button" className="primary" onClick={() => window.dispatchEvent(new CustomEvent("leis-open-contact", { detail: "Research dialogue" }))}>{participation.action}</button><span>{participation.note}</span></div><p className="source-language-note">{participation.sourceNote}</p><footer>{local ? local.footer : "Created by"} <b>Martin Puzik</b> · {local ? local.technical : "Technical collaboration:"} <b>M.A.J. Puzik</b></footer></section>
+  <ContactPath copy={copy} contactText={contactText}/></main><LanguageDock language={language} onChange={setLanguage} label={copy.language}/><aside className={`leis-dock ${leisOpen ? "open" : ""}`} aria-label={guideText.label}>
     {leisOpen && <div className="leis-dock-window">
-      <button className="leis-dock-close" onClick={() => setLeisOpen(false)} aria-label="Close LEIS guide">×</button>
-      <small>LEIS ORIENTATION GUIDE</small>
+      <button className="leis-dock-close" onClick={() => setLeisOpen(false)} aria-label={guideText.close}>×</button>
+      <small>{guideText.label}</small>
       <h3>{leisGuidance.title}</h3>
       <p>{leisGuidance.text}</p>
       <div className="leis-dock-choices">
-        <button className={leisTopic === "start" ? "active" : ""} onClick={() => setLeisTopic("start")}>What is LEIS?</button>
-        <button className={leisTopic === "story" ? "active" : ""} onClick={() => setLeisTopic("story")}>Our story</button>
-        <button className={leisTopic === "work" ? "active" : ""} onClick={() => setLeisTopic("work")}>Work with LEIS</button>
+        <button className={leisTopic === "start" ? "active" : ""} onClick={() => setLeisTopic("start")}>{guideText.start.choice}</button>
+        <button className={leisTopic === "story" ? "active" : ""} onClick={() => setLeisTopic("story")}>{guideText.story.choice}</button>
+        <button className={leisTopic === "work" ? "active" : ""} onClick={() => setLeisTopic("work")}>{guideText.work.choice}</button>
       </div>
       <a href={leisGuidance.link} onClick={() => setLeisOpen(false)}>{leisGuidance.action} ↗</a>
-      <em>This is an orientation guide, not a live AI chat.</em>
+      <em>{guideText.note}</em>
     </div>}
-    <button className="leis-dock-trigger" onClick={() => setLeisOpen(!leisOpen)} aria-expanded={leisOpen}><span>Ω</span>{leisOpen ? "Close" : "Ask LEIS"}</button>
+    <button className="leis-dock-trigger" onClick={() => setLeisOpen(!leisOpen)} aria-expanded={leisOpen}><span aria-hidden="true"/>{leisOpen ? guideText.close : guideText.ask}</button>
   </aside></>;
 }
