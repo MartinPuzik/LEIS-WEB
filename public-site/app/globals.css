@@ -248,6 +248,9 @@ nav div a.active{color:#e6ffff!important;background:linear-gradient(105deg,#39df
 .ask-route h4{margin:0 0 8px;color:var(--leis-moon-strong);font-size:1rem;line-height:1.25}.ask-route small{display:block;margin-top:12px;padding-top:11px;border-top:1px solid #3b77884d;color:#89b1b9;font-size:.67rem;line-height:1.45}
 
 /* Water belongs to the projected map itself. It must never sit behind the globe as a fixed CSS disk. */
+.human-hero-lead{max-width:650px;margin:19px 0 8px;color:#e5ffff;font-size:clamp(1.05rem,2vw,1.24rem);font-weight:650;line-height:1.55}.hero-copy .human-hero-lead+.lead{margin-top:0;color:#9fc5cc;font-size:.91rem}
+
+/* Water belongs to the projected map itself. It must never sit behind the globe as a fixed CSS disk. */
 .earth-experience .globe-map{background:transparent!important}
 .earth-experience .globe-map-shell:after{display:none!important}
 

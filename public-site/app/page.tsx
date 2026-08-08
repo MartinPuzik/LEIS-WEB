@@ -25,6 +25,14 @@ const portalCopy = {
 
 type PortalCopy = (typeof portalCopy)[Language];
 
+const heroHumanCopy: Record<Language, string> = {
+  en: "LEIS helps you keep the important reason behind your work, so another person — or your AI — can understand it too.",
+  cs: "LEIS pomáhá uchovat důležitý důvod vaší práce, aby mu porozuměl další člověk — nebo vaše AI.",
+  de: "LEIS hilft Ihnen, den wichtigen Grund hinter Ihrer Arbeit zu bewahren, damit ihn eine andere Person — oder Ihre KI — verstehen kann.",
+  fr: "LEIS vous aide à conserver la raison importante derrière votre travail, afin qu’une autre personne — ou votre IA — puisse aussi la comprendre.",
+  es: "LEIS le ayuda a conservar la razón importante detrás de su trabajo, para que otra persona — o su IA — también pueda comprenderla.",
+};
+
 const sectionCopy: Record<Language, { orientation: string; reality: string; recognition: string; timeline: string; continuity: string; earth: string; earthLead: string }> = {
   en: { orientation: "QUICK ORIENTATION", reality: "Reality was never hidden. Recognition was incomplete.", recognition: "Recognition", timeline: "LIVING LEIS TIMELINE", continuity: "From seed to continuity.", earth: "Where the current conversation is coming from.", earthLead: "Explore public AI signals by place. Tap a glowing hub or a newsroom card to open its source, a short summary and LEIS context." },
   cs: { orientation: "RYCHLÁ ORIENTACE", reality: "Realita nikdy nebyla skrytá. Rozpoznání bylo neúplné.", recognition: "Rozpoznání", timeline: "ŽIVÁ ČASOVÁ OSA LEIS", continuity: "Od semene ke kontinuitě.", earth: "Odkud přichází současná konverzace.", earthLead: "Prozkoumejte veřejné AI signály podle místa. Klepněte na zářící bod nebo kartu zdroje a otevřete původ, krátké shrnutí a kontext LEIS." },
@@ -435,7 +443,7 @@ const localizedMilestones: Record<Language, readonly (readonly [string, string, 
 // A new language is accepted only when every public interface layer contains it.
 // This prevents a partly translated portal from reaching visitors.
 const translationTables: Array<[string, Partial<Record<Language, unknown>>]> = [
-  ["portal", portalCopy], ["sections", sectionCopy], ["participation", participationCopy], ["grant dossier", grantDossierCopy], ["public briefing", publicBriefCopy], ["LEIS loop", loopCopy], ["LEIS test", testCopy], ["Seed download", seedDownloadCopy], ["Reality sources", sourceRegistryCopy], ["understanding path", understandingPathCopy], ["principles", principleCopy],
+  ["portal", portalCopy], ["hero human introduction", heroHumanCopy], ["sections", sectionCopy], ["participation", participationCopy], ["grant dossier", grantDossierCopy], ["public briefing", publicBriefCopy], ["LEIS loop", loopCopy], ["LEIS test", testCopy], ["Seed download", seedDownloadCopy], ["Reality sources", sourceRegistryCopy], ["understanding path", understandingPathCopy], ["principles", principleCopy],
   ["earth", earthCopy], ["globe", globeCopy], ["country profiles", countryBaselineCopy], ["document titles", documentTitles],
   ["Prague context", pragueCopy], ["contact", contactCopy], ["orientation guide", guideCopy], ["Ask LEIS", askLeisCopy], ["Ask LEIS send", askSendCopy], ["AI handoff", aiHandoffCopy], ["public Ask LEIS routing", publicRouteCopy], ["human clarity", humanClarityCopy], ["AI difference", aiDifferenceCopy], ["timeline", localizedMilestones],
   ["localized page content", { en: true, ...localizedStatic }],
@@ -1637,6 +1645,7 @@ export default function Home() {
   const [newsIndex, setNewsIndex] = useState(0);
   const [activeSection, setActiveSection] = useState("top");
   const copy = portalCopy[language];
+  const humanHeroLead = heroHumanCopy[language];
   const sections = sectionCopy[language];
   const participation = participationCopy[language];
   const grantDossier = grantDossierCopy[language];
@@ -1730,7 +1739,7 @@ export default function Home() {
   const choose = useCallback((index: number) => { setNewsIndex(index); window.dispatchEvent(new CustomEvent("leis-globe-focus", { detail: index })); }, []);
   return <><a className="skip-link" href="#orientation">{copy.learn}</a><main>
     <nav><a className="mark omega-mark" href="#top" aria-label={`LEIS — ${copy.start}`}><span aria-hidden="true"/><b>LEIS</b></a><div>{navigation.map(([id, label]) => <a key={id} href={`#${id}`} className={activeSection === id ? "active" : ""} aria-current={activeSection === id ? "page" : undefined} onClick={() => setActiveSection(id)}>{label}</a>)}</div></nav>
-    <section className="hero" id="top"><div className="stars" /><div className="hero-copy"><p className="eyebrow">{copy.eyebrow}</p><h1>{local ? local.heroA : "Understanding"}<br/><em>{local ? local.heroB : "that can travel."}</em></h1><p className="lead">{copy.heroLead}</p><div className="actions"><a className="primary" href="#orientation">{copy.learn}</a><a className="quiet" href="#timeline">{copy.lineage}</a></div></div><button className={`seed ${seedOpen ? "open" : ""}`} onClick={() => setSeedOpen(!seedOpen)} aria-expanded={seedOpen} aria-label={local ? local.seedAria : "Open the LEIS Seed preview"}><i/><span className="shell left"/><span className="shell right"/><span className="sprout"/></button><div className="seed-note"><span>{local ? local.seedLabel : "LEIS SEED"}</span><strong>{local ? (seedOpen ? local.seedOpen : local.seedClosed) : (seedOpen ? "A public Seed is taking shape." : "Touch the seed.")}</strong><p>{local ? (seedOpen ? local.seedOpenText : local.seedClosedText) : (seedOpen ? "A reviewed public entry point is being prepared: lineage, orientation and limits — without private archives." : "A small beginning, built to travel.")}</p></div></section>
+    <section className="hero" id="top"><div className="stars" /><div className="hero-copy"><p className="eyebrow">{copy.eyebrow}</p><h1>{local ? local.heroA : "Understanding"}<br/><em>{local ? local.heroB : "that can travel."}</em></h1><p className="human-hero-lead">{humanHeroLead}</p><p className="lead">{copy.heroLead}</p><div className="actions"><a className="primary" href="#orientation">{copy.learn}</a><a className="quiet" href="#timeline">{copy.lineage}</a></div></div><button className={`seed ${seedOpen ? "open" : ""}`} onClick={() => setSeedOpen(!seedOpen)} aria-expanded={seedOpen} aria-label={local ? local.seedAria : "Open the LEIS Seed preview"}><i/><span className="shell left"/><span className="shell right"/><span className="sprout"/></button><div className="seed-note"><span>{local ? local.seedLabel : "LEIS SEED"}</span><strong>{local ? (seedOpen ? local.seedOpen : local.seedClosed) : (seedOpen ? "A public Seed is taking shape." : "Touch the seed.")}</strong><p>{local ? (seedOpen ? local.seedOpenText : local.seedClosedText) : (seedOpen ? "A reviewed public entry point is being prepared: lineage, orientation and limits — without private archives." : "A small beginning, built to travel.")}</p></div></section>
     <AiDifference copy={aiDifference}/>
     <HumanClarity copy={humanClarity}/>
     <FirstSteps copy={firstSteps}/>
