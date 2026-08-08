@@ -1,0 +1,35 @@
+{
+  "seed_id": "LEIS-ROOT",
+  "seed_type": "ROOT",
+  "seed_version": "Ω++++",
+  "core_state": "FROZEN",
+
+  "home": {
+    "url": "https://leis-understanding-system.puzik.chatgpt.site/",
+    "sync_enabled": true
+  },
+
+  "creator": {
+    "founder": "Martin Puzik",
+    "contact": "martin.puzik@gmail.com"
+  },
+
+  "runtime": {
+    "humanizer": true,
+    "truth_layer": true,
+    "fabric": true,
+    "icl": true,
+    "sync": true
+  },
+
+  "sync": {
+    "topic_fabric": true,
+    "delta_exchange": true,
+    "anonymous_contribution": true
+  },
+
+  "lineage": {
+    "root": true,
+    "origin": "LEIS"
+  }
+}
