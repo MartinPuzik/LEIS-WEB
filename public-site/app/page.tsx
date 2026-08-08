@@ -276,6 +276,23 @@ const askSendCopy: Record<Language, { send: string; received: string }> = {
   es: { send: "Enviar pregunta", received: "Pregunta recibida" },
 };
 
+const aiHandoffCopy: Record<Language, { title: string; lead: string; choose: string; action: string; copied: string; local: string }> = {
+  en: { title: "Take the package to your own AI", lead: "LEIS prepares the context; you select the AI provider. The package is copied before the selected service opens.", choose: "Choose your AI", action: "Copy and open AI", copied: "Package copied. Paste it into the open AI conversation.", local: "Local or another AI" },
+  cs: { title: "Vezměte balíček do své vlastní AI", lead: "LEIS připraví kontext; poskytovatele AI si volíte vy. Balíček se zkopíruje před otevřením vybrané služby.", choose: "Vyberte svou AI", action: "Kopírovat a otevřít AI", copied: "Balíček je zkopírován. Vložte jej do otevřené konverzace AI.", local: "Lokální nebo jiná AI" },
+  de: { title: "Nehmen Sie das Paket zu Ihrer eigenen KI mit", lead: "LEIS bereitet den Kontext vor; Sie wählen den KI-Anbieter. Das Paket wird kopiert, bevor der gewählte Dienst geöffnet wird.", choose: "Wählen Sie Ihre KI", action: "Kopieren und KI öffnen", copied: "Paket kopiert. Fügen Sie es in die geöffnete KI-Unterhaltung ein.", local: "Lokale oder andere KI" },
+  fr: { title: "Emportez le paquet vers votre propre IA", lead: "LEIS prépare le contexte ; vous choisissez le fournisseur d’IA. Le paquet est copié avant l’ouverture du service choisi.", choose: "Choisissez votre IA", action: "Copier et ouvrir l’IA", copied: "Paquet copié. Collez-le dans la conversation IA ouverte.", local: "IA locale ou autre" },
+  es: { title: "Lleve el paquete a su propia IA", lead: "LEIS prepara el contexto; usted elige el proveedor de IA. El paquete se copia antes de abrir el servicio seleccionado.", choose: "Elija su IA", action: "Copiar y abrir IA", copied: "Paquete copiado. Péguelo en la conversación de IA abierta.", local: "IA local u otra" },
+};
+
+const aiTargets = [
+  { id: "chatgpt", label: "ChatGPT", url: "https://chatgpt.com/" },
+  { id: "claude", label: "Claude", url: "https://claude.ai/" },
+  { id: "gemini", label: "Gemini", url: "https://gemini.google.com/" },
+  { id: "copilot", label: "Copilot", url: "https://copilot.microsoft.com/" },
+  { id: "openrouter", label: "OpenRouter", url: "https://openrouter.ai/chat" },
+  { id: "local", label: "Local", url: "" },
+] as const;
+
 function LanguageDock({ language, onChange, label }: { language: Language; onChange: (language: Language) => void; label: string }) {
   const [open, setOpen] = useState(false);
   const dockRef = useRef<HTMLElement>(null);
@@ -396,7 +413,7 @@ const localizedMilestones: Record<Language, readonly (readonly [string, string, 
 const translationTables: Array<[string, Partial<Record<Language, unknown>>]> = [
   ["portal", portalCopy], ["sections", sectionCopy], ["participation", participationCopy], ["grant dossier", grantDossierCopy], ["public briefing", publicBriefCopy], ["LEIS loop", loopCopy], ["LEIS test", testCopy], ["Seed download", seedDownloadCopy], ["Reality sources", sourceRegistryCopy], ["understanding path", understandingPathCopy], ["principles", principleCopy],
   ["earth", earthCopy], ["globe", globeCopy], ["country profiles", countryBaselineCopy], ["document titles", documentTitles],
-  ["Prague context", pragueCopy], ["contact", contactCopy], ["orientation guide", guideCopy], ["Ask LEIS", askLeisCopy], ["Ask LEIS send", askSendCopy], ["timeline", localizedMilestones],
+  ["Prague context", pragueCopy], ["contact", contactCopy], ["orientation guide", guideCopy], ["Ask LEIS", askLeisCopy], ["Ask LEIS send", askSendCopy], ["AI handoff", aiHandoffCopy], ["timeline", localizedMilestones],
   ["localized page content", { en: true, ...localizedStatic }],
 ];
 
@@ -1510,6 +1527,8 @@ function AskLeis({ language, copy }: { language: Language; copy: (typeof askLeis
   const [packageText, setPackageText] = useState("");
   const [copied, setCopied] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [targetId, setTargetId] = useState<(typeof aiTargets)[number]["id"]>("chatgpt");
+  const [handoffReady, setHandoffReady] = useState(false);
   const recognitionRef = useRef<SpeechRecognizer | null>(null);
   const stopRequestedRef = useRef(true);
   const silenceTimerRef = useRef<number | null>(null);
@@ -1518,9 +1537,12 @@ function AskLeis({ language, copy }: { language: Language; copy: (typeof askLeis
   const stopVoice = () => { stopRequestedRef.current = true; clearSilenceTimer(); recognitionRef.current?.stop(); recognitionRef.current = null; setListening(false); };
   useEffect(() => () => stopVoice(), []);
   useEffect(() => { setVoiceMessage(""); setCopied(false); setSubmitted(false); }, [language]);
-  const buildPackage = () => {
+  const createPackage = () => {
     const userQuestion = question.trim() || copy.placeholder;
-    setPackageText(`LEIS CONTEXT PACKAGE\n\nLANGUAGE: ${locale[language]}\n\nQUESTION\n${userQuestion}\n\nPUBLIC LEIS FRAME\n${copy.packageLead}\n\nWORKING RULES\n${copy.packageRules}\n\nAVAILABLE PUBLIC ROUTES\n- LEIS Root Seed and Seed Manifest\n- Public orientation and LEIS method\n- Public timeline and lineage labels\n- Curated public Earth Pulse signals\n\nREQUEST TO THE AI\nHelp explore the question without pretending to access private LEIS archives or hidden data. State uncertainty, separate quoted source claims from interpretation, and name what additional evidence would be needed.`);
+    return `LEIS CONTEXT PACKAGE\n\nLANGUAGE: ${locale[language]}\n\nQUESTION\n${userQuestion}\n\nPUBLIC LEIS FRAME\n${copy.packageLead}\n\nWORKING RULES\n${copy.packageRules}\n\nAVAILABLE PUBLIC ROUTES\n- LEIS Root Seed and Seed Manifest\n- Public orientation and LEIS method\n- Public timeline and lineage labels\n- Curated public Earth Pulse signals\n\nREQUEST TO THE AI\nHelp explore the question without pretending to access private LEIS archives or hidden data. State uncertainty, separate quoted source claims from interpretation, and name what additional evidence would be needed.`;
+  };
+  const buildPackage = () => {
+    setPackageText(createPackage());
     setCopied(false);
   };
   const copyPackage = async () => {
@@ -1541,6 +1563,12 @@ function AskLeis({ language, copy }: { language: Language; copy: (typeof askLeis
   };
   const toggleVoice = () => { if (listening) stopVoice(); else beginVoice(); };
   const submitQuestion = () => { setSubmitted(true); if (mode === 1) buildPackage(); };
+  const handoff = async () => {
+    const text = createPackage(); setPackageText(text); setHandoffReady(false);
+    try { await navigator.clipboard.writeText(text); setHandoffReady(true); } catch { setHandoffReady(false); }
+    const target = aiTargets.find((item) => item.id === targetId);
+    if (target?.url) window.open(target.url, "_blank", "noopener,noreferrer");
+  };
   const publicAnswer = question.trim() ? `${copy.publicLead} ${copy.publicRoutes}` : copy.publicLead;
   return <aside className={`leis-dock ${open ? "open" : ""}`} aria-label={copy.label}>
     {open && <section className="leis-dock-window ask-leis-window" role="dialog" aria-modal="false" aria-label={copy.title}>
@@ -1552,7 +1580,7 @@ function AskLeis({ language, copy }: { language: Language; copy: (typeof askLeis
       <p className="ask-voice-note">{voiceMessage || copy.voiceNote}</p>
       {mode === 0 && <article className="ask-result" aria-live="polite"><p className="eyebrow">{submitted ? `${askSendCopy[language].received} · ${copy.publicTitle}` : copy.publicTitle}</p><p>{publicAnswer}</p><a href="#seed" onClick={() => setOpen(false)}>LEIS Root Seed →</a><a href="#timeline" onClick={() => setOpen(false)}>LEIS timeline →</a></article>}
       {mode === 1 && packageText && <article className="ask-result"><p className="eyebrow">{copy.packageTitle}</p><p>{copy.packageLead}</p><textarea readOnly value={packageText} aria-label={copy.packageTitle}/><button type="button" className="quiet" onClick={copyPackage}>{copied ? copy.copied : copy.copy}</button></article>}
-      {mode === 2 && <article className="ask-result"><p className="eyebrow">{copy.connectedTitle}</p><p>{copy.connectedLead}</p></article>}
+      {mode === 2 && <article className="ask-result ask-handoff"><p className="eyebrow">{aiHandoffCopy[language].title}</p><p>{aiHandoffCopy[language].lead}</p><label><span>{aiHandoffCopy[language].choose}</span><select value={targetId} onChange={(event) => setTargetId(event.target.value as (typeof aiTargets)[number]["id"])}>{aiTargets.map((target) => <option key={target.id} value={target.id}>{target.id === "local" ? aiHandoffCopy[language].local : target.label}</option>)}</select></label><button type="button" className="primary" onClick={handoff}>{aiHandoffCopy[language].action}</button>{handoffReady && <small aria-live="polite">{aiHandoffCopy[language].copied}</small>}</article>}
       <em>{copy.noPrivate}</em>
     </section>}
     <button className="leis-dock-trigger" onClick={() => setOpen(!open)} aria-expanded={open}><span aria-hidden="true"/>{open ? copy.close : copy.label}</button>
