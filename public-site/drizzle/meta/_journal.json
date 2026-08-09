@@ -8,6 +8,13 @@
       "when": 1786236391889,
       "tag": "0000_daily_spirit",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1786239175261,
+      "tag": "0001_shallow_cyclops",
+      "breakpoints": true
     }
   ]
 }

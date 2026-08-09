@@ -11,8 +11,18 @@ export const seedRegistry = sqliteTable("seed_registry", {
   topicsJson: text("topics_json").notNull().default("[]"),
   city: text("city").notNull().default(""),
   capabilitiesJson: text("capabilities_json").notNull().default("{}"),
+  manifestHash: text("manifest_hash").notNull().default(""),
+  publicKey: text("public_key").notNull().default(""),
   status: text("status").notNull().default("pending"),
   receivedAt: text("received_at").notNull(),
+  lastSync: text("last_sync").notNull().default(""),
+});
+
+export const syncChallenges = sqliteTable("sync_challenges", {
+  nonce: text("nonce").primaryKey(),
+  purpose: text("purpose").notNull(),
+  expiresAt: text("expires_at").notNull(),
+  usedAt: text("used_at").notNull().default(""),
 });
 
 export const seedDeltas = sqliteTable("seed_deltas", {

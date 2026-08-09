@@ -1,0 +1,2 @@
+import { protocol, reply } from "../../api/seed-sync/v1/sync";
+export async function GET() { return reply({ protocol, seed_farm: "/api/seed-sync/v1", endpoints: { challenge: "/api/seed-sync/v1/challenge", seeds: "/api/seed-sync/v1/seeds", deltas: "/api/seed-sync/v1/deltas", topic_fabric: "/api/seed-sync/v1/topic-fabric" }, identity: "UUIDv7 + manifest SHA-256 + Ed25519 public key", privacy: "Public Seed metadata and public deltas only." }); }
