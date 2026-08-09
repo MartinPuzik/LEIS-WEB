@@ -25,7 +25,11 @@
   "sync": {
     "topic_fabric": true,
     "delta_exchange": true,
-    "anonymous_contribution": true
+    "anonymous_contribution": true,
+    "protocol": "leis-seed-sync/v1",
+    "endpoint": "https://leis-understanding-system.puzik.chatgpt.site/api/seed-sync/v1",
+    "registration": "quarantine",
+    "public_data_only": true
   },
 
   "lineage": {

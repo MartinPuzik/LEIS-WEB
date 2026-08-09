@@ -1,0 +1,10 @@
+{
+  "protocol": "leis-seed-sync/v1",
+  "endpoint": "/api/seed-sync/v1",
+  "registration": "quarantine",
+  "accepts": ["public_seed_manifest", "public_delta"],
+  "privacy": "No private files, chat content, names, emails or credentials are accepted.",
+  "required_manifest_fields": ["seed_id", "seed_type", "seed_version", "home.url", "home.sync_enabled"],
+  "optional_public_fields": ["sync_generation", "topics", "city", "capabilities"],
+  "delta": { "optional_fields": ["topic", "statement"], "status_on_receipt": "pending" }
+}
