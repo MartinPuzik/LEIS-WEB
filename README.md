@@ -14,13 +14,34 @@ Modern LLMs are powerful predictive engines. They expand patterns, generate hypo
 
 This repository contains the first public technical package for LEIS:
 
-- `docs/leis-architecture-whitepaper.pdf` - formal protocol specification.
 - `integration/leis_llm_middleware.py` - executable Python middleware demonstrating LEIS above an LLM call.
 - `seed/LEIS_ROOT_SEED_V4_2026_08_09.md` - public Root Seed release.
 - `seed/LEIS_SEED_LINK_V4_2026_08_09.json` - public Seed Link / manifest for the Root Seed.
-- `docs/LEIS_GOOGLE_OUTREACH_TARGETS.md` - cautious outreach shortlist for Google / Discovery Loop review.
+- `docs/research/` - public research package for reviewers, engineers, policy readers and integration teams.
 - `assets/leis_linkedin_banner.jpg` - media banner for launch posts.
 - Existing visual runtime prototypes in the repository root.
+
+---
+
+## Research Package
+
+If you are reviewing LEIS as a researcher, engineer, policy specialist, investor, or potential integration partner, start here.
+
+| Document | Best for | What it gives you |
+| --- | --- | --- |
+| [LEIS Scientific Whitepaper](docs/research/leis-scientific-whitepaper.pdf) | Research and architecture review | The core scientific framing, protocol loop, mathematical model and reconstruction argument. |
+| [LEIS Empirical Benchmark Report](docs/research/leis-empirical-benchmark-report.pdf) | Engineering validation | A compact benchmark-oriented view of the LEIS runtime claim: lightweight validation above generation rather than another heavy model layer. |
+| [LEIS EU AI Act Compliance Matrix](docs/research/leis-eu-ai-act-compliance-matrix.pdf) | Governance, risk and compliance | A first mapping from LEIS concepts to oversight, traceability, risk management and human-control concerns. |
+| [LEIS Product Integration Blueprint](docs/research/leis-product-integration-blueprint.pdf) | Product and platform teams | A practical view of how LEIS can sit above LLM outputs as a validation and continuation layer. |
+
+Additional reference:
+
+- [Original architecture whitepaper](docs/leis-architecture-whitepaper.pdf)
+- [Live LEIS portal](https://leis-understanding-system.puzik.chatgpt.site/)
+
+The documents are intentionally public and lightweight. LEIS does not ask a reviewer to believe a hidden system exists. The useful question is simpler:
+
+> Can generated output remain connected to explicit reality markers, uncertainty, conflict handling and human-readable continuation before it is treated as understanding?
 
 ---
 
