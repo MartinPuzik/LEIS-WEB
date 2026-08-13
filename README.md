@@ -25,21 +25,25 @@ This repository contains the first public technical package for LEIS:
 
 ## Research Package
 
-If you are reviewing LEIS as a researcher, engineer, policy specialist, investor, or potential integration partner, start here.
+If you are reviewing LEIS as a researcher, engineer, policy specialist, investor, media contact, hub, or potential integration partner, start here.
 
 | Document | Best for | What it gives you |
 | --- | --- | --- |
-| [LEIS Scientific Whitepaper](docs/research/leis-scientific-whitepaper.pdf) | Research and architecture review | The core scientific framing, protocol loop, mathematical model and reconstruction argument. |
-| [LEIS Empirical Benchmark Report](docs/research/leis-empirical-benchmark-report.pdf) | Engineering validation | A compact benchmark-oriented view of the LEIS runtime claim: lightweight validation above generation rather than another heavy model layer. |
-| [LEIS EU AI Act Compliance Matrix](docs/research/leis-eu-ai-act-compliance-matrix.pdf) | Governance, risk and compliance | A first mapping from LEIS concepts to oversight, traceability, risk management and human-control concerns. |
-| [LEIS Product Integration Blueprint](docs/research/leis-product-integration-blueprint.pdf) | Product and platform teams | A practical view of how LEIS can sit above LLM outputs as a validation and continuation layer. |
+| [Integrated Scientific Whitepaper](docs/research/leis-integrated-scientific-whitepaper.pdf) | Research and architecture review | The master paper: Spark Ladder, LEIS-ZERO reconstructability, the 13-stage loop, reality markers and the scientific framing of LEIS as an understanding protocol. |
+| [EU AI Act Compliance Matrix](docs/research/leis-eu-ai-act-compliance-matrix.pdf) | Governance, risk and compliance | A plain mapping from LEIS oversight, Conflict Capsules, traceability and human-control rules to EU AI Act concerns. |
+| [Product Integration Blueprint](docs/research/leis-product-integration-blueprint.pdf) | Product and platform teams | How LEIS can sit above Gemini, OpenAI, Claude, local LLMs or enterprise ontologies as a validation and continuation layer. |
+| [Empirical Benchmark Report](docs/research/leis-empirical-benchmark-report.pdf) | Engineering validation | First benchmark-oriented evidence for lightweight context validation, reconstruction fidelity and token-efficiency claims. |
+| [The LEIS Protocol presentation - PDF](docs/research/the-leis-protocol-presentation.pdf) | Investors, media, hubs and first meetings | A board-room readable overview of the protocol and why it matters. |
+| [The LEIS Protocol presentation - PPTX](docs/research/the-leis-protocol-presentation.pptx) | Presentations and partner briefings | Editable slide material for meetings, hubs and outreach. |
+| [RFI Calculator](rfi-calculator.py) | Developers and reviewers | A small Python script for calculating a Reconstruction Fidelity Index from handover text. |
 
 Additional reference:
 
 - [Original architecture whitepaper](docs/leis-architecture-whitepaper.pdf)
+- [Gemini Notebook artifact](https://notebook.google.com/notebook/c654db9e-7e53-4ef2-9c8e-473e476665da/artifact/8158ccb2-e14a-452c-b075-41254c193c8b?utm_source=nlm_web_share&utm_medium=google_oo&utm_campaign=art_share_1&utm_content=&utm_smc=nlm_web_share_google_oo_art_share_1_)
 - [Live LEIS portal](https://leis-understanding-system.puzik.chatgpt.site/)
 
-The documents are intentionally public and lightweight. LEIS does not ask a reviewer to believe a hidden system exists. The useful question is simpler:
+The documents are intentionally public and reviewable. LEIS does not ask a reviewer to believe a hidden system exists. The useful question is simpler:
 
 > Can generated output remain connected to explicit reality markers, uncertainty, conflict handling and human-readable continuation before it is treated as understanding?
 
