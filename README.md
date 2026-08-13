@@ -29,19 +29,29 @@ If you are reviewing LEIS as a researcher, engineer, policy specialist, investor
 
 | Document | Best for | What it gives you |
 | --- | --- | --- |
-| [Integrated Scientific Whitepaper](docs/research/leis-integrated-scientific-whitepaper.pdf) | Research and architecture review | The master paper: Spark Ladder, LEIS-ZERO reconstructability, the 13-stage loop, reality markers and the scientific framing of LEIS as an understanding protocol. |
-| [EU AI Act Compliance Matrix](docs/research/leis-eu-ai-act-compliance-matrix.pdf) | Governance, risk and compliance | A plain mapping from LEIS oversight, Conflict Capsules, traceability and human-control rules to EU AI Act concerns. |
-| [Product Integration Blueprint](docs/research/leis-product-integration-blueprint.pdf) | Product and platform teams | How LEIS can sit above Gemini, OpenAI, Claude, local LLMs or enterprise ontologies as a validation and continuation layer. |
-| [Empirical Benchmark Report](docs/research/leis-empirical-benchmark-report.pdf) | Engineering validation | First benchmark-oriented evidence for lightweight context validation, reconstruction fidelity and token-efficiency claims. |
-| [The LEIS Protocol presentation - PDF](docs/research/the-leis-protocol-presentation.pdf) | Investors, media, hubs and first meetings | A board-room readable overview of the protocol and why it matters. |
-| [The LEIS Protocol presentation - PPTX](docs/research/the-leis-protocol-presentation.pptx) | Presentations and partner briefings | Editable slide material for meetings, hubs and outreach. |
-| [RFI Calculator](rfi-calculator.py) | Developers and reviewers | A small Python script for calculating a Reconstruction Fidelity Index from handover text. |
+| [Integrated Scientific Whitepaper](public/research/leis-integrated-scientific-whitepaper.pdf) | Research and architecture review | The master paper: Spark Ladder, LEIS-ZERO reconstructability, the 13-stage loop, reality markers and the scientific framing of LEIS as an understanding protocol. |
+| [EU AI Act Compliance Matrix](public/research/leis-eu-ai-act-compliance-matrix.pdf) | Governance, risk and compliance | A plain mapping from LEIS oversight, Conflict Capsules, traceability and human-control rules to EU AI Act concerns. |
+| [Product Integration Blueprint](public/research/leis-product-integration-blueprint.pdf) | Product and platform teams | How LEIS can sit above Gemini, OpenAI, Claude, local LLMs or enterprise ontologies as a validation and continuation layer. |
+| [Empirical Benchmark Report](public/research/leis-empirical-benchmark-report.pdf) | Engineering validation | First benchmark-oriented evidence for lightweight context validation, reconstruction fidelity and token-efficiency claims. |
+| [The LEIS Protocol presentation - PDF](public/research/the-leis-protocol-presentation.pdf) | Investors, media, hubs and first meetings | A board-room readable overview of the protocol and why it matters. |
+| [The LEIS Protocol presentation - PPTX](public/research/the-leis-protocol-presentation.pptx) | Presentations and partner briefings | Editable slide material for meetings, hubs and outreach. |
+| [RFI Calculator](public/research/rfi-calculator.py) | Developers and reviewers | A small Python script for calculating a Reconstruction Fidelity Index from handover text. |
 
 Additional reference:
 
 - [Original architecture whitepaper](docs/leis-architecture-whitepaper.pdf)
 - [Gemini Notebook artifact](https://notebook.google.com/notebook/c654db9e-7e53-4ef2-9c8e-473e476665da/artifact/8158ccb2-e14a-452c-b075-41254c193c8b?utm_source=nlm_web_share&utm_medium=google_oo&utm_campaign=art_share_1&utm_content=&utm_smc=nlm_web_share_google_oo_art_share_1_)
 - [Live LEIS portal](https://leis-understanding-system.puzik.chatgpt.site/)
+
+Public portal mirrors:
+
+- [Live research package on LEIS HOME](https://leis-understanding-system.puzik.chatgpt.site/#media)
+- [Live scientific whitepaper](https://leis-understanding-system.puzik.chatgpt.site/research/leis-integrated-scientific-whitepaper.pdf)
+- [Live EU AI Act matrix](https://leis-understanding-system.puzik.chatgpt.site/research/leis-eu-ai-act-compliance-matrix.pdf)
+- [Live product integration blueprint](https://leis-understanding-system.puzik.chatgpt.site/research/leis-product-integration-blueprint.pdf)
+- [Live empirical benchmark report](https://leis-understanding-system.puzik.chatgpt.site/research/leis-empirical-benchmark-report.pdf)
+- [Live LEIS Protocol presentation](https://leis-understanding-system.puzik.chatgpt.site/research/the-leis-protocol-presentation.pdf)
+
 
 The documents are intentionally public and reviewable. LEIS does not ask a reviewer to believe a hidden system exists. The useful question is simpler:
 
