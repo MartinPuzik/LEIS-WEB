@@ -1,0 +1,464 @@
+.simulator {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  color: #e9fbff;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(26, 111, 155, 0.18), transparent 27%),
+    radial-gradient(circle at 79% 75%, rgba(21, 81, 122, 0.13), transparent 31%),
+    linear-gradient(145deg, #010409 0%, #020a12 49%, #02050c 100%);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.simulator::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(102, 215, 232, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(102, 215, 232, 0.028) 1px, transparent 1px),
+    radial-gradient(circle at center, transparent 41%, rgba(0, 0, 0, 0.46) 100%);
+  background-size: 48px 48px, 48px 48px, 100% 100%;
+}
+
+.canvas,
+.canvas canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.canvas canvas {
+  display: block;
+  touch-action: none;
+  cursor: grab;
+}
+
+.canvas canvas:active { cursor: grabbing; }
+
+.identity {
+  position: absolute;
+  z-index: 8;
+  top: 24px;
+  right: 28px;
+  display: grid;
+  justify-items: end;
+  gap: 3px;
+  pointer-events: none;
+  text-align: right;
+}
+
+.identity small,
+.identity span,
+.telemetry small,
+.inspector > small,
+.systems > small {
+  color: #64e3ec;
+  font: 750 0.57rem/1.35 ui-monospace, SFMono-Regular, Consolas, monospace;
+  letter-spacing: 0.14em;
+}
+
+.identity strong {
+  font-size: clamp(1.3rem, 2.4vw, 2.35rem);
+  font-weight: 680;
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.telemetry,
+.inspector,
+.systems {
+  position: absolute;
+  z-index: 7;
+  border: 1px solid rgba(94, 207, 219, 0.28);
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(6, 26, 38, 0.82), rgba(2, 10, 18, 0.91));
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5), inset 0 1px rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(18px) saturate(1.14);
+}
+
+.telemetry {
+  top: 24px;
+  left: 24px;
+  width: min(348px, calc(100vw - 48px));
+  padding: 18px;
+}
+
+.telemetry > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.telemetry h1 {
+  margin: 4px 0 0;
+  font-size: 1.42rem;
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+.telemetry header > b {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 9px;
+  border: 1px solid rgba(113, 240, 191, 0.34);
+  border-radius: 999px;
+  color: #8ff0c7;
+  font-size: 0.56rem;
+  letter-spacing: 0.08em;
+}
+
+.telemetry header > b i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 14px currentColor;
+  animation: statusPulse 1.8s ease-in-out infinite;
+}
+
+.telemetry header > b.stateLOADING,
+.telemetry header > b.statePARTIAL,
+.telemetry header > b.stateSTALE { color: #f0c77e; border-color: rgba(240, 199, 126, 0.38); }
+.telemetry header > b.stateUNAVAILABLE { color: #ff8c8c; border-color: rgba(255, 140, 140, 0.38); }
+
+.telemetry > p,
+.inspector > p {
+  margin: 13px 0;
+  color: #98b9c0;
+  font-size: 0.72rem;
+  line-height: 1.48;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 14px 0;
+}
+
+.metrics span {
+  display: grid;
+  min-width: 0;
+  padding: 10px 7px 8px;
+  border: 1px solid rgba(76, 145, 159, 0.3);
+  border-radius: 10px;
+  background: rgba(2, 15, 25, 0.56);
+}
+
+.metrics b {
+  color: #e9feff;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.metrics small {
+  margin-top: 5px;
+  overflow: hidden;
+  color: #668f98;
+  font-size: 0.43rem;
+  letter-spacing: 0.015em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.layers {
+  display: grid;
+  grid-template-columns: 0.8fr 1fr 1.35fr;
+  gap: 6px;
+  margin: -2px 0 8px;
+}
+
+.layers button {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 6px 7px;
+  overflow: hidden;
+  border: 1px solid rgba(91, 199, 211, 0.28);
+  border-radius: 9px;
+  background: rgba(10, 55, 68, 0.36);
+  color: #b8d9dd;
+  font: 700 0.5rem/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.layers button[aria-pressed="false"] {
+  border-color: rgba(90, 130, 139, 0.18);
+  background: rgba(2, 13, 21, 0.5);
+  color: #58757b;
+  opacity: 0.68;
+}
+
+.layers button:hover,
+.layers button:focus-visible {
+  border-color: rgba(102, 233, 241, 0.65);
+  outline: none;
+}
+
+.layers i,
+.legend i {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6cdcf5;
+  box-shadow: 0 0 9px currentColor;
+}
+
+.layers i.cloudLayer,
+.legend i.cloudLayer {
+  width: 15px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(226, 242, 250, 0.35), #f4fbff, rgba(196, 222, 236, 0.42));
+  box-shadow: 0 0 12px rgba(224, 245, 255, 0.62);
+}
+
+.layers i.surfaceWind,
+.legend i.surfaceWind {
+  background: #76f0ad;
+  color: #76f0ad;
+}
+
+.layers i.jetWind,
+.legend i.jetWind {
+  background: #71d7ff;
+  color: #a58cff;
+  box-shadow: 0 0 10px #a58cff;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1.15fr 1.2fr 1fr;
+  gap: 6px;
+  margin-bottom: 13px;
+}
+
+.actions button,
+.coordinate,
+.systems button {
+  border: 1px solid rgba(91, 199, 211, 0.29);
+  background: rgba(10, 55, 68, 0.42);
+  color: #ccecf0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.actions button {
+  min-height: 34px;
+  padding: 7px 8px;
+  border-radius: 9px;
+  font-size: 0.55rem;
+  font-weight: 700;
+}
+
+.actions button:hover,
+.actions button:focus-visible,
+.coordinate:hover,
+.coordinate:focus-visible,
+.systems button:hover,
+.systems button:focus-visible {
+  border-color: rgba(102, 233, 241, 0.65);
+  background: rgba(16, 79, 92, 0.64);
+  outline: none;
+}
+
+.telemetry dl {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.6rem;
+}
+
+.telemetry dl > div {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(67, 127, 140, 0.22);
+}
+
+.telemetry dt { color: #608992; }
+.telemetry dd { margin: 0; color: #b8d8dc; }
+.telemetry a { color: #65dfe8; text-decoration: none; }
+.telemetry a:hover { text-decoration: underline; }
+
+.inspector {
+  right: 25px;
+  bottom: 123px;
+  width: min(292px, calc(100vw - 48px));
+  padding: 16px;
+}
+
+.coordinate {
+  display: block;
+  margin: 9px 0 5px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  color: #69e4ec;
+  font: 760 0.62rem/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+  letter-spacing: 0.08em;
+}
+
+.inspector > strong {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 1.75rem;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.inspectorGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.inspectorGrid span {
+  display: grid;
+  padding: 8px;
+  border: 1px solid rgba(75, 140, 151, 0.27);
+  border-radius: 9px;
+  color: #6f98a0;
+  font-size: 0.53rem;
+}
+
+.inspectorGrid b {
+  color: #e2fafc;
+  font-size: 0.84rem;
+}
+
+.systems {
+  top: 131px;
+  right: 25px;
+  display: grid;
+  width: 222px;
+  gap: 5px;
+  padding: 13px;
+}
+
+.systems > small { margin-bottom: 3px; font-size: 0.46rem; }
+
+.systems button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: 8px;
+  font-size: 0.54rem;
+}
+
+.systems button span { color: #739da5; }
+.systems button b { color: #dff9fa; }
+
+.legend {
+  position: absolute;
+  z-index: 6;
+  bottom: 65px;
+  left: 50%;
+  display: flex;
+  gap: 14px;
+  padding: 8px 12px;
+  border: 1px solid rgba(90, 173, 185, 0.18);
+  border-radius: 999px;
+  background: rgba(2, 11, 18, 0.68);
+  transform: translateX(-50%);
+  backdrop-filter: blur(12px);
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #779ba2;
+  font: 650 0.51rem/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+  white-space: nowrap;
+}
+
+.boundary {
+  position: absolute;
+  z-index: 8;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 12px 24px;
+  border-top: 1px solid rgba(91, 181, 193, 0.15);
+  background: rgba(1, 6, 11, 0.82);
+  color: #54757c;
+  font: 650 0.5rem/1.35 ui-monospace, SFMono-Regular, Consolas, monospace;
+  letter-spacing: 0.045em;
+  backdrop-filter: blur(12px);
+}
+
+.boundary span:last-child { text-align: right; }
+.boundary a { color: #6ca0aa; text-decoration: underline; text-underline-offset: 2px; }
+
+@keyframes statusPulse {
+  50% { opacity: 0.45; transform: scale(0.72); }
+}
+
+@media (max-width: 920px) {
+  .identity span,
+  .systems { display: none; }
+  .inspector { bottom: 110px; }
+  .boundary span:first-child { display: none; }
+  .boundary { justify-content: center; }
+  .boundary span:last-child { text-align: center; }
+}
+
+@media (max-height: 760px) {
+  .systems { display: none; }
+  .inspector { bottom: 76px; }
+}
+
+@media (max-width: 680px) {
+  .identity { top: 12px; right: 13px; }
+  .identity small { display: none; }
+  .identity strong { font-size: 1.15rem; }
+  .telemetry {
+    top: 52px;
+    left: 10px;
+    width: calc(100vw - 20px);
+    padding: 13px;
+  }
+  .telemetry h1 { font-size: 1.15rem; }
+  .telemetry > p { display: none; }
+  .metrics { margin: 11px 0; }
+  .layers { margin-top: -5px; }
+  .layers button { min-height: 27px; font-size: 0.44rem; }
+  .actions button { font-size: 0.5rem; }
+  .telemetry dl > div:not(:last-child) { display: none; }
+  .inspector {
+    right: 10px;
+    bottom: 73px;
+    left: 10px;
+    width: auto;
+    padding: 11px;
+  }
+  .inspector > strong { position: absolute; top: 12px; right: 12px; font-size: 1.35rem; }
+  .inspectorGrid { grid-template-columns: repeat(4, 1fr); }
+  .inspectorGrid span { padding: 6px; font-size: 0.45rem; }
+  .inspectorGrid b { font-size: 0.7rem; }
+  .inspector > p { display: none; }
+  .legend { bottom: 50px; gap: 7px; padding: 6px 8px; }
+  .legend span { font-size: 0.43rem; }
+  .boundary { padding: 8px 10px; font-size: 0.43rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .telemetry header > b i { animation: none; }
+}

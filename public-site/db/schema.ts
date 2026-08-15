@@ -33,3 +33,11 @@ export const seedDeltas = sqliteTable("seed_deltas", {
   status: text("status").notNull().default("pending"),
   receivedAt: text("received_at").notNull(),
 });
+
+// A single sanitized public snapshot. Book text, paths, hashes, source IDs and
+// private-memory records are deliberately outside this table and API boundary.
+export const memoryPublicStatus = sqliteTable("memory_public_status", {
+  id: integer("id").primaryKey(),
+  payloadJson: text("payload_json").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});

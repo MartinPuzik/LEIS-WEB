@@ -6,10 +6,10 @@
     "node": ">=22.13.0"
   },
   "scripts": {
-    "dev": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext dev",
-    "build": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext build",
+    "dev": "vinext dev",
+    "build": "vinext build",
     "verify:release": "npx vinext build --verbose",
-    "start": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext start",
+    "start": "vinext start",
     "test": "npm run build && node --test tests/rendered-html.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate"
@@ -17,11 +17,13 @@
   "dependencies": {
     "@amcharts/amcharts5": "^5.20.1",
     "@amcharts/amcharts5-geodata": "^5.1.6",
+    "@types/three": "^0.185.4",
     "drizzle-orm": "0.45.2",
     "next": "^16.3.1",
     "react": "19.2.6",
     "react-dom": "19.2.6",
-    "react-loading-skeleton": "3.5.0"
+    "react-loading-skeleton": "3.5.0",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.37.1",

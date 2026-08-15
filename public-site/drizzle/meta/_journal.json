@@ -15,6 +15,13 @@
       "when": 1786239175261,
       "tag": "0001_shallow_cyclops",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1786783755086,
+      "tag": "0002_lovely_legion",
+      "breakpoints": true
     }
   ]
 }

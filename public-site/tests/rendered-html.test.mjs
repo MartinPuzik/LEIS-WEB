@@ -59,6 +59,81 @@ test("uses the Portable Kernel as the single public onboarding file", async () =
   assert.match(page, /The older Root Seed remains in the lineage archive/);
 });
 
+test("restores RealSIM as a bounded multilingual reconstruction sandbox", async () => {
+  const page = await readFile(path.join(siteRoot, "app", "page.tsx"), "utf8");
+
+  assert.match(page, /REALITY RECONSTRUCTION SANDBOX/);
+  assert.match(page, /PÍSKOVIŠTĚ REKONSTRUKCE REALITY/);
+  assert.match(page, /SANDBOX ZUR REALITÄTSREKONSTRUKTION/);
+  assert.match(page, /BAC À SABLE DE RECONSTRUCTION DU RÉEL/);
+  assert.match(page, /ENTORNO DE RECONSTRUCCIÓN DE LA REALIDAD/);
+  assert.match(page, /does not measure global reality, predict outcomes or validate a claim/);
+  assert.match(page, /leis-realsim-inject|injectRealSim/);
+  assert.match(page, /SPACE · RELATION · TIME · LINEAGE/);
+});
+
+test("provides a focused local 4D realSIM workbench", async () => {
+  const [route, workbench, earth, styles, layout] = await Promise.all([
+    readFile(path.join(siteRoot, "app", "realsim", "page.tsx"), "utf8"),
+    readFile(path.join(siteRoot, "app", "realsim", "RealSimWorkbench.tsx"), "utf8"),
+    readFile(path.join(siteRoot, "app", "realsim", "RealSimEarth.tsx"), "utf8"),
+    readFile(path.join(siteRoot, "app", "realsim", "realsim.module.css"), "utf8"),
+    readFile(path.join(siteRoot, "app", "layout.tsx"), "utf8"),
+  ]);
+
+  assert.match(route, /4D realSIM Earth \| LEIS Local Workbench/);
+  assert.match(workbench, /RealSimEarth/);
+  assert.match(workbench, /ssr: false/);
+  assert.match(layout, /suppressHydrationWarning/);
+  assert.match(earth, /OrbitControls/);
+  assert.match(earth, /WebGLRenderer/);
+  assert.match(earth, /earth-blue-marble-august\.jpg/);
+  assert.match(earth, /SPACE \+ RELATION \+ TIME \+ LINEAGE/);
+  assert.match(styles, /position: fixed/);
+});
+
+test("grounds the first realSIM layer in live sampled weather", async () => {
+  const [page, earth, weatherRoute] = await Promise.all([
+    readFile(path.join(siteRoot, "app", "page.tsx"), "utf8"),
+    readFile(path.join(siteRoot, "app", "realsim", "RealSimEarth.tsx"), "utf8"),
+    readFile(path.join(siteRoot, "app", "api", "realsim-weather", "route.ts"), "utf8"),
+  ]);
+
+  assert.match(page, /api\.open-meteo\.com\/v1\/forecast/);
+  assert.match(page, /No synthetic starting weather is shown/);
+  assert.match(earth, /\/api\/realsim-weather/);
+  assert.match(weatherRoute, /api\.open-meteo\.com\/v1\/forecast/);
+  assert.match(weatherRoute, /stale-while-revalidate=1800/);
+  assert.match(earth, /wind_direction_10m/);
+  assert.match(earth, /wind_gusts_10m/);
+  assert.match(earth, /wind_speed_250hPa/);
+  assert.match(earth, /wind_direction_250hPa/);
+  assert.match(earth, /cloudFieldTexture/);
+  assert.match(earth, /cloudShell/);
+  assert.match(earth, /deterministic multi-scale mask/);
+  assert.match(earth, /dominantFlowMeshes/);
+  assert.match(weatherRoute, /cell_selection: "nearest"/);
+  assert.match(earth, /windSites\.length/);
+  assert.match(earth, /vizualizace 144 buněk/);
+  assert.match(earth, /nikoli radar ani výstražná služba/);
+});
+
+test("adds the privacy-bounded LEIS Memory reading monitor", async () => {
+  const [page, monitor, route] = await Promise.all([
+    readFile(path.join(siteRoot, "app", "page.tsx"), "utf8"),
+    readFile(path.join(siteRoot, "app", "memory", "MemoryMonitor.tsx"), "utf8"),
+    readFile(path.join(siteRoot, "app", "api", "memory-progress", "route.ts"), "utf8"),
+  ]);
+
+  assert.match(page, /href="\/memory"/);
+  assert.match(monitor, /5 naposledy přečtených titulů/);
+  assert.match(monitor, /Zapnout jemný zvuk/);
+  assert.match(monitor, /Obsah knih a místní cesty se nikdy nezveřejňují/);
+  assert.match(route, /leis_memory_public_status_v1/);
+  assert.match(route, /INVALID_SIGNATURE/);
+  assert.doesNotMatch(route, /source_id|relative_path|content_sha256/);
+});
+
 test("publishes a privacy-bounded foundation information map", async () => {
   const [page, foundation] = await Promise.all([
     readFile(path.join(siteRoot, "app", "page.tsx"), "utf8"),

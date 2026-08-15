@@ -5,6 +5,19 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 type Source = "OpenAI" | "Anthropic" | "Google AI" | "Hugging Face" | "Mistral AI" | "Cohere" | "Google DeepMind" | "TII" | "RIKEN" | "AI Singapore" | "IndiaAI" | "KAIST" | "Brazil Government" | "CTU Prague" | "DFKI" | "AI Sweden" | "CSIRO" | "Kenya ICT" | "NCAIR Nigeria";
 type News = { title: string; source: Source; place: string; lat: number; lon: number; url: string; summary: string; leis: string; reviewed?: string };
 type Language = "en" | "cs" | "de" | "fr" | "es";
+type RealSimCategory = "observation" | "recognition" | "conflict" | "validation";
+type WeatherFeedState = "LOADING" | "LIVE" | "PARTIAL" | "STALE" | "UNAVAILABLE";
+type WeatherFeedSummary = {
+  state: WeatherFeedState;
+  sites: number;
+  totalSites: number;
+  windSamples: number;
+  totalWindSamples: number;
+  peakWind: number;
+  intenseSystems: number;
+  observedAt: string | null;
+  refreshedAt: string | null;
+};
 
 const languageOptions: Array<{ code: Language; label: string }> = [
   { code: "en", label: "English" }, { code: "cs", label: "Čeština" }, { code: "de", label: "Deutsch" }, { code: "fr", label: "Français" }, { code: "es", label: "Español" },
@@ -242,6 +255,19 @@ const globeRetryCopy: Record<Language, string> = {
   de: "Interaktive Erde erneut versuchen",
   fr: "Réessayer la Terre interactive",
   es: "Volver a probar la Tierra interactiva",
+};
+
+const realSimCopy: Record<Language, {
+  open: string; close: string; eyebrow: string; title: string; lead: string; boundary: string;
+  category: string; magnitude: string; sensitivity: string; reset: string; inject: string;
+  events: string; paths: string; cycle: string; idle: string;
+  categories: Record<RealSimCategory, string>;
+}> = {
+  en: { open: "Open RealSIM", close: "Return to source signals", eyebrow: "REALITY RECONSTRUCTION SANDBOX", title: "4D RealSIM", lead: "Touch the Earth to place a bounded event. Watch the event become a spatial pulse, a relationship path, a time trace and a lineage record.", boundary: "Local demonstration only. It visualises a proposed method; it does not measure global reality, predict outcomes or validate a claim.", category: "Signal type", magnitude: "Magnitude", sensitivity: "Relationship reach", reset: "Reset field", inject: "Choose a point on the globe", events: "Events", paths: "Paths", cycle: "Cycle", idle: "Waiting for a bounded observation", categories: { observation: "Observation", recognition: "Recognition", conflict: "Conflict", validation: "Validation" } },
+  cs: { open: "Otevřít RealSIM", close: "Zpět ke zdrojovým signálům", eyebrow: "PÍSKOVIŠTĚ REKONSTRUKCE REALITY", title: "4D RealSIM", lead: "Dotykem Země vložte ohraničenou událost. Sledujte, jak se mění v prostorový pulz, vztahovou cestu, časovou stopu a záznam linie vývoje.", boundary: "Pouze místní demonstrace. Vizualizuje navrženou metodu; neměří světovou realitu, nepředpovídá výsledky ani neověřuje tvrzení.", category: "Typ signálu", magnitude: "Síla", sensitivity: "Dosah vztahů", reset: "Vyčistit pole", inject: "Zvolte bod na glóbu", events: "Události", paths: "Cesty", cycle: "Cyklus", idle: "Čekám na ohraničené pozorování", categories: { observation: "Pozorování", recognition: "Rozpoznání", conflict: "Rozpor", validation: "Ověření" } },
+  de: { open: "RealSIM öffnen", close: "Zurück zu Quellensignalen", eyebrow: "SANDBOX ZUR REALITÄTSREKONSTRUKTION", title: "4D RealSIM", lead: "Berühren Sie die Erde, um ein begrenztes Ereignis zu setzen. Beobachten Sie, wie daraus ein räumlicher Impuls, ein Beziehungspfad, eine Zeitspur und ein Herkunftseintrag werden.", boundary: "Nur lokale Demonstration. Sie visualisiert eine vorgeschlagene Methode; sie misst keine globale Realität, sagt keine Ergebnisse voraus und validiert keine Behauptung.", category: "Signaltyp", magnitude: "Stärke", sensitivity: "Beziehungsreichweite", reset: "Feld leeren", inject: "Punkt auf dem Globus wählen", events: "Ereignisse", paths: "Pfade", cycle: "Zyklus", idle: "Wartet auf eine begrenzte Beobachtung", categories: { observation: "Beobachtung", recognition: "Erkennung", conflict: "Konflikt", validation: "Validierung" } },
+  fr: { open: "Ouvrir RealSIM", close: "Retour aux signaux sources", eyebrow: "BAC À SABLE DE RECONSTRUCTION DU RÉEL", title: "4D RealSIM", lead: "Touchez la Terre pour placer un événement délimité. Observez-le devenir une impulsion spatiale, un chemin relationnel, une trace temporelle et une entrée de lignée.", boundary: "Démonstration locale uniquement. Elle visualise une méthode proposée ; elle ne mesure pas la réalité mondiale, ne prédit aucun résultat et ne valide aucune affirmation.", category: "Type de signal", magnitude: "Amplitude", sensitivity: "Portée relationnelle", reset: "Réinitialiser", inject: "Choisissez un point sur le globe", events: "Événements", paths: "Chemins", cycle: "Cycle", idle: "En attente d’une observation délimitée", categories: { observation: "Observation", recognition: "Reconnaissance", conflict: "Conflit", validation: "Validation" } },
+  es: { open: "Abrir RealSIM", close: "Volver a señales de fuente", eyebrow: "ENTORNO DE RECONSTRUCCIÓN DE LA REALIDAD", title: "4D RealSIM", lead: "Toque la Tierra para colocar un evento acotado. Observe cómo se convierte en un pulso espacial, una ruta de relación, una huella temporal y un registro de linaje.", boundary: "Solo demostración local. Visualiza un método propuesto; no mide la realidad global, no predice resultados ni valida afirmaciones.", category: "Tipo de señal", magnitude: "Magnitud", sensitivity: "Alcance relacional", reset: "Reiniciar campo", inject: "Elija un punto del globo", events: "Eventos", paths: "Rutas", cycle: "Ciclo", idle: "Esperando una observación acotada", categories: { observation: "Observación", recognition: "Reconocimiento", conflict: "Conflicto", validation: "Validación" } },
 };
 
 const countryBaselineCopy: Record<Language, { eyebrow: string; title: string; summary: string; use: string; leis: string; oecd: string; unesco: string }> = {
@@ -960,9 +986,25 @@ function GlobeCurrentLegacy({ onSelect }: { onSelect: (index: number) => void })
 
 */
 
-function Globe({ onSelect, language }: { onSelect: (index: number) => void; language: Language }) {
+export function Globe({
+  onSelect,
+  language,
+  initialRealSim = false,
+  showRealSimToggle = true,
+  liveWeatherWorkbench = false,
+}: {
+  onSelect: (index: number) => void;
+  language: Language;
+  initialRealSim?: boolean;
+  showRealSimToggle?: boolean;
+  liveWeatherWorkbench?: boolean;
+}) {
   const node = useRef<HTMLDivElement>(null);
   const chartRef = useRef<any>(null);
+  const realSimActiveRef = useRef(false);
+  const realSimCategoryRef = useRef<RealSimCategory>("observation");
+  const realSimMagnitudeRef = useRef(5);
+  const realSimSensitivityRef = useRef(50);
   const focusWindowRef = useRef<HTMLElement>(null);
   const lastActiveElementRef = useRef<HTMLElement | null>(null);
   const [focus, setFocus] = useState(false);
@@ -973,10 +1015,27 @@ function Globe({ onSelect, language }: { onSelect: (index: number) => void; lang
   const [atmosphereOn, setAtmosphereOn] = useState(true);
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "fallback">("loading");
   const [mapAttempt, setMapAttempt] = useState(0);
+  const [realSimActive, setRealSimActive] = useState(initialRealSim);
+  const [realSimCategory, setRealSimCategory] = useState<RealSimCategory>("observation");
+  const [realSimMagnitude, setRealSimMagnitude] = useState(5);
+  const [realSimSensitivity, setRealSimSensitivity] = useState(50);
+  const [realSimEvents, setRealSimEvents] = useState(0);
+  const [realSimPaths, setRealSimPaths] = useState(0);
+  const [realSimLast, setRealSimLast] = useState<{ category: RealSimCategory; lat: number; lon: number } | null>(null);
+  const [weatherFeed, setWeatherFeed] = useState<WeatherFeedSummary>({
+    state: "LOADING", sites: 0, totalSites: 22, windSamples: 0, totalWindSamples: 144,
+    peakWind: 0, intenseSystems: 0, observedAt: null, refreshedAt: null,
+  });
   const selectedNews = selected === null ? null : news[selected];
   const globeText = globeCopy[language];
+  const realSimText = realSimCopy[language];
   const baselineText = countryBaselineCopy[language];
   const placeText = pragueCopy[language];
+
+  realSimActiveRef.current = realSimActive;
+  realSimCategoryRef.current = realSimCategory;
+  realSimMagnitudeRef.current = realSimMagnitude;
+  realSimSensitivityRef.current = realSimSensitivity;
 
   const aim = useCallback((item: News, duration = 850) => {
     const chart = chartRef.current;
@@ -1002,6 +1061,30 @@ function Globe({ onSelect, language }: { onSelect: (index: number) => void; lang
   const retryMap = useCallback(() => {
     setMapStatus("loading");
     setMapAttempt((attempt) => attempt + 1);
+  }, []);
+
+  const toggleRealSim = useCallback(() => {
+    setRealSimActive((active) => {
+      const next = !active;
+      node.current?.dispatchEvent(new CustomEvent("leis-realsim-mode", { detail: next }));
+      return next;
+    });
+    setFocus(false);
+    setDetail(false);
+    setCountry(null);
+    setDeskStart(null);
+  }, []);
+
+  const resetRealSim = useCallback(() => {
+    node.current?.dispatchEvent(new CustomEvent("leis-realsim-reset"));
+    setRealSimEvents(0);
+    setRealSimPaths(0);
+    setRealSimLast(null);
+  }, []);
+
+  const refreshLiveWeather = useCallback(() => {
+    setWeatherFeed((current) => ({ ...current, state: current.sites ? "STALE" : "LOADING" }));
+    node.current?.dispatchEvent(new CustomEvent("leis-weather-refresh"));
   }, []);
 
   const choose = useCallback((index: number, expand = false) => {
@@ -1086,6 +1169,11 @@ function Globe({ onSelect, language }: { onSelect: (index: number) => void; lang
     let onTouchStart: ((event: TouchEvent) => void) | undefined;
     let onTouchMove: ((event: TouchEvent) => void) | undefined;
     let onTouchEnd: ((event: TouchEvent) => void) | undefined;
+    let onRealSimClick: ((event: MouseEvent) => void) | undefined;
+    let onRealSimMode: ((event: Event) => void) | undefined;
+    let onRealSimReset: (() => void) | undefined;
+    let onWeatherRefresh: (() => void) | undefined;
+    let atmosphereToggle: ((event: Event) => void) | undefined;
     let resizeObserver: ResizeObserver | undefined;
     let resizeTimer: ReturnType<typeof setTimeout> | undefined;
     let pinchStartDistance = 0;
@@ -1184,6 +1272,7 @@ function Globe({ onSelect, language }: { onSelect: (index: number) => void; lang
       });
       polygons.mapPolygons.template.states.create("hover", { fill: am5.color(0x246f8a) });
       polygons.mapPolygons.template.events.on("click", (event: any) => {
+        if (realSimActiveRef.current) return;
         const data = event.target.dataItem?.dataContext ?? {};
         if (data.name === "Czechia" || data.name === "Czech Republic") openCzechia();
         else { setCountry(data.name ?? "Selected country"); setSelected(null); setDeskStart(null); setDetail(false); setFocus(true); }
@@ -1239,6 +1328,107 @@ function Globe({ onSelect, language }: { onSelect: (index: number) => void; lang
       // Keep the geographic weather feed for storm detection, but never render
       // that unreliable fill across the Earth surface.
       weatherLayer.set("visible", false);
+      const liveWeatherLayer = chart.series.push(am5map.MapPointSeries.new(root, { clipBack: true }));
+      liveWeatherLayer.bullets.push((rootArg: any, _series: any, dataItem: any) => {
+        const data = dataItem?.dataContext ?? {};
+        const cloud = Math.max(0, Math.min(100, Number(data.cloud ?? 0)));
+        const wind = Math.max(0, Number(data.wind ?? 0));
+        const direction = Number(data.windDirection ?? 0);
+        const tone = am5.color(data.tone ?? 0x9ee6c0);
+        const holder = am5.Container.new(rootArg, { width: 0, height: 0, centerX: am5.p50, centerY: am5.p50 });
+        if (cloud >= 8) holder.children.push(am5.Picture.new(rootArg, {
+          src: data.cloudAsset,
+          width: data.cloudWidth,
+          height: data.cloudHeight,
+          centerX: am5.p50,
+          centerY: am5.p50,
+          opacity: data.cloudOpacity,
+        }));
+        const halo = holder.children.push(am5.Circle.new(rootArg, {
+          radius: data.severe ? 15 : 7 + cloud * 0.055,
+          fill: tone,
+          fillOpacity: data.wet ? 0.16 : 0.07,
+          stroke: tone,
+          strokeOpacity: data.severe ? 0.9 : 0.48,
+          strokeWidth: data.severe ? 1.5 : 0.8,
+        }));
+        holder.children.push(am5.Circle.new(rootArg, {
+          radius: data.severe ? 4.6 : 3.1,
+          fill: tone,
+          fillOpacity: 0.96,
+          stroke: am5.color(0xf2ffff),
+          strokeOpacity: 0.88,
+          strokeWidth: 0.8,
+        }));
+        holder.children.push(am5.Label.new(rootArg, {
+          text: `${Math.round(Number(data.temperature ?? 0))}°`,
+          x: 8,
+          y: -22,
+          fill: am5.color(0xe9feff),
+          fontSize: 10,
+          fontWeight: "600",
+          centerY: am5.p50,
+        }));
+        if (wind >= 8) holder.children.push(am5.Label.new(rootArg, {
+          text: "↑",
+          x: -5,
+          y: 7,
+          rotation: direction,
+          fill: am5.color(0xb4edf4),
+          fontSize: Math.min(18, 10 + wind * 0.12),
+          centerX: am5.p50,
+          centerY: am5.p50,
+        }));
+        const hit = holder.children.push(am5.Circle.new(rootArg, {
+          radius: Math.max(22, 11 + cloud * 0.12),
+          fill: am5.color(0xffffff),
+          fillOpacity: 0.001,
+          tooltipText: data.weather,
+        }));
+        hit.set("tooltip", am5.Tooltip.new(rootArg, {
+          labelText: data.weather,
+          getFillFromSprite: false,
+          getStrokeFromSprite: false,
+          autoTextColor: false,
+          pointerOrientation: "vertical",
+          dy: -8,
+        }));
+        if (!reducedMotion && (data.severe || data.wet)) {
+          halo.animate({ key: "scale", from: 0.72, to: data.severe ? 2.6 : 1.8, duration: data.severe ? 1250 : 2100, loops: Infinity, easing: am5.ease.out(am5.ease.cubic) });
+          halo.animate({ key: "opacity", from: 0.92, to: 0.08, duration: data.severe ? 1250 : 2100, loops: Infinity, easing: am5.ease.out(am5.ease.cubic) });
+        }
+        return am5.Bullet.new(rootArg, { sprite: holder });
+      });
+      liveWeatherLayer.set("visible", liveWeatherWorkbench);
+      // The wind field is a dense set of model vectors, not a decorative flow.
+      // Each animated trail is anchored to one requested WGS84 coordinate and
+      // points downwind (Open-Meteo reports the meteorological source bearing).
+      const windLayer = chart.series.push(am5map.MapLineSeries.new(root, {}));
+      windLayer.mapLines.template.setAll({
+        templateField: "settings",
+        interactive: false,
+        forceInactive: true,
+        stroke: am5.color(0x86eef4),
+        strokeOpacity: 0.58,
+        strokeWidth: 1,
+        strokeDasharray: [1.2, 4.8],
+        strokeDashoffset: 0,
+      });
+      windLayer.events.on("datavalidated", () => {
+        if (reducedMotion) return;
+        windLayer.mapLines.each((line: any) => {
+          const speed = Math.max(0, Number(line.dataItem?.dataContext?.speed ?? 0));
+          line.animate({
+            key: "strokeDashoffset",
+            from: 0,
+            to: -20,
+            duration: Math.max(620, 2700 - speed * 38),
+            loops: Infinity,
+            easing: am5.ease.linear,
+          });
+        });
+      });
+      windLayer.set("visible", liveWeatherWorkbench);
       const stormLayer = chart.series.push(am5map.MapPointSeries.new(root, { clipBack: true }));
       stormLayer.bullets.push((rootArg: any) => {
         const holder = am5.Container.new(rootArg, { width: 0, height: 0, centerX: am5.p50, centerY: am5.p50 });
@@ -1264,53 +1454,95 @@ function Globe({ onSelect, language }: { onSelect: (index: number) => void; lang
         { name: "Beijing", lat: 39.9042, lon: 116.4074 }, { name: "Seoul", lat: 37.5665, lon: 126.978 },
         { name: "Sydney", lat: -33.8688, lon: 151.2093 }, { name: "Perth", lat: -31.9505, lon: 115.8605 },
       ];
-      const weatherLabel = (code: number) => code >= 95 ? "thunderstorm" : code >= 80 ? "rain showers" : code >= 51 ? "rain" : code >= 45 ? "mist" : code >= 3 ? "overcast" : code >= 1 ? "partly cloudy" : "clear";
+      const windLatitudes = [-70, -50, -30, -10, 10, 30, 50, 70];
+      const windLongitudes = Array.from({ length: 18 }, (_, index) => -170 + index * 20);
+      const windSites = windLatitudes.flatMap((lat) => windLongitudes.map((lon) => ({ lat, lon })));
+      const weatherLabel = (code: number) => code >= 95 ? "thunderstorm" : code >= 85 ? "snow showers" : code >= 80 ? "rain showers" : code >= 71 ? "snow" : code >= 61 ? "rain" : code >= 51 ? "drizzle" : code >= 45 ? "fog" : code >= 3 ? "overcast" : code >= 1 ? "partly cloudy" : "clear";
       const weatherTone = (code: number, temperature = 0) => code >= 95 ? 0xc090ff : code >= 51 ? 0x5caef5 : temperature >= 30 ? 0xf2bb78 : code >= 3 ? 0x9ad7e4 : 0x9ee6c0;
-      // A restrained atmospheric simulation is visible immediately. When the live
-      // public weather feed returns, it replaces these visual starting conditions.
-      weatherLayer.data.setAll(weatherSites.map((site, index) => {
-        const cloud = [76, 58, 66, 46, 12, 42, 71, 35, 57, 64, 52, 79][index] ?? 48;
-        const wet = [true, false, true, false, false, false, true, false, true, true, false, true][index] ?? false;
-        const severe = index === 6;
-        const tone = severe ? 0xc090ff : wet ? 0x5caef5 : cloud > 60 ? 0x9ad7e4 : 0x9ee6c0;
-        return {
-          geometry: stratusGeometry(site.lon, site.lat, cloud, severe), lon: site.lon, lat: site.lat,
-          weather: `${site.name} · atmospheric simulation · live public conditions load when available`,
-          tone, cloud, wet, severe,
-          settings: { fill: am5.color(severe ? 0xf3d27d : wet ? 0xd9f9ff : 0xc3eefa), fillOpacity: severe ? 0.12 : cloud < 22 ? 0 : Math.min(0.075, 0.012 + cloud * 0.0007), strokeOpacity: severe ? 0.13 : 0.03 },
-        };
-      }));
-      stormLayer.data.setAll([{ geometry: { type: "Point", coordinates: [103.8198, 1.3521] } }]);
+      const windTone = (speed: number) => speed >= 60 ? 0xffa463 : speed >= 40 ? 0xe9e86c : speed >= 20 ? 0x72f3a3 : 0x78dff4;
+      const windTrail = (lon: number, lat: number, sourceDirection: number, speed: number) => {
+        const bearing = (((sourceDirection + 180) % 360) * Math.PI) / 180;
+        const length = 1.4 + Math.min(7.2, Math.max(0, speed) * 0.105);
+        const latitudeScale = Math.max(0.34, Math.cos((lat * Math.PI) / 180));
+        const deltaLat = Math.cos(bearing) * length;
+        const deltaLon = (Math.sin(bearing) * length) / latitudeScale;
+        const point = (progress: number) => [
+          Math.max(-179.4, Math.min(179.4, lon + deltaLon * progress)),
+          Math.max(-78, Math.min(78, lat + deltaLat * progress)),
+        ];
+        return { type: "LineString", coordinates: [point(-0.28), point(0.18), point(0.72)] };
+      };
+      const currentWeatherUrl = (sites: Array<{ lat: number; lon: number }>, variables: string) => {
+        const params = new URLSearchParams({
+          latitude: sites.map(({ lat }) => lat).join(","),
+          longitude: sites.map(({ lon }) => lon).join(","),
+          current: variables,
+          wind_speed_unit: "kmh",
+          forecast_days: "1",
+          cell_selection: "nearest",
+        });
+        return `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
+      };
+      // No synthetic starting weather is shown. Until the public feed responds,
+      // the weather surface is deliberately empty rather than visually plausible.
+      weatherLayer.data.setAll([]);
+      liveWeatherLayer.data.setAll([]);
+      windLayer.data.setAll([]);
+      stormLayer.data.setAll([]);
       const refreshWeather = async () => {
         if (!pageVisible) return;
         try {
-          const weather = await Promise.all(weatherSites.map(async (site, index) => {
-            const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${site.lat}&longitude=${site.lon}&current=temperature_2m,weather_code,cloud_cover,precipitation,wind_speed_10m&timezone=auto`);
+          const results = await Promise.allSettled(weatherSites.map(async (site, index) => {
+            const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${site.lat}&longitude=${site.lon}&current=temperature_2m,relative_humidity_2m,weather_code,cloud_cover,precipitation,wind_speed_10m,wind_direction_10m&forecast_days=1`);
             if (!response.ok) throw new Error("Weather response unavailable");
             const payload = await response.json();
             const current = payload?.current ?? {};
             const code = Number(current.weather_code ?? 0);
-            const temperature = Math.round(Number(current.temperature_2m ?? 0));
-            const wind = Math.round(Number(current.wind_speed_10m ?? 0));
+            const temperature = Number(current.temperature_2m ?? 0);
+            const humidity = Math.round(Number(current.relative_humidity_2m ?? 0));
+            const wind = Number(current.wind_speed_10m ?? 0);
+            const windDirection = Math.round(Number(current.wind_direction_10m ?? 0));
             const rain = Number(current.precipitation ?? 0);
             const cloud = Math.round(Number(current.cloud_cover ?? 0));
-            const severe = code >= 95;
+            const severe = code >= 95 || wind >= 62;
+            const visual = cloudVisual(cloud, severe);
             return {
               geometry: stratusGeometry(site.lon, site.lat, cloud, severe), lon: site.lon, lat: site.lat,
-              weather: `${site.name} · LIVE ${temperature}°C · ${weatherLabel(code)} · cloud ${cloud}% · wind ${wind} km/h`,
+              weather: `${site.name} · ${temperature.toFixed(1)}°C · ${weatherLabel(code)} · cloud ${cloud}% · humidity ${humidity}% · precipitation ${rain.toFixed(1)} mm · wind ${wind.toFixed(1)} km/h @ ${windDirection}° · Open-Meteo · ${current.time ?? "current"} UTC`,
               tone: weatherTone(code, temperature), cloud, wet: code >= 51 || rain > 0, severe,
+              temperature, humidity, precipitation: rain, wind, windDirection, code,
+              cloudAsset: cloudAsset(index, severe), ...visual,
+              observedAt: current.time ?? null,
               settings: { fill: am5.color(severe ? 0xf3d27d : code >= 51 || rain > 0 ? 0xd9f9ff : 0xc3eefa), fillOpacity: severe ? 0.14 : cloud < 22 ? 0 : Math.min(0.085, 0.016 + cloud * 0.00075), strokeOpacity: severe ? 0.16 : 0.035 },
             };
           }));
+          const weather = results.flatMap((result) => result.status === "fulfilled" ? [result.value] : []);
+          if (!weather.length) throw new Error("No weather sampling point returned data");
           if (!disposed) {
             weatherLayer.data.setAll(weather);
+            liveWeatherLayer.data.setAll(weather.map((item) => ({ ...item, geometry: { type: "Point", coordinates: [item.lon, item.lat] } })));
             stormLayer.data.setAll(weather.filter((item: any) => item.severe).map((item: any) => ({ geometry: { type: "Point", coordinates: [item.lon, item.lat] } })));
+            setWeatherFeed({
+              state: weather.length === weatherSites.length ? "LIVE" : "PARTIAL",
+              sites: weather.length,
+              totalSites: weatherSites.length,
+              windSamples: 0,
+              totalWindSamples: windSites.length,
+              peakWind: Math.max(0, ...weather.map((item) => item.wind)),
+              intenseSystems: weather.filter((item) => item.severe).length,
+              observedAt: weather[0]?.observedAt ?? null,
+              refreshedAt: new Date().toISOString(),
+            });
           }
-        } catch { /* The optional stream never blocks the globe itself. */ }
+        } catch {
+          if (!disposed) setWeatherFeed((current) => ({ ...current, state: current.sites ? "STALE" : "UNAVAILABLE" }));
+        }
       };
       void refreshWeather();
       weatherRefresh = setInterval(() => { void refreshWeather(); }, 10 * 60 * 1000);
-      const atmosphereToggle = (event: Event) => {
+      onWeatherRefresh = () => { void refreshWeather(); };
+      node.current?.addEventListener("leis-weather-refresh", onWeatherRefresh);
+      atmosphereToggle = (event: Event) => {
         const visible = Boolean((event as CustomEvent<boolean>).detail);
         stormLayer.set("visible", visible);
       };
@@ -1327,13 +1559,102 @@ function Globe({ onSelect, language }: { onSelect: (index: number) => void; lang
         { geometry: { type: "LineString", coordinates: [[14.4378, 50.0755], [-122.0839, 37.3861]] } },
         { geometry: { type: "LineString", coordinates: [[-122.0839, 37.3861], [-122.4194, 37.7749]] } },
       ]);
+      routes.set("visible", !realSimActiveRef.current);
       routes.events.on("datavalidated", () => {
         if (reducedMotion) return;
         routes.mapLines.each((line: any, index: number) => {
           line.animate({ key: "strokeDashoffset", from: 0, to: -32, duration: 1320 + index * 150, loops: Infinity, easing: am5.ease.linear });
         });
       });
+      // RealSIM is a bounded visual sandbox recovered from the July 2026
+      // Reality Reconstruction Environment lineage. It creates local, synthetic
+      // events only. It never labels these events as observations of the world.
+      const realSimRoutes = chart.series.push(am5map.MapLineSeries.new(root, {}));
+      realSimRoutes.mapLines.template.setAll({
+        templateField: "settings", stroke: am5.color(0x77f7c8), strokeOpacity: 0.66,
+        strokeWidth: 1.35, strokeDasharray: [3, 7], strokeDashoffset: 0,
+      });
+      const realSimLayer = chart.series.push(am5map.MapPointSeries.new(root, { clipBack: true }));
+      realSimLayer.bullets.push((rootArg: any, _series: any, dataItem: any) => {
+        const data = dataItem?.dataContext ?? {};
+        const tone = am5.color(data.tone ?? 0x73eff5);
+        const magnitude = Math.max(1, Math.min(10, Number(data.magnitude ?? 5)));
+        const holder = am5.Container.new(rootArg, { width: 0, height: 0, centerX: am5.p50, centerY: am5.p50 });
+        const outer = holder.children.push(am5.Circle.new(rootArg, { radius: 8 + magnitude * 1.35, fillOpacity: 0, stroke: tone, strokeOpacity: 0.56, strokeWidth: 1.1 }));
+        const middle = holder.children.push(am5.Circle.new(rootArg, { radius: 5 + magnitude * 0.72, fill: tone, fillOpacity: 0.13, stroke: tone, strokeOpacity: 0.78, strokeWidth: 1 }));
+        const core = holder.children.push(am5.Circle.new(rootArg, { radius: 2.6 + magnitude * 0.18, fill: tone, fillOpacity: 0.98, stroke: am5.color(0xf2ffff), strokeOpacity: 0.92, strokeWidth: 0.8 }));
+        if (!reducedMotion) {
+          outer.animate({ key: "scale", from: 0.35, to: 3.4, duration: 1900 + magnitude * 95, loops: Infinity, easing: am5.ease.out(am5.ease.cubic) });
+          outer.animate({ key: "opacity", from: 0.95, to: 0, duration: 1900 + magnitude * 95, loops: Infinity, easing: am5.ease.out(am5.ease.cubic) });
+          middle.animate({ key: "scale", from: 0.82, to: 1.35, duration: 1050, loops: Infinity, easing: am5.ease.yoyo(am5.ease.sine) });
+          core.animate({ key: "scale", from: 0.88, to: 1.2, duration: 780, loops: Infinity, easing: am5.ease.yoyo(am5.ease.sine) });
+        }
+        return am5.Bullet.new(rootArg, { sprite: holder });
+      });
+      if (liveWeatherWorkbench) stormLayer.set("visible", false);
+      realSimRoutes.set("visible", realSimActiveRef.current);
+      realSimLayer.set("visible", realSimActiveRef.current);
+      const simAnchors = [
+        { lon: 14.4378, lat: 50.0755 }, { lon: -122.4194, lat: 37.7749 },
+        { lon: 103.8198, lat: 1.3521 }, { lon: 36.8219, lat: -1.2921 },
+        { lon: 139.6503, lat: 35.6762 }, { lon: -46.6333, lat: -23.5505 },
+      ];
+      const simTone: Record<RealSimCategory, number> = { observation: 0x73e6f5, recognition: 0xf3d27d, conflict: 0xff7d94, validation: 0x78f0b3 };
+      let simEntries: Array<Record<string, unknown>> = [];
+      let simPaths: Array<Record<string, unknown>> = [];
+      const distanceFrom = (a: { lon: number; lat: number }, b: { lon: number; lat: number }) => {
+        const lonDistance = Math.min(Math.abs(a.lon - b.lon), 360 - Math.abs(a.lon - b.lon));
+        return Math.hypot(lonDistance * Math.cos((a.lat * Math.PI) / 180), a.lat - b.lat);
+      };
+      const injectRealSim = (lon: number, lat: number) => {
+        const category = realSimCategoryRef.current;
+        const magnitude = realSimMagnitudeRef.current;
+        const sensitivity = realSimSensitivityRef.current;
+        const pathCount = Math.max(1, Math.min(4, Math.round((magnitude / 10) * 2 + (sensitivity / 100) * 2)));
+        const nearest = [...simAnchors].sort((a, b) => distanceFrom({ lon, lat }, a) - distanceFrom({ lon, lat }, b)).slice(0, pathCount);
+        const eventId = Date.now() + Math.random();
+        simEntries = [...simEntries.slice(-11), { eventId, magnitude, category, tone: simTone[category], geometry: { type: "Point", coordinates: [lon, lat] } }];
+        simPaths = [...simPaths.slice(-23), ...nearest.map((anchor) => ({
+          eventId, geometry: { type: "LineString", coordinates: [[lon, lat], [anchor.lon, anchor.lat]] },
+          settings: { stroke: am5.color(simTone[category]), strokeOpacity: 0.34 + sensitivity * 0.0045, strokeWidth: 0.8 + magnitude * 0.13 },
+        }))];
+        realSimLayer.data.setAll(simEntries);
+        realSimRoutes.data.setAll(simPaths);
+        if (!reducedMotion) realSimRoutes.mapLines.each((line: any, index: number) => line.animate({ key: "strokeDashoffset", from: 0, to: -30, duration: 950 + index * 35, loops: Infinity, easing: am5.ease.linear }));
+        setRealSimEvents(simEntries.length);
+        setRealSimPaths(simPaths.length);
+        setRealSimLast({ category, lat, lon });
+      };
+      onRealSimClick = (event: MouseEvent) => {
+        if (!realSimActiveRef.current || liveWeatherWorkbench || !wheelHost) return;
+        const rect = wheelHost.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        const radius = Math.min(rect.width, rect.height) * 0.47;
+        if (Math.hypot(x - rect.width / 2, y - rect.height / 2) > radius) return;
+        const point = chart.invert({ x, y });
+        if (!Number.isFinite(point?.longitude) || !Number.isFinite(point?.latitude)) return;
+        injectRealSim(Math.max(-180, Math.min(180, point.longitude)), Math.max(-85, Math.min(85, point.latitude)));
+        manualUntil = Date.now() + 13000;
+      };
+      onRealSimMode = (event: Event) => {
+        const active = Boolean((event as CustomEvent<boolean>).detail);
+        realSimLayer.set("visible", active);
+        realSimRoutes.set("visible", active);
+        routes.set("visible", !active);
+        points.set("visible", !active);
+      };
+      onRealSimReset = () => {
+        simEntries = [];
+        simPaths = [];
+        realSimLayer.data.setAll([]);
+        realSimRoutes.data.setAll([]);
+      };
+      wheelHost.addEventListener("click", onRealSimClick);
+      wheelHost.addEventListener("leis-realsim-mode", onRealSimMode);
+      wheelHost.addEventListener("leis-realsim-reset", onRealSimReset);
       const points = chart.series.push(am5map.MapPointSeries.new(root, {}));
+      points.set("visible", !realSimActiveRef.current);
       points.bullets.push((rootArg: any, _series: any, dataItem: any) => {
         const data = dataItem?.dataContext ?? {};
         const isOrigin = Boolean(data.origin);
@@ -1385,14 +1706,18 @@ function Globe({ onSelect, language }: { onSelect: (index: number) => void; lang
       if (resizeTimer) clearTimeout(resizeTimer);
       document.removeEventListener("visibilitychange", onVisibilityChange);
       resizeObserver?.disconnect();
-      node.current?.removeEventListener("leis-atmosphere-toggle", atmosphereToggle);
+      if (atmosphereToggle) node.current?.removeEventListener("leis-atmosphere-toggle", atmosphereToggle);
+      if (onWeatherRefresh) node.current?.removeEventListener("leis-weather-refresh", onWeatherRefresh);
       if (wheelHost && onWheel) wheelHost.removeEventListener("wheel", onWheel);
       if (wheelHost && onTouchStart) wheelHost.removeEventListener("touchstart", onTouchStart);
       if (wheelHost && onTouchMove) wheelHost.removeEventListener("touchmove", onTouchMove);
       if (wheelHost && onTouchEnd) wheelHost.removeEventListener("touchend", onTouchEnd);
+      if (wheelHost && onRealSimClick) wheelHost.removeEventListener("click", onRealSimClick);
+      if (wheelHost && onRealSimMode) wheelHost.removeEventListener("leis-realsim-mode", onRealSimMode);
+      if (wheelHost && onRealSimReset) wheelHost.removeEventListener("leis-realsim-reset", onRealSimReset);
       root?.dispose();
     };
-  }, [mapAttempt, openCzechia, openDesk, openPragueOrigin]);
+  }, [liveWeatherWorkbench, mapAttempt, openCzechia, openDesk, openPragueOrigin]);
 
   const isCzechRepublic = Boolean(country && /Czechia|Czech Republic/i.test(country));
   const countrySignals = country
@@ -1426,14 +1751,47 @@ function Globe({ onSelect, language }: { onSelect: (index: number) => void; lang
         <small>{mapStatus === "loading" ? globeText.appearing : globeText.refresh}</small>
         {mapStatus === "fallback" && <button type="button" onClick={retryMap}>{globeRetryCopy[language]}</button>}
       </div>}
-      <div className="globe-weather-hud" aria-label={globeText.weatherAria}>
+      {showRealSimToggle && <button type="button" className={`realsim-launch ${realSimActive ? "active" : ""}`} onPointerDown={(event) => event.stopPropagation()} onClick={toggleRealSim} aria-pressed={realSimActive}>
+        <span aria-hidden="true">Ω</span>{realSimActive ? realSimText.close : realSimText.open}
+      </button>}
+      {realSimActive && !liveWeatherWorkbench && <section className="realsim-console" aria-label={realSimText.title} onPointerDown={(event) => event.stopPropagation()} onClick={(event) => event.stopPropagation()}>
+        <header><div><small>{realSimText.eyebrow}</small><h3>{realSimText.title}</h3></div><b>{realSimText.cycle} {String(realSimEvents + 1).padStart(2, "0")}</b></header>
+        <p>{realSimText.lead}</p>
+        <div className="realsim-stats"><span><b>{realSimEvents}</b>{realSimText.events}</span><span><b>{realSimPaths}</b>{realSimText.paths}</span><span><b>4D</b>SPACE · RELATION · TIME · LINEAGE</span></div>
+        <label>{realSimText.category}<select value={realSimCategory} onChange={(event) => setRealSimCategory(event.target.value as RealSimCategory)}>{(Object.keys(realSimText.categories) as RealSimCategory[]).map((category) => <option key={category} value={category}>{realSimText.categories[category]}</option>)}</select></label>
+        <label>{realSimText.magnitude}<span><input type="range" min="1" max="10" value={realSimMagnitude} onChange={(event) => setRealSimMagnitude(Number(event.target.value))}/><output>{realSimMagnitude}</output></span></label>
+        <label>{realSimText.sensitivity}<span><input type="range" min="10" max="100" step="10" value={realSimSensitivity} onChange={(event) => setRealSimSensitivity(Number(event.target.value))}/><output>{realSimSensitivity}%</output></span></label>
+        <p className="realsim-next"><i aria-hidden="true"/>{realSimLast ? `${realSimText.categories[realSimLast.category]} · ${realSimLast.lat.toFixed(1)}°, ${realSimLast.lon.toFixed(1)}°` : realSimText.idle}<small>{realSimText.inject}</small></p>
+        <button type="button" className="realsim-reset" onClick={resetRealSim}>{realSimText.reset}</button>
+        <em>{realSimText.boundary}</em>
+      </section>}
+      {liveWeatherWorkbench && <section className={`realsim-weather-panel state-${weatherFeed.state.toLowerCase()}`} aria-label="Live sampled weather field">
+        <header>
+          <div><small>REALITY CONTACT / WEATHER 01</small><h3>Živé počasí Země</h3></div>
+          <b><i aria-hidden="true" />{weatherFeed.state}</b>
+        </header>
+        <p>Aktuální podmínky z veřejného meteorologického modelu jsou promítnuty do 22 geografických bodů. Nejde o souvislý globální radar.</p>
+        <div className="realsim-weather-stats">
+          <span><b>{weatherFeed.sites}/{weatherFeed.totalSites}</b>živých bodů</span>
+          <span><b>{weatherFeed.intenseSystems}</b>intenzivních signálů</span>
+          <span><b>10 min</b>obnova vrstvy</span>
+        </div>
+        <dl>
+          <div><dt>Čas dat</dt><dd>{weatherFeed.observedAt ? `${weatherFeed.observedAt.replace("T", " ")} UTC` : "čekám na první odpověď"}</dd></div>
+          <div><dt>Vizualizace</dt><dd>oblačnost · teplota · srážky · vítr</dd></div>
+          <div><dt>Zdroj</dt><dd><a href="https://open-meteo.com/en/docs" target="_blank" rel="noreferrer">Open-Meteo Forecast API ↗</a></dd></div>
+        </dl>
+        <button type="button" onClick={refreshLiveWeather}>{weatherFeed.state === "LOADING" ? "Načítám…" : "Obnovit nyní"}</button>
+        <em>Každý bod je měřený modelový výstup pro konkrétní souřadnici. Mezery mezi body se nedopočítávají ani nevydávají za pozorovanou realitu.</em>
+      </section>}
+      {!realSimActive && <div className="globe-weather-hud" aria-label={globeText.weatherAria}>
         <i aria-hidden="true" />
         <span>{globeText.clouds}</span>
         <small>{globeText.cloudNote}</small>
-      </div>
-      <button type="button" className={`globe-atmosphere-control ${atmosphereOn ? "active" : ""}`} onPointerDown={(event) => event.stopPropagation()} onClick={toggleAtmosphere} aria-pressed={atmosphereOn}>
+      </div>}
+      {!realSimActive && <button type="button" className={`globe-atmosphere-control ${atmosphereOn ? "active" : ""}`} onPointerDown={(event) => event.stopPropagation()} onClick={toggleAtmosphere} aria-pressed={atmosphereOn}>
         <span aria-hidden="true">☁</span>{atmosphereOn ? globeText.atmosphereOn : globeText.atmosphereOff}
-      </button>
+      </button>}
       <div className="globe-zoom-controls" aria-label={globeText.zoomAria}>
         <button type="button" onPointerDown={(event) => event.stopPropagation()} onClick={() => adjustZoom(1)} aria-label={globeText.zoomIn}>+</button>
         <button type="button" onPointerDown={(event) => event.stopPropagation()} onClick={() => adjustZoom(-1)} aria-label={globeText.zoomOut}>−</button>
@@ -1822,6 +2180,6 @@ export default function Home() {
       <div className="media-grid"><article><b>{local ? local.media[0][0] : "01 · ORIENTATION"}</b><h3>{copy.orientation}</h3><p>{local ? local.media[0][1] : "What LEIS is, what it is not, where it began and how it can be tested without asking anyone to simply believe it."}</p><a className="card-link" href="#orientation">{copy.readOrientation}</a></article><article><b>{local ? local.media[1][0] : "02 · EVIDENCE"}</b><h3>{copy.evidence}</h3><p>{local ? local.media[1][1] : "Timeline labels distinguish documented evidence, creator-reported context and open questions. Private archives remain private."}</p><a className="card-link" href="#timeline">{copy.traceTimeline}</a></article><article><b>{local ? local.media[2][0] : "03 · DIALOGUE"}</b><h3>{copy.dialogue}</h3><p>{local ? local.media[2][1] : "For an interview, research question or source packet, use the public contact route. No mailing-list subscription is required."}</p><button type="button" className="card-link" onClick={() => window.dispatchEvent(new CustomEvent("leis-open-contact", { detail: "Media enquiry" }))}>{copy.openContact}</button></article></div>
       <button type="button" className="primary" onClick={() => window.dispatchEvent(new CustomEvent("leis-open-contact", { detail: "Media enquiry" }))}>{copy.mediaContact}</button>
     </section>
-    <section className="participate" id="participate"><p className="eyebrow">{participation.eyebrow}</p><h2>{participation.title}</h2><p>{participation.lead}</p><div className="contact"><button type="button" className="primary" onClick={() => window.dispatchEvent(new CustomEvent("leis-open-contact", { detail: "Research dialogue" }))}>{participation.action}</button><span>{participation.note}</span></div><p className="source-language-note">{participation.sourceNote}</p><footer>{local ? local.footer : "Created by"} <b>Martin Puzik</b> · {local ? local.technical : "Technical collaboration:"} <b>M.A.J. Puzik</b></footer></section>
+    <section className="participate" id="participate"><p className="eyebrow">{participation.eyebrow}</p><h2>{participation.title}</h2><p>{participation.lead}</p><div className="contact"><button type="button" className="primary" onClick={() => window.dispatchEvent(new CustomEvent("leis-open-contact", { detail: "Research dialogue" }))}>{participation.action}</button><span>{participation.note}</span></div><p className="source-language-note">{participation.sourceNote}</p><p><a href="/memory">LEIS Memory — live reading monitor →</a></p><footer>{local ? local.footer : "Created by"} <b>Martin Puzik</b> · {local ? local.technical : "Technical collaboration:"} <b>M.A.J. Puzik</b></footer></section>
   <ContactPath copy={copy} contactText={contactText}/></main><LanguageDock language={language} onChange={setLanguage} label={copy.language}/><AskLeis language={language} copy={askLeisCopy[language]}/></>;
 }
