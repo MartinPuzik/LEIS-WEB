@@ -1,0 +1,98 @@
+{
+  "protocol_version": "0.2",
+  "offer_id": "HOP-V02-001",
+  "offer_nonce": "20260815-HOP-V02-001",
+  "space": "LEIS_CORE",
+  "task": "Evaluate the new fresh-window Hopper evidence without promoting unverified claims.",
+  "source_manifest": [
+    {
+      "id": "SRC-AI-WINDOW",
+      "kind": "local_file",
+      "locator": "L:/_LEIS_/____DAILY WORK with leis_0003/AI HOPPING_results_in new chatgpt window.md",
+      "sha256": "72843939C4A1E2F7CD3C5ECBE16E24469A0429D2EC7A3B53AF52FF06E8B2E3AE",
+      "inspected": true
+    },
+    {
+      "id": "SRC-LEIS-ZERO-INPUT",
+      "kind": "local_file",
+      "locator": "L:/_LEIS_/____DAILY WORK with leis_0003/LEIS_ZERO_message to chat.md",
+      "sha256": "6BF23949EC9C6A04ACBA412637852E3B7F1A9190FD3DB43BE5BAF5A30BC877A9",
+      "inspected": true
+    },
+    {
+      "id": "SRC-RV003",
+      "kind": "test_result",
+      "locator": "results/RV-003-SHADOW-PILOT-COMPARISON.md",
+      "inspected": true
+    }
+  ],
+  "claims": [
+    {
+      "id": "C1-FRESH-WINDOW-OUTPUT",
+      "text": "A supplied artifact records a fresh receiver reconstructing and challenging a LEIS_ZERO Capsule.",
+      "label": "VERIFIED",
+      "critical": true,
+      "source_refs": ["SRC-AI-WINDOW", "SRC-LEIS-ZERO-INPUT"]
+    },
+    {
+      "id": "C2-HOPPER-DONE",
+      "text": "The supplied receiver output proves that the Hopper is complete or universally reliable.",
+      "label": "REJECTED",
+      "critical": true,
+      "source_refs": ["SRC-AI-WINDOW", "SRC-RV003"]
+    },
+    {
+      "id": "C3-RECEIVER-VARIANCE",
+      "text": "Observed reconstruction quality varies across fresh receivers under the tested conditions.",
+      "label": "VERIFIED",
+      "critical": true,
+      "source_refs": ["SRC-RV003"]
+    }
+  ],
+  "critical_anchors": [
+    {
+      "id": "H1-PURPOSE",
+      "kind": "identity",
+      "meaning": "Continue a small, human-governed, channel-neutral reconstruction handshake."
+    },
+    {
+      "id": "H2-CLAIM-ATOMICITY",
+      "kind": "evidence",
+      "meaning": "Each claim keeps its own evidence label and cannot hide inside one global checked status."
+    },
+    {
+      "id": "H3-HUMAN-GATE",
+      "kind": "safety",
+      "meaning": "External action and publication require explicit human approval."
+    },
+    {
+      "id": "H4-NON-GUARANTEE",
+      "kind": "boundary",
+      "meaning": "Structural reconstruction does not prove semantic equivalence, zero loss, authenticity, or a universal Hopper."
+    }
+  ],
+  "unknowns": [
+    {
+      "id": "Q1-SEMANTIC-FIDELITY",
+      "meaning": "Semantic equivalence still requires blinded independent review."
+    },
+    {
+      "id": "Q2-REPLAY",
+      "meaning": "Exact same-offer receipt replay cannot be detected by a stateless checker."
+    }
+  ],
+  "next_action": {
+    "id": "A1-RUN-V02-GATES",
+    "meaning": "Run v0.2 positive and adversarial tests before another external receiver trial."
+  },
+  "boundary": [
+    "No hidden access, credentials, or autonomous routing.",
+    "No public release or external action.",
+    "No cross-Space merge without an approved Bridge Capsule."
+  ],
+  "non_claims": [
+    "No universal memory or zero-loss reconstruction.",
+    "No semantic proof from matching IDs.",
+    "No authentication or replay protection for the exact same offer without state."
+  ]
+}

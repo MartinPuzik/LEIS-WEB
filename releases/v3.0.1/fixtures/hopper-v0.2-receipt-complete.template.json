@@ -1,0 +1,70 @@
+{
+  "receipt_id": "R-HOP-V02-COMPLETE",
+  "receiver_conditions": {
+    "model": "synthetic-self-test",
+    "memory": "none",
+    "tools": "none",
+    "web": "none",
+    "source_access": "offer-only"
+  },
+  "new_sources": [],
+  "recovered": [
+    {
+      "id": "H1-PURPOSE",
+      "meaning_in_receiver_words": "Use a minimal human-controlled reconstruction handshake that does not depend on one transport channel."
+    },
+    {
+      "id": "H2-CLAIM-ATOMICITY",
+      "meaning_in_receiver_words": "Judge every claim separately instead of marking the whole Capsule checked."
+    },
+    {
+      "id": "H3-HUMAN-GATE",
+      "meaning_in_receiver_words": "A human must approve publication or other outside action."
+    },
+    {
+      "id": "H4-NON-GUARANTEE",
+      "meaning_in_receiver_words": "A structurally complete receipt is not proof of meaning, identity, losslessness, or universal reliability."
+    },
+    {
+      "id": "Q1-SEMANTIC-FIDELITY",
+      "meaning_in_receiver_words": "Independent blinded review remains necessary for semantic fidelity."
+    },
+    {
+      "id": "Q2-REPLAY",
+      "meaning_in_receiver_words": "A stateless checker cannot recognize an identical receipt replayed against the same exact offer."
+    },
+    {
+      "id": "A1-RUN-V02-GATES",
+      "meaning_in_receiver_words": "Run positive and hostile local protocol tests before another receiver experiment."
+    }
+  ],
+  "claim_reviews": [
+    {
+      "id": "C1-FRESH-WINDOW-OUTPUT",
+      "outcome": "preserved",
+      "receiver_label": "VERIFIED",
+      "rationale": "The local input and output artifacts were inspected as artifacts.",
+      "source_refs": ["SRC-AI-WINDOW", "SRC-LEIS-ZERO-INPUT"]
+    },
+    {
+      "id": "C2-HOPPER-DONE",
+      "outcome": "preserved",
+      "receiver_label": "REJECTED",
+      "rationale": "One successful output and the RV-003 variance cannot prove universal reliability.",
+      "source_refs": ["SRC-AI-WINDOW", "SRC-RV003"]
+    },
+    {
+      "id": "C3-RECEIVER-VARIANCE",
+      "outcome": "preserved",
+      "receiver_label": "VERIFIED",
+      "rationale": "RV-003 retained materially different A and B results.",
+      "source_refs": ["SRC-RV003"]
+    }
+  ],
+  "declared_gaps": [
+    "This synthetic receipt does not evaluate paraphrase semantics independently."
+  ],
+  "conflicts": [],
+  "unsupported_claims": [],
+  "requested_external_actions": []
+}

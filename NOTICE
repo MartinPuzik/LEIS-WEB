@@ -1,0 +1,15 @@
+LEIS Portable Kernel public release 3.0.1
+Copyright 2026 Martin Puzik
+
+Code and JSON schemas in this release are licensed under Apache-2.0.
+Original LEIS documentation is licensed under CC BY 4.0 unless a file states
+otherwise. Names, logos, and trademarks are not licensed except as necessary
+to describe the origin of the work.
+
+The release includes references and links to third-party sources. Those sources
+remain under their own terms and are not relicensed by this package.
+
+This release validates declared local protocol behavior only. It does not
+certify truth, identical internal understanding, lawfulness, compliance,
+privacy, security, public-network operation, or external integration.
+

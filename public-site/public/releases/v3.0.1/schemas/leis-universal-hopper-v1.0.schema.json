@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://leis.local/schemas/leis-universal-hopper-v1.0.schema.json",
+  "title": "LEIS Universal Hopper v1.0 Messages",
+  "oneOf": [
+    {"$ref": "#/$defs/offer"},
+    {"$ref": "#/$defs/receipt"},
+    {"$ref": "#/$defs/controlKey"},
+    {"$ref": "#/$defs/ack"}
+  ],
+  "$defs": {
+    "nonEmpty": {"type": "string", "minLength": 1},
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "label": {"enum": ["VERIFIED", "REPORTED", "INTERPRETATION", "HYPOTHESIS", "UNKNOWN", "REJECTED"]},
+    "offer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol_version", "message_type", "header", "payload", "integrity"],
+      "properties": {
+        "protocol_version": {"const": "1.0"},
+        "message_type": {"const": "OFFER"},
+        "header": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["offer_id", "space", "sender_id", "issued_at_utc", "expires_at_utc", "nonce", "max_attempts"],
+          "properties": {
+            "offer_id": {"$ref": "#/$defs/nonEmpty"},
+            "space": {"$ref": "#/$defs/nonEmpty"},
+            "sender_id": {"$ref": "#/$defs/nonEmpty"},
+            "issued_at_utc": {"$ref": "#/$defs/nonEmpty"},
+            "expires_at_utc": {"$ref": "#/$defs/nonEmpty"},
+            "nonce": {"type": "string", "minLength": 16},
+            "max_attempts": {"type": "integer", "minimum": 1, "maximum": 5}
+          }
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["task_id", "task", "source_manifest", "claims", "critical_objects", "challenges", "control_commitment_sha256", "boundaries", "non_claims", "next_action", "data_policy"],
+          "properties": {
+            "task_id": {"$ref": "#/$defs/nonEmpty"},
+            "task": {"$ref": "#/$defs/nonEmpty"},
+            "source_manifest": {"type": "array", "items": {"type": "object"}},
+            "claims": {"type": "array", "items": {"type": "object"}},
+            "critical_objects": {"type": "array", "minItems": 1, "items": {"type": "object"}},
+            "challenges": {"type": "array", "minItems": 1, "items": {"type": "object"}},
+            "control_commitment_sha256": {"$ref": "#/$defs/sha256"},
+            "boundaries": {"type": "array", "items": {"$ref": "#/$defs/nonEmpty"}},
+            "non_claims": {"type": "array", "items": {"$ref": "#/$defs/nonEmpty"}},
+            "next_action": {"type": "object"},
+            "data_policy": {"type": "object"}
+          }
+        },
+        "integrity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["canonicalization", "content_digest_sha256", "auth_mode", "key_id", "signature_ed25519_b64"],
+          "properties": {
+            "canonicalization": {"const": "LEIS-C14N-1"},
+            "content_digest_sha256": {"$ref": "#/$defs/sha256"},
+            "auth_mode": {"enum": ["DIGEST_ONLY", "ED25519"]},
+            "key_id": {"type": ["string", "null"]},
+            "signature_ed25519_b64": {"type": ["string", "null"]}
+          }
+        }
+      }
+    },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol_version", "message_type", "receipt_id", "offer_id", "offer_nonce", "offer_digest_sha256", "attempt", "receiver_conditions", "recovered_objects", "challenge_answers", "claim_reviews", "declared_gaps", "conflicts", "unsupported_claims", "requested_external_actions"],
+      "properties": {
+        "protocol_version": {"const": "1.0"},
+        "message_type": {"const": "RECEIPT"},
+        "receipt_id": {"$ref": "#/$defs/nonEmpty"},
+        "offer_id": {"$ref": "#/$defs/nonEmpty"},
+        "offer_nonce": {"$ref": "#/$defs/nonEmpty"},
+        "offer_digest_sha256": {"$ref": "#/$defs/sha256"},
+        "attempt": {"type": "integer", "minimum": 1, "maximum": 5},
+        "receiver_conditions": {"type": "object"},
+        "recovered_objects": {"type": "array", "items": {"type": "object"}},
+        "challenge_answers": {"type": "array", "items": {"type": "object"}},
+        "claim_reviews": {"type": "array", "items": {"type": "object"}},
+        "declared_gaps": {"type": "array", "items": {"$ref": "#/$defs/nonEmpty"}},
+        "conflicts": {"type": "array", "items": {"$ref": "#/$defs/nonEmpty"}},
+        "unsupported_claims": {"type": "array", "items": {"$ref": "#/$defs/nonEmpty"}},
+        "requested_external_actions": {"type": "array", "items": {"$ref": "#/$defs/nonEmpty"}}
+      }
+    },
+    "controlKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol_version", "message_type", "offer_id", "required_object_ids", "challenge_answers"],
+      "properties": {
+        "protocol_version": {"const": "1.0"},
+        "message_type": {"const": "CONTROL_KEY"},
+        "offer_id": {"$ref": "#/$defs/nonEmpty"},
+        "required_object_ids": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/nonEmpty"}},
+        "challenge_answers": {"type": "array", "minItems": 1, "items": {"type": "object"}}
+      }
+    },
+    "ack": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["protocol_version", "message_type", "state", "accepted", "offer_id", "receipt_id"],
+      "properties": {
+        "protocol_version": {"const": "1.0"},
+        "message_type": {"const": "ACK"},
+        "state": {"type": "string"},
+        "accepted": {"type": "boolean"},
+        "offer_id": {"type": ["string", "null"]},
+        "receipt_id": {"type": ["string", "null"]}
+      }
+    }
+  }
+}

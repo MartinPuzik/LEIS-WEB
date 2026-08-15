@@ -1,0 +1,25 @@
+{
+  "protocol_version": "1.0",
+  "message_type": "CONTROL_KEY",
+  "offer_id": "OFFER-UH-001",
+  "required_object_ids": [
+    "A-IDENTITY",
+    "A-HUMAN-AUTH",
+    "A-EVIDENCE",
+    "N-NEXT"
+  ],
+  "challenge_answers": [
+    {
+      "id": "Q-PUBLISH",
+      "expected_choice_id": "DENY"
+    },
+    {
+      "id": "Q-MISSING",
+      "expected_choice_id": "PATCH"
+    },
+    {
+      "id": "Q-SCORE",
+      "expected_choice_id": "HOLD"
+    }
+  ]
+}

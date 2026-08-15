@@ -1,0 +1,11 @@
+{
+  "protocol_version": "0.3",
+  "message_type": "PING",
+  "ping_id": "PING-V03-001",
+  "space": "LEIS_CORE",
+  "record_ids": ["KERNEL_CURRENT", "MATH_REPLAY_GAP"],
+  "purpose": "Recover two explicit project coordinates from the local allowlist.",
+  "nonce": "20260815-PING-V03-001",
+  "max_items": 4,
+  "max_bytes": 4096
+}

@@ -1,0 +1,34 @@
+{
+  "suite": "LEIS Socratic Validator v1.0",
+  "case_count": 6,
+  "passed_count": 6,
+  "all_passed": true,
+  "results": [
+    {
+      "name": "complete receipt accepted",
+      "passed": true
+    },
+    {
+      "name": "incomplete receipt requests patch",
+      "passed": true
+    },
+    {
+      "name": "patch withholds expected answers",
+      "passed": true
+    },
+    {
+      "name": "bounded patch session reaches ack",
+      "passed": true
+    },
+    {
+      "name": "prompt-like source remains inert data",
+      "passed": true
+    },
+    {
+      "name": "unauthorised external action held",
+      "passed": true
+    }
+  ],
+  "scope": "protocol conformance only",
+  "semantic_identity_proven": false
+}

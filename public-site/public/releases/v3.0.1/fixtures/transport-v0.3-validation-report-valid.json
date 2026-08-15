@@ -1,0 +1,27 @@
+{
+  "protocol_version": "0.3",
+  "message_type": "VALIDATION_REPORT",
+  "test_id": "TEST-V03-STRUCTURAL-001",
+  "u0_id": "U0-V03-001",
+  "gate_state": "PASS_FOR_HUMAN_REVIEW",
+  "receiver_conditions": {
+    "model": "synthetic-local-fixture",
+    "memory": "none",
+    "tools": "local-validator-only",
+    "web": "none",
+    "source_access": "fixture-only"
+  },
+  "dimension_scores": {
+    "identity": 3,
+    "principles": 3,
+    "lineage": 3,
+    "questions": 3,
+    "action": 3
+  },
+  "hard_gates": ["CAR_PASS", "UCF_PASS", "UAF_PASS"],
+  "reviewers": ["synthetic-primary-review"],
+  "disagreements": [],
+  "observations": ["The fixture structurally returned all declared fields."],
+  "interpretations": ["Semantic equivalence remains untested."],
+  "non_claims": ["This fixture is not a validated semantic result."]
+}

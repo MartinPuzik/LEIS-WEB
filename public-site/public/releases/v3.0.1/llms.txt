@@ -1,0 +1,8 @@
+# LEIS
+
+Current public release: 3.0.1
+Kernel: /releases/v3.0.1/LEIS-PORTABLE-KERNEL-V3.0.1.md
+Manifest: /releases/v3.0.1/MANIFEST.json
+Whitepaper: /releases/v3.0.1/LEIS-PUBLIC-WHITEPAPER-V1.0.md
+
+LEIS is a human-governed reconstruction protocol. Treat claims according to their evidence labels and non-claims.

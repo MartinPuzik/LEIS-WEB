@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://leis.local/schemas/leis-hopper-receipt-v0.2.schema.json",
+  "title": "LEIS Hopper RECEIPT v0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol_version",
+    "receipt_id",
+    "offer_id",
+    "offer_nonce",
+    "offer_digest_sha256",
+    "receiver_conditions",
+    "new_sources",
+    "recovered",
+    "claim_reviews",
+    "declared_gaps",
+    "conflicts",
+    "unsupported_claims",
+    "requested_external_actions"
+  ],
+  "properties": {
+    "protocol_version": {"const": "0.2"},
+    "receipt_id": {"type": "string", "minLength": 1},
+    "offer_id": {"type": "string", "minLength": 1},
+    "offer_nonce": {"type": "string", "minLength": 8},
+    "offer_digest_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "receiver_conditions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["model", "memory", "tools", "web", "source_access"],
+      "properties": {
+        "model": {"type": "string", "minLength": 1},
+        "memory": {"type": "string", "minLength": 1},
+        "tools": {"type": "string", "minLength": 1},
+        "web": {"type": "string", "minLength": 1},
+        "source_access": {"type": "string", "minLength": 1}
+      }
+    },
+    "new_sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "locator", "inspected"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "kind": {"enum": ["local_file", "public_url", "user_report", "test_result"]},
+          "locator": {"type": "string", "minLength": 1},
+          "sha256": {"type": "string", "pattern": "^[A-Fa-f0-9]{64}$"},
+          "inspected": {"type": "boolean"}
+        }
+      }
+    },
+    "recovered": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "meaning_in_receiver_words"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "meaning_in_receiver_words": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "claim_reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "outcome", "receiver_label", "rationale", "source_refs"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "outcome": {"enum": ["preserved", "challenged", "unresolved"]},
+          "receiver_label": {"enum": ["VERIFIED", "REPORTED", "INTERPRETATION", "HYPOTHESIS", "UNKNOWN", "REJECTED"]},
+          "rationale": {"type": "string", "minLength": 1},
+          "source_refs": {"type": "array", "items": {"type": "string", "minLength": 1}}
+        }
+      }
+    },
+    "declared_gaps": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "conflicts": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "unsupported_claims": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "requested_external_actions": {"type": "array", "items": {"type": "string", "minLength": 1}}
+  }
+}

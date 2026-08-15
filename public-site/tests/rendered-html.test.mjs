@@ -1,91 +1,72 @@
 import assert from "node:assert/strict";
-import { access, readFile, readdir } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { access, readFile, stat } from "node:fs/promises";
+import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
-const developmentPreviewMeta =
-  /<meta(?=[^>]*\bname=["']codex-preview["'])(?=[^>]*\bcontent=["']development["'])[^>]*>/i;
-const templateRoot = new URL("../", import.meta.url);
-const previewRoot = new URL("../app/_sites-preview/", import.meta.url);
+const siteRoot = fileURLToPath(new URL("../", import.meta.url));
+const publicRoot = path.join(siteRoot, "public");
 
-async function render() {
-  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
-  const { default: worker } = await import(workerUrl.href);
-
-  return worker.fetch(
-    new Request("http://localhost/", {
-      headers: { accept: "text/html" },
-    }),
-    {
-      ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
-      },
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
-  );
+function sha256(buffer) {
+  return createHash("sha256").update(buffer).digest("hex").toUpperCase();
 }
 
-test("server-renders the starter loading skeleton", async () => {
-  const response = await render();
-  assert.equal(response.status, 200);
-  assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
-
-  const html = await response.text();
-  assert.match(html, developmentPreviewMeta);
-  assert.match(html, /<title>Your site is taking shape<\/title>/i);
-  assert.match(html, /Building your site/);
-  assert.match(html, /Your site is taking shape/);
-  assert.match(
-    html,
-    /Your first version will appear here automatically when it’s ready\./,
-  );
-  assert.doesNotMatch(html, /Codex/);
-  assert.match(html, /react-loading-skeleton/);
-  assert.match(html, /role="status"/);
-});
-
-test("keeps the loading skeleton scoped and disposable", async () => {
-  const [preview, css, page, layout, packageJson, files] = await Promise.all([
-    readFile(new URL("SkeletonPreview.tsx", previewRoot), "utf8"),
-    readFile(new URL("preview.css", previewRoot), "utf8"),
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../package.json", import.meta.url), "utf8"),
-    readdir(previewRoot),
+test("builds the current multilingual LEIS Portal", async () => {
+  const [page, layout, packageJson] = await Promise.all([
+    readFile(path.join(siteRoot, "app", "page.tsx"), "utf8"),
+    readFile(path.join(siteRoot, "app", "layout.tsx"), "utf8"),
+    readFile(path.join(siteRoot, "package.json"), "utf8"),
+    access(path.join(siteRoot, "dist", "server", "index.js")),
+    access(path.join(siteRoot, "dist", "client")),
   ]);
 
-  assert.deepEqual(files.sort(), ["SkeletonPreview.tsx", "preview.css"]);
-  assert.match(preview, /from "react-loading-skeleton"/);
-  assert.match(preview, /baseColor="#eceae7"/);
-  assert.match(preview, /highlightColor="#f9f8f6"/);
-  assert.match(preview, /duration=\{2\.8\}/);
-  assert.match(preview, /sites-skeleton-search-placeholder/);
-  assert.match(packageJson, /"react-loading-skeleton": "3\.5\.0"/);
+  assert.match(page, /type Language = "en" \| "cs" \| "de" \| "fr" \| "es"/);
+  assert.match(page, /\["public release", releaseCopy\]/);
+  assert.match(page, /id="release"/);
+  assert.match(page, /98 of 98 deterministic local protocol cases passed/);
+  assert.match(page, /No claim of identical internal understanding/);
+  assert.match(layout, /LEIS — Understanding that can travel/);
+  assert.match(packageJson, /"next": "\^16\.3\.1"/);
+});
 
-  const shellIndex = preview.indexOf('className="sites-skeleton-shell"');
-  const statusIndex = preview.indexOf('className="sites-skeleton-status"');
-  assert.ok(shellIndex >= 0 && statusIndex > shellIndex);
-  assert.match(css, /position:\s*fixed/);
-  assert.match(css, /inset:\s*0/);
-  assert.match(css, /opacity:\s*0\.52/);
-  assert.match(css, /prefers-reduced-motion:\s*reduce/);
-  assert.doesNotMatch(css, /#020617|canvas|pets|progress/i);
-  assert.doesNotMatch(
-    preview,
-    /loading-spinner|status-mark|status-progress|canvas|cookie|random/i,
-  );
+test("ships the evidence-bounded release in all five Portal languages", async () => {
+  const page = await readFile(path.join(siteRoot, "app", "page.tsx"), "utf8");
 
-  assert.match(page, /export const metadata:\s*Metadata/);
-  assert.match(page, /"codex-preview": "development"/);
-  assert.match(page, /<SkeletonPreview \/>/);
-  assert.match(layout, /title:\s*"Starter Project"/);
-  assert.doesNotMatch(layout, /codex-preview|_sites-preview|themeColor|\bViewport\b/);
-  assert.doesNotMatch(css, /(^|\s)(html|body)\s*\{/m);
+  assert.match(page, /LEIS Portable Kernel v3\.0\.1 is ready to inspect/);
+  assert.match(page, /LEIS Portable Kernel v3\.0\.1 je připraven ke kontrole/);
+  assert.match(page, /LEIS Portable Kernel v3\.0\.1 kann jetzt geprüft werden/);
+  assert.match(page, /LEIS Portable Kernel v3\.0\.1 est prêt à être examiné/);
+  assert.match(page, /LEIS Portable Kernel v3\.0\.1 está listo para revisión/);
 
-  await assert.rejects(
-    access(new URL("public/_sites-preview", templateRoot)),
-  );
+  await Promise.all([
+    access(path.join(publicRoot, "releases", "LEIS-V3.0.1-PUBLIC.zip")),
+    access(path.join(publicRoot, "releases", "v3.0.1", "MANIFEST.json")),
+    access(path.join(publicRoot, "releases", "v3.0.1", "LEIS-PORTABLE-KERNEL-V3.0.1.md")),
+    access(path.join(publicRoot, ".well-known", "leis.json")),
+    access(path.join(publicRoot, "llms.txt")),
+  ]);
+});
+
+test("matches every v3.0.1 manifest entry and the approved release ZIP", async () => {
+  const releaseRoot = path.join(publicRoot, "releases", "v3.0.1");
+  const manifest = JSON.parse(await readFile(path.join(releaseRoot, "MANIFEST.json"), "utf8"));
+  assert.equal(manifest.release, "LEIS Portable Kernel v3.0.1");
+  assert.equal(manifest.state, "PUBLIC_RELEASE");
+  assert.deepEqual(manifest.suite, {
+    cases: 98,
+    passed: 98,
+    scope: "deterministic local protocol conformance",
+  });
+
+  for (const entry of manifest.files) {
+    const filePath = path.resolve(releaseRoot, entry.path);
+    assert.ok(filePath.startsWith(`${path.resolve(releaseRoot)}${path.sep}`));
+    const [bytes, details] = await Promise.all([readFile(filePath), stat(filePath)]);
+    assert.equal(details.size, entry.bytes, `${entry.path}: byte length`);
+    assert.equal(sha256(bytes), entry.sha256, `${entry.path}: SHA-256`);
+  }
+
+  const archive = await readFile(path.join(publicRoot, "releases", "LEIS-V3.0.1-PUBLIC.zip"));
+  assert.equal(sha256(archive), "7C9748DD4C1B657622CF2669BF658DAC4CA786178ADED5FD6FFE29A59B68D889");
 });

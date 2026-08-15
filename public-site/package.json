@@ -18,7 +18,7 @@
     "@amcharts/amcharts5": "^5.20.1",
     "@amcharts/amcharts5-geodata": "^5.1.6",
     "drizzle-orm": "0.45.2",
-    "next": "16.2.6",
+    "next": "^16.3.1",
     "react": "19.2.6",
     "react-dom": "19.2.6",
     "react-loading-skeleton": "3.5.0"

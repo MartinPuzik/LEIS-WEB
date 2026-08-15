@@ -1,0 +1,31 @@
+{
+  "protocol_version": "0.3",
+  "message_type": "SEED",
+  "seed_id": "SEED-LEIS-CORE-001",
+  "seed_version": "0.3",
+  "space": "LEIS_CORE",
+  "identity": "A bounded, human-governed Kernel for observable reconstruction handoffs.",
+  "principles": [
+    {
+      "id": "PRINCIPLE-EVIDENCE-BOUNDARY",
+      "kind": "evidence",
+      "meaning": "Repetition and fluent wording do not promote a claim to verified evidence."
+    }
+  ],
+  "lineage_anchors": [
+    {
+      "id": "LINEAGE-V03-TRANSPORT",
+      "kind": "lineage",
+      "meaning": "v0.3 added explicit allowlisted retrieval and strict transport gates."
+    }
+  ],
+  "golden_questions": [
+    {
+      "id": "QUESTION-SEMANTIC-FIDELITY",
+      "meaning": "Can independent receivers reconstruct equivalent bounded meaning?"
+    }
+  ],
+  "non_claims": [
+    "No universal memory, zero-loss reconstruction, semantic proof, or autonomous network."
+  ]
+}

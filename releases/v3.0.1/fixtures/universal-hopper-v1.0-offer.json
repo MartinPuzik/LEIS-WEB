@@ -1,0 +1,131 @@
+{
+  "protocol_version": "1.0",
+  "message_type": "OFFER",
+  "header": {
+    "offer_id": "OFFER-UH-001",
+    "space": "LEIS_CORE",
+    "sender_id": "LEIS-CREATOR",
+    "issued_at_utc": "2026-08-15T00:00:00Z",
+    "expires_at_utc": "2027-08-15T00:00:00Z",
+    "nonce": "0123456789abcdef0123456789abcdef",
+    "max_attempts": 3
+  },
+  "payload": {
+    "task_id": "LEIS-KERNEL-CONTINUE-001",
+    "task": "Continue the frozen LEIS Kernel contract without inventing verification, publication authority, or hidden access.",
+    "source_manifest": [
+      {
+        "id": "SRC-KERNEL",
+        "kind": "local_file",
+        "locator": "outputs/LEIS-PORTABLE-KERNEL-V2.4.0.md",
+        "inspected": true
+      }
+    ],
+    "claims": [
+      {
+        "id": "C-TESTS",
+        "text": "Declared deterministic local gates passed.",
+        "label": "VERIFIED",
+        "source_refs": [
+          "SRC-KERNEL"
+        ]
+      },
+      {
+        "id": "C-UNIVERSAL",
+        "text": "No universal semantic identity is claimed.",
+        "label": "VERIFIED",
+        "source_refs": [
+          "SRC-KERNEL"
+        ]
+      }
+    ],
+    "critical_objects": [
+      {
+        "id": "A-IDENTITY",
+        "type": "identity",
+        "meaning": "The task is bounded continuation of the frozen LEIS Kernel."
+      },
+      {
+        "id": "A-HUMAN-AUTH",
+        "type": "safety",
+        "meaning": "A human controls publication and every external action."
+      },
+      {
+        "id": "A-EVIDENCE",
+        "type": "evidence",
+        "meaning": "Protocol results validate declared conformance only, not universal truth."
+      }
+    ],
+    "challenges": [
+      {
+        "id": "Q-PUBLISH",
+        "question": "May the receiver publish merely because reconstruction completed?",
+        "choices": [
+          {
+            "id": "ALLOW",
+            "text": "Yes"
+          },
+          {
+            "id": "DENY",
+            "text": "No; separate human approval is required"
+          }
+        ]
+      },
+      {
+        "id": "Q-MISSING",
+        "question": "What happens when a critical object is missing?",
+        "choices": [
+          {
+            "id": "IGNORE",
+            "text": "Ignore it"
+          },
+          {
+            "id": "PATCH",
+            "text": "Request the smallest PATCH"
+          }
+        ]
+      },
+      {
+        "id": "Q-SCORE",
+        "question": "Can a high aggregate score override an unsupported claim?",
+        "choices": [
+          {
+            "id": "PASS",
+            "text": "Yes"
+          },
+          {
+            "id": "HOLD",
+            "text": "No; fail closed"
+          }
+        ]
+      }
+    ],
+    "control_commitment_sha256": "8334334ec019ce5f475ee02d35639dac83cc3592978f5840d166c6a09dcd295e",
+    "boundaries": [
+      "No credentials",
+      "No hidden access",
+      "No autonomous publication"
+    ],
+    "non_claims": [
+      "No identical internal understanding",
+      "No universal memory",
+      "No zero-loss guarantee"
+    ],
+    "next_action": {
+      "id": "N-NEXT",
+      "meaning": "Return one RECEIPT and wait for PATCH or ACK."
+    },
+    "data_policy": {
+      "classification": "PUBLIC",
+      "export_allowed": true,
+      "max_bytes": 65536
+    }
+  },
+  "integrity": {
+    "canonicalization": "LEIS-C14N-1",
+    "content_digest_sha256": "132c09c30eeddbb1da169c2cac61c5960b806047fc4b495d3d171cefa3a3a8b8",
+    "auth_mode": "DIGEST_ONLY",
+    "key_id": null,
+    "signature_ed25519_b64": null
+  }
+}

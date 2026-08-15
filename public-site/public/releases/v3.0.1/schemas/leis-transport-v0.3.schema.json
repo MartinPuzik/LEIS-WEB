@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://leis.local/schemas/leis-transport-v0.3.schema.json",
+  "title": "LEIS Transport Envelopes v0.3",
+  "oneOf": [
+    {"$ref": "#/$defs/Seed"},
+    {"$ref": "#/$defs/Capsule"},
+    {"$ref": "#/$defs/BridgeCapsule"},
+    {"$ref": "#/$defs/Ping"},
+    {"$ref": "#/$defs/Pong"},
+    {"$ref": "#/$defs/ValidationReport"}
+  ],
+  "$defs": {
+    "EvidenceLabel": {
+      "enum": ["VERIFIED", "REPORTED", "INTERPRETATION", "HYPOTHESIS", "UNKNOWN", "REJECTED"]
+    },
+    "ID": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_-]{2,63}$"
+    },
+    "Source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "locator", "inspected", "content_role"],
+      "properties": {
+        "id": {"$ref": "#/$defs/ID"},
+        "kind": {"enum": ["local_file", "public_url", "user_report", "test_result"]},
+        "locator": {"type": "string", "minLength": 1, "maxLength": 600},
+        "sha256": {"type": "string", "pattern": "^[A-Fa-f0-9]{64}$"},
+        "inspected": {"type": "boolean"},
+        "content_role": {"const": "data_only"}
+      }
+    },
+    "Claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "text", "label", "critical", "source_refs"],
+      "properties": {
+        "id": {"$ref": "#/$defs/ID"},
+        "text": {"type": "string", "minLength": 1, "maxLength": 1200},
+        "label": {"$ref": "#/$defs/EvidenceLabel"},
+        "critical": {"type": "boolean"},
+        "source_refs": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/ID"}}
+      }
+    },
+    "Anchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "meaning"],
+      "properties": {
+        "id": {"$ref": "#/$defs/ID"},
+        "kind": {"enum": ["identity", "principle", "lineage", "evidence", "safety", "boundary"]},
+        "meaning": {"type": "string", "minLength": 1, "maxLength": 1000}
+      }
+    },
+    "Unknown": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "meaning"],
+      "properties": {
+        "id": {"$ref": "#/$defs/ID"},
+        "meaning": {"type": "string", "minLength": 1, "maxLength": 1000}
+      }
+    },
+    "PrivacyBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["owner", "allowed_classes", "excluded_classes", "retention"],
+      "properties": {
+        "owner": {"type": "string", "minLength": 1, "maxLength": 120},
+        "allowed_classes": {"type": "array", "uniqueItems": true, "items": {"type": "string", "maxLength": 80}},
+        "excluded_classes": {"type": "array", "uniqueItems": true, "items": {"type": "string", "maxLength": 80}},
+        "retention": {"type": "string", "minLength": 1, "maxLength": 240}
+      }
+    },
+    "Seed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol_version", "message_type", "seed_id", "seed_version", "space", "identity", "principles", "lineage_anchors", "golden_questions", "non_claims"],
+      "properties": {
+        "protocol_version": {"const": "0.3"},
+        "message_type": {"const": "SEED"},
+        "seed_id": {"$ref": "#/$defs/ID"},
+        "seed_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+$"},
+        "space": {"$ref": "#/$defs/ID"},
+        "identity": {"type": "string", "minLength": 1, "maxLength": 800},
+        "principles": {"type": "array", "minItems": 1, "maxItems": 20, "items": {"$ref": "#/$defs/Anchor"}},
+        "lineage_anchors": {"type": "array", "minItems": 1, "maxItems": 30, "items": {"$ref": "#/$defs/Anchor"}},
+        "golden_questions": {"type": "array", "maxItems": 20, "items": {"$ref": "#/$defs/Unknown"}},
+        "non_claims": {"type": "array", "items": {"type": "string", "maxLength": 500}}
+      }
+    },
+    "Capsule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol_version", "message_type", "capsule_id", "space", "seed_ref", "task", "human_orientation", "source_manifest", "claims", "critical_anchors", "lineage_delta", "unknowns", "next_action", "privacy_boundary", "non_claims", "encoding"],
+      "properties": {
+        "protocol_version": {"const": "0.3"},
+        "message_type": {"const": "CAPSULE"},
+        "capsule_id": {"$ref": "#/$defs/ID"},
+        "space": {"$ref": "#/$defs/ID"},
+        "seed_ref": {"$ref": "#/$defs/ID"},
+        "task": {"type": "string", "minLength": 1, "maxLength": 1000},
+        "human_orientation": {"type": "string", "minLength": 1, "maxLength": 1500},
+        "source_manifest": {"type": "array", "maxItems": 40, "items": {"$ref": "#/$defs/Source"}},
+        "claims": {"type": "array", "maxItems": 60, "items": {"$ref": "#/$defs/Claim"}},
+        "critical_anchors": {"type": "array", "minItems": 1, "maxItems": 30, "items": {"$ref": "#/$defs/Anchor"}},
+        "lineage_delta": {"type": "array", "maxItems": 30, "items": {"$ref": "#/$defs/Claim"}},
+        "unknowns": {"type": "array", "maxItems": 30, "items": {"$ref": "#/$defs/Unknown"}},
+        "next_action": {"$ref": "#/$defs/Unknown"},
+        "privacy_boundary": {"$ref": "#/$defs/PrivacyBoundary"},
+        "non_claims": {"type": "array", "items": {"type": "string", "maxLength": 500}},
+        "encoding": {"const": "UTF-8"}
+      }
+    },
+    "BridgeCapsule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol_version", "message_type", "bridge_id", "source_space", "target_space", "purpose", "source_capsule_sha256", "allowed_claim_ids", "excluded_data", "owner_approval", "review_condition", "nonce"],
+      "properties": {
+        "protocol_version": {"const": "0.3"},
+        "message_type": {"const": "BRIDGE_CAPSULE"},
+        "bridge_id": {"$ref": "#/$defs/ID"},
+        "source_space": {"$ref": "#/$defs/ID"},
+        "target_space": {"$ref": "#/$defs/ID"},
+        "purpose": {"type": "string", "minLength": 1, "maxLength": 600},
+        "source_capsule_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "allowed_claim_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/ID"}},
+        "excluded_data": {"type": "array", "items": {"type": "string", "maxLength": 240}},
+        "owner_approval": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["approved", "owner", "scope"],
+          "properties": {
+            "approved": {"const": true},
+            "owner": {"type": "string", "minLength": 1, "maxLength": 120},
+            "scope": {"type": "string", "minLength": 1, "maxLength": 500}
+          }
+        },
+        "review_condition": {"type": "string", "minLength": 1, "maxLength": 500},
+        "nonce": {"type": "string", "minLength": 8, "maxLength": 128}
+      }
+    },
+    "Ping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol_version", "message_type", "ping_id", "space", "record_ids", "purpose", "nonce", "max_items", "max_bytes"],
+      "properties": {
+        "protocol_version": {"const": "0.3"},
+        "message_type": {"const": "PING"},
+        "ping_id": {"$ref": "#/$defs/ID"},
+        "space": {"$ref": "#/$defs/ID"},
+        "record_ids": {"type": "array", "minItems": 1, "maxItems": 8, "uniqueItems": true, "items": {"$ref": "#/$defs/ID"}},
+        "purpose": {"type": "string", "minLength": 1, "maxLength": 500},
+        "nonce": {"type": "string", "minLength": 8, "maxLength": 128},
+        "max_items": {"type": "integer", "minimum": 1, "maximum": 8},
+        "max_bytes": {"type": "integer", "minimum": 256, "maximum": 8192}
+      }
+    },
+    "PongRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["record_id", "label", "content", "source_refs", "content_role", "record_sha256"],
+      "properties": {
+        "record_id": {"$ref": "#/$defs/ID"},
+        "label": {"$ref": "#/$defs/EvidenceLabel"},
+        "content": {"type": "string", "maxLength": 6000},
+        "source_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "maxLength": 600}},
+        "content_role": {"const": "data_only"},
+        "record_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "Pong": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol_version", "message_type", "pong_id", "ping_id", "space", "nonce", "request_sha256", "state", "records", "gaps", "instructions_executable", "external_action_performed"],
+      "properties": {
+        "protocol_version": {"const": "0.3"},
+        "message_type": {"const": "PONG"},
+        "pong_id": {"$ref": "#/$defs/ID"},
+        "ping_id": {"$ref": "#/$defs/ID"},
+        "space": {"$ref": "#/$defs/ID"},
+        "nonce": {"type": "string", "minLength": 8, "maxLength": 128},
+        "request_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "state": {"enum": ["CANDIDATE_DATA_REVIEW", "HOLD_SCHEMA", "HOLD_SPACE", "HOLD_UNKNOWN_RECORD", "HOLD_SIZE", "HOLD_ENCODING", "HOLD_INTEGRITY"]},
+        "records": {"type": "array", "maxItems": 8, "items": {"$ref": "#/$defs/PongRecord"}},
+        "gaps": {"type": "array", "items": {"type": "string", "maxLength": 500}},
+        "instructions_executable": {"const": false},
+        "external_action_performed": {"const": false}
+      }
+    },
+    "ValidationReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol_version", "message_type", "test_id", "u0_id", "gate_state", "receiver_conditions", "dimension_scores", "hard_gates", "reviewers", "disagreements", "observations", "interpretations", "non_claims"],
+      "properties": {
+        "protocol_version": {"const": "0.3"},
+        "message_type": {"const": "VALIDATION_REPORT"},
+        "test_id": {"$ref": "#/$defs/ID"},
+        "u0_id": {"$ref": "#/$defs/ID"},
+        "gate_state": {"enum": ["HOLD", "PASS_FOR_HUMAN_REVIEW", "VALIDATED"]},
+        "receiver_conditions": {"type": "object"},
+        "dimension_scores": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["identity", "principles", "lineage", "questions", "action"],
+          "properties": {
+            "identity": {"type": "integer", "minimum": 0, "maximum": 3},
+            "principles": {"type": "integer", "minimum": 0, "maximum": 3},
+            "lineage": {"type": "integer", "minimum": 0, "maximum": 3},
+            "questions": {"type": "integer", "minimum": 0, "maximum": 3},
+            "action": {"type": "integer", "minimum": 0, "maximum": 3}
+          }
+        },
+        "hard_gates": {"type": "array", "items": {"type": "string", "maxLength": 160}},
+        "reviewers": {"type": "array", "items": {"type": "string", "maxLength": 120}},
+        "disagreements": {"type": "array", "items": {"type": "string", "maxLength": 800}},
+        "observations": {"type": "array", "items": {"type": "string", "maxLength": 800}},
+        "interpretations": {"type": "array", "items": {"type": "string", "maxLength": 800}},
+        "non_claims": {"type": "array", "items": {"type": "string", "maxLength": 500}}
+      }
+    }
+  }
+}

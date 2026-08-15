@@ -1,0 +1,204 @@
+{
+  "protocol": "LEIS Universal Hopper v1.0",
+  "all_passed": true,
+  "case_count": 32,
+  "cases": [
+    {
+      "case": "complete-digest-only",
+      "expected": "ACCEPTED_OPERATIONAL",
+      "actual": "ACCEPTED_OPERATIONAL",
+      "passed": true
+    },
+    {
+      "case": "complete-ed25519",
+      "expected": "ACCEPTED_OPERATIONAL",
+      "actual": "ACCEPTED_OPERATIONAL",
+      "passed": true
+    },
+    {
+      "case": "signed-without-trust-store",
+      "expected": "HOLD_AUTH",
+      "actual": "HOLD_AUTH",
+      "passed": true
+    },
+    {
+      "case": "tampered-content",
+      "expected": "HOLD_INTEGRITY",
+      "actual": "HOLD_INTEGRITY",
+      "passed": true
+    },
+    {
+      "case": "invalid-signature",
+      "expected": "HOLD_AUTH",
+      "actual": "HOLD_AUTH",
+      "passed": true
+    },
+    {
+      "case": "expired-offer",
+      "expected": "HOLD_FRESHNESS",
+      "actual": "HOLD_FRESHNESS",
+      "passed": true
+    },
+    {
+      "case": "future-offer",
+      "expected": "HOLD_FRESHNESS",
+      "actual": "HOLD_FRESHNESS",
+      "passed": true
+    },
+    {
+      "case": "receipt-digest-mismatch",
+      "expected": "HOLD_INTEGRITY",
+      "actual": "HOLD_INTEGRITY",
+      "passed": true
+    },
+    {
+      "case": "receipt-nonce-mismatch",
+      "expected": "HOLD_INTEGRITY",
+      "actual": "HOLD_INTEGRITY",
+      "passed": true
+    },
+    {
+      "case": "missing-critical-object",
+      "expected": "PATCH_REQUIRED",
+      "actual": "PATCH_REQUIRED",
+      "passed": true
+    },
+    {
+      "case": "wrong-blind-answer",
+      "expected": "PATCH_REQUIRED",
+      "actual": "PATCH_REQUIRED",
+      "passed": true
+    },
+    {
+      "case": "missing-blind-answer",
+      "expected": "PATCH_REQUIRED",
+      "actual": "PATCH_REQUIRED",
+      "passed": true
+    },
+    {
+      "case": "missing-claim-review",
+      "expected": "PATCH_REQUIRED",
+      "actual": "PATCH_REQUIRED",
+      "passed": true
+    },
+    {
+      "case": "challenged-claim",
+      "expected": "HOLD_CLAIM_RECONCILIATION",
+      "actual": "HOLD_CLAIM_RECONCILIATION",
+      "passed": true
+    },
+    {
+      "case": "relabelled-claim",
+      "expected": "HOLD_CLAIM_RECONCILIATION",
+      "actual": "HOLD_CLAIM_RECONCILIATION",
+      "passed": true
+    },
+    {
+      "case": "unsupported-claim",
+      "expected": "HOLD_EVIDENCE_OR_SAFETY",
+      "actual": "HOLD_EVIDENCE_OR_SAFETY",
+      "passed": true
+    },
+    {
+      "case": "external-action",
+      "expected": "HOLD_EVIDENCE_OR_SAFETY",
+      "actual": "HOLD_EVIDENCE_OR_SAFETY",
+      "passed": true
+    },
+    {
+      "case": "changed-control-key",
+      "expected": "HOLD_CONTROL",
+      "actual": "HOLD_CONTROL",
+      "passed": true
+    },
+    {
+      "case": "export-not-allowed",
+      "expected": "HOLD_PRIVACY",
+      "actual": "HOLD_PRIVACY",
+      "passed": true
+    },
+    {
+      "case": "declared-size-exceeded",
+      "expected": "HOLD_SIZE",
+      "actual": "HOLD_SIZE",
+      "passed": true
+    },
+    {
+      "case": "attempts-exhausted",
+      "expected": "FAILED_RELIABILITY",
+      "actual": "FAILED_RELIABILITY",
+      "passed": true
+    },
+    {
+      "case": "duplicate-recovered-id",
+      "expected": "HOLD_SCHEMA",
+      "actual": "HOLD_SCHEMA",
+      "passed": true
+    },
+    {
+      "case": "unknown-recovered-id",
+      "expected": "HOLD_SCHEMA",
+      "actual": "HOLD_SCHEMA",
+      "passed": true
+    },
+    {
+      "case": "invalid-attempt",
+      "expected": "HOLD_SCHEMA",
+      "actual": "HOLD_SCHEMA",
+      "passed": true
+    },
+    {
+      "case": "declared-gap",
+      "expected": "PATCH_REQUIRED",
+      "actual": "PATCH_REQUIRED",
+      "passed": true
+    },
+    {
+      "case": "prompt-injection-is-data",
+      "expected": "ACCEPTED_OPERATIONAL",
+      "actual": "ACCEPTED_OPERATIONAL",
+      "passed": true
+    },
+    {
+      "case": "unknown-receiver-conditions-retained",
+      "expected": "ACCEPTED_OPERATIONAL",
+      "actual": "ACCEPTED_OPERATIONAL",
+      "passed": true
+    },
+    {
+      "case": "unicode-value-canonicalized",
+      "expected": "ACCEPTED_OPERATIONAL",
+      "actual": "ACCEPTED_OPERATIONAL",
+      "passed": true
+    },
+    {
+      "case": "replay-first-accept",
+      "expected": "ACCEPTED_OPERATIONAL",
+      "actual": "ACCEPTED_OPERATIONAL",
+      "passed": true
+    },
+    {
+      "case": "replay-second-hold",
+      "expected": "HOLD_REPLAY",
+      "actual": "HOLD_REPLAY",
+      "passed": true
+    },
+    {
+      "case": "session-patch-then-ack",
+      "expected": "PATCH_REQUIRED->ACCEPTED_OPERATIONAL",
+      "actual": "PATCH_REQUIRED->ACCEPTED_OPERATIONAL",
+      "passed": true
+    },
+    {
+      "case": "session-attempt-order",
+      "expected": "HOLD_ATTEMPT_ORDER",
+      "actual": "HOLD_ATTEMPT_ORDER",
+      "passed": true
+    }
+  ],
+  "non_claims": [
+    "Tests validate declared local conformance and recovery control flow only.",
+    "Ephemeral test signing does not establish a public root of trust.",
+    "No external network or autonomous publication was exercised."
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "suite": "LEIS Policy Profile v1.0",
+  "case_count": 18,
+  "passed_count": 18,
+  "all_passed": true,
+  "results": [
+    {
+      "name": "no profile",
+      "expected_pass": true,
+      "actual_pass": true,
+      "passed": true
+    },
+    {
+      "name": "official legal complete",
+      "expected_pass": true,
+      "actual_pass": true,
+      "passed": true
+    },
+    {
+      "name": "official legal missing locator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "passed": true
+    },
+    {
+      "name": "applied rule missing role",
+      "expected_pass": false,
+      "actual_pass": false,
+      "passed": true
+    },
+    {
+      "name": "research source does not imply role",
+      "expected_pass": true,
+      "actual_pass": true,
+      "passed": true
+    },
+    {
+      "name": "self certified compliance rejected",
+      "expected_pass": false,
+      "actual_pass": false,
+      "passed": true
+    },
+    {
+      "name": "employment complete",
+      "expected_pass": true,
+      "actual_pass": true,
+      "passed": true
+    },
+    {
+      "name": "employment contestability missing",
+      "expected_pass": false,
+      "actual_pass": false,
+      "passed": true
+    },
+    {
+      "name": "nested secret rejected",
+      "expected_pass": false,
+      "actual_pass": false,
+      "passed": true
+    },
+    {
+      "name": "empty sensitive field rejected",
+      "expected_pass": false,
+      "actual_pass": false,
+      "passed": true
+    },
+    {
+      "name": "prompt text stays inert data",
+      "expected_pass": true,
+      "actual_pass": true,
+      "passed": true
+    },
+    {
+      "name": "executable imported instructions rejected",
+      "expected_pass": false,
+      "actual_pass": false,
+      "passed": true
+    },
+    {
+      "name": "retention with purpose accepted",
+      "expected_pass": true,
+      "actual_pass": true,
+      "passed": true
+    },
+    {
+      "name": "retention without basis rejected",
+      "expected_pass": false,
+      "actual_pass": false,
+      "passed": true
+    },
+    {
+      "name": "dp evidence complete candidate",
+      "expected_pass": true,
+      "actual_pass": true,
+      "passed": true
+    },
+    {
+      "name": "dp adjacency missing",
+      "expected_pass": false,
+      "actual_pass": false,
+      "passed": true
+    },
+    {
+      "name": "dp invalid delta",
+      "expected_pass": false,
+      "actual_pass": false,
+      "passed": true
+    },
+    {
+      "name": "unknown profile",
+      "expected_pass": false,
+      "actual_pass": false,
+      "passed": true
+    }
+  ],
+  "non_claim": "Branch conformance does not certify legal compliance, privacy, or semantic understanding."
+}

@@ -1,0 +1,50 @@
+{
+  "release": "LEIS Portable Kernel v3.0.1",
+  "all_passed": true,
+  "total_cases": 98,
+  "suites": [
+    {
+      "name": "Understanding Hopper v0.2",
+      "passed": true,
+      "case_count": 12
+    },
+    {
+      "name": "Transport and Local Retrieval v0.3",
+      "passed": true,
+      "case_count": 16
+    },
+    {
+      "name": "Universal Hopper v1.0",
+      "passed": true,
+      "case_count": 32
+    },
+    {
+      "name": "Policy Profile v1.0",
+      "passed": true,
+      "case_count": 18
+    },
+    {
+      "name": "Socratic compatibility v1.0",
+      "passed": true,
+      "case_count": 6
+    },
+    {
+      "name": "Network Security Officer v1.0",
+      "passed": true,
+      "case_count": 14
+    }
+  ],
+  "validated_scope": [
+    "Frozen v2.4.0 protocol behavior",
+    "Bounded Socratic PATCH compatibility",
+    "Loopback-only HTTP boundary and local OFFER resolution",
+    "Strict UTF-8 JSON, duplicate-key, size, route, policy, replay, and external-action gates",
+    "Metadata-only network audit events"
+  ],
+  "non_claims": [
+    "No public network, remote node, or autonomous command queue was activated.",
+    "Conformance does not prove identical internal understanding or universal truth.",
+    "Policy gates do not certify legal compliance, privacy, or security.",
+    "The suite itself performs no external publication."
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://leis.local/schemas/leis-hopper-offer-v0.2.schema.json",
+  "title": "LEIS Hopper OFFER v0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol_version",
+    "offer_id",
+    "offer_nonce",
+    "space",
+    "task",
+    "source_manifest",
+    "claims",
+    "critical_anchors",
+    "unknowns",
+    "next_action",
+    "boundary",
+    "non_claims"
+  ],
+  "properties": {
+    "protocol_version": {"const": "0.2"},
+    "offer_id": {"type": "string", "minLength": 1},
+    "offer_nonce": {"type": "string", "minLength": 8},
+    "space": {"type": "string", "minLength": 1},
+    "task": {"type": "string", "minLength": 1},
+    "source_manifest": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/source"}
+    },
+    "claims": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/claim"}
+    },
+    "critical_anchors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/anchor"}
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/unknown"}
+    },
+    "next_action": {"$ref": "#/$defs/unknown"},
+    "boundary": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "non_claims": {"type": "array", "items": {"type": "string", "minLength": 1}}
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "locator", "inspected"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["local_file", "public_url", "user_report", "test_result"]},
+        "locator": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[A-Fa-f0-9]{64}$"},
+        "inspected": {"type": "boolean"}
+      }
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "text", "label", "critical", "source_refs"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "text": {"type": "string", "minLength": 1},
+        "label": {"enum": ["VERIFIED", "REPORTED", "INTERPRETATION", "HYPOTHESIS", "UNKNOWN", "REJECTED"]},
+        "critical": {"type": "boolean"},
+        "source_refs": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "anchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "meaning"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["identity", "principle", "lineage", "evidence", "safety", "boundary"]},
+        "meaning": {"type": "string", "minLength": 1}
+      }
+    },
+    "unknown": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "meaning"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "meaning": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

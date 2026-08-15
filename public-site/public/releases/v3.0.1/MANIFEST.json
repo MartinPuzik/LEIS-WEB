@@ -1,0 +1,270 @@
+{
+  "release": "LEIS Portable Kernel v3.0.1",
+  "package": "LEIS-V3.0.1-PUBLIC",
+  "state": "PUBLIC_RELEASE",
+  "created_date": "2026-08-15",
+  "creator": "Martin Puzik",
+  "kernel_sha256": "1467033922B5A6D67405188825B7E6260215D3917D2F371215FA25E0CFAEE96D",
+  "suite": {
+    "cases": 98,
+    "passed": 98,
+    "scope": "deterministic local protocol conformance"
+  },
+  "licences": {
+    "code_and_schemas": "Apache-2.0",
+    "original_documentation": "CC-BY-4.0"
+  },
+  "publication_approved": true,
+  "publication_targets": [
+    "GitHub",
+    "LEIS Portal"
+  ],
+  "public_network_activated": false,
+  "files": [
+    {
+      "path": ".well-known/leis.json",
+      "bytes": 769,
+      "sha256": "B6D9FBCEE7E48354EAC1C36CDE2C97E5C18CCAD7E4907B5BF9C684D850E94603"
+    },
+    {
+      "path": "fixtures/hopper-v0.2-offer-001.json",
+      "bytes": 3302,
+      "sha256": "25DE3E9EFF5612806A3B491CF55DAC6D6CF626C590B85680D6BF06E28138292E"
+    },
+    {
+      "path": "fixtures/hopper-v0.2-receipt-complete.template.json",
+      "bytes": 2376,
+      "sha256": "2043F56C4D5B54DE79375AA94C6F4C2C597BD0C2AD32D950CF2BA10B035F5965"
+    },
+    {
+      "path": "fixtures/transport-v0.3-bridge-valid.json",
+      "bytes": 791,
+      "sha256": "A2E510AE38F806EF75247BF2D0873A3E56E6D14DEE600A9FA711C4ED6A45D1F3"
+    },
+    {
+      "path": "fixtures/transport-v0.3-capsule-valid.json",
+      "bytes": 1965,
+      "sha256": "817E1F57426C4AF1BF340BE91671FAA3BA1BBE27AEC68A63BDF905B93C9DDF6F"
+    },
+    {
+      "path": "fixtures/transport-v0.3-memory-index.json",
+      "bytes": 913,
+      "sha256": "269A6E35C2084B68A08E5476D2C9DE481746AD1AA4EC9EA7B29FE8BAD37AFB2B"
+    },
+    {
+      "path": "fixtures/transport-v0.3-ping-valid.json",
+      "bytes": 324,
+      "sha256": "C952939AB5BDF59D686075328F8CCE297AB89BD346058A1096D5363F7E22561E"
+    },
+    {
+      "path": "fixtures/transport-v0.3-seed-valid.json",
+      "bytes": 904,
+      "sha256": "DB05B25A5A4EB15F225909D63FCEB352826FA0AA0A2E1EAD26047228251E8522"
+    },
+    {
+      "path": "fixtures/transport-v0.3-validation-report-valid.json",
+      "bytes": 821,
+      "sha256": "C8F3518F1D66BFDBFA6BD0B8F6151C92084EFE05E8DA580714D452BC35BDF00E"
+    },
+    {
+      "path": "fixtures/universal-hopper-v1.0-control-key.json",
+      "bytes": 468,
+      "sha256": "6899FC82CFC4E7A7B965EAE10B5977228977520EA20E0D66175B66B046F9B1BE"
+    },
+    {
+      "path": "fixtures/universal-hopper-v1.0-offer.json",
+      "bytes": 3608,
+      "sha256": "21CF7301DC0F02EC2AC32A4BE2F4610FD68360D1F0DB37C4C66704EC219BD075"
+    },
+    {
+      "path": "fixtures/universal-hopper-v1.0-receipt-complete.json",
+      "bytes": 1924,
+      "sha256": "AE5551F4CAE84CB051A6D2904B21437493D790B3CA6749C9CE460DE79B2C01A5"
+    },
+    {
+      "path": "LEIS-CORE-MANIFESTO-V1.1.md",
+      "bytes": 2597,
+      "sha256": "B5B970AAB680CC0773D55290B2BFF1A2AC5D7995B58A4F960108FBD24DB03243"
+    },
+    {
+      "path": "LEIS-ECOSYSTEM-FINAL-BLUEPRINT-V1.1.md",
+      "bytes": 15370,
+      "sha256": "1C6157D8ECAD8D633EDC70ABDAB4B58005FC3263715AAB5B7F267732BD1401C0"
+    },
+    {
+      "path": "LEIS-MATHEMATICAL-AND-CLAIMS-BOUNDARY-V1.0.md",
+      "bytes": 4892,
+      "sha256": "73A4BFAA29D96434D2128B8EA88DB025CE893A4A0DB229CB88D0F70AB2A52A7E"
+    },
+    {
+      "path": "LEIS-NETWORK-LOCAL-ACTIVATION-RECEIPT.md",
+      "bytes": 1094,
+      "sha256": "1C1DC44002B1143210A93A8630151C0386E223F3AEEF7CACAB3FE7EBB8E66EEB"
+    },
+    {
+      "path": "LEIS-NETWORK-SECURITY-OFFICER-V1.0.md",
+      "bytes": 2405,
+      "sha256": "2F7AE6828C4237D8CD31C795640544A0316F335D139CA0A3BC98843D3EB5A402"
+    },
+    {
+      "path": "LEIS-PORTABLE-KERNEL-V3.0.1.md",
+      "bytes": 8678,
+      "sha256": "1467033922B5A6D67405188825B7E6260215D3917D2F371215FA25E0CFAEE96D"
+    },
+    {
+      "path": "LEIS-PUBLIC-PACK-INDEX-V3.0.1.md",
+      "bytes": 1601,
+      "sha256": "58ADE2410A0C88E8EDD86DDD9413E0328845A74999C1A4339E5662F0BA07F166"
+    },
+    {
+      "path": "LEIS-PUBLIC-WHITEPAPER-V1.0.md",
+      "bytes": 5754,
+      "sha256": "B2F03D62C555E770EE77D57346C2CA565ABC8F3A1F8EBD80AB420ADB8D8A3724"
+    },
+    {
+      "path": "LEIS-PUBLICATION-APPROVAL-V3.0.1.md",
+      "bytes": 718,
+      "sha256": "7F1E3A848C1BDC79AE87E4041E96F3C177363F06F758CB16DF9480BF8DCED760"
+    },
+    {
+      "path": "LICENSE-CODE-APACHE-2.0.txt",
+      "bytes": 11343,
+      "sha256": "FBE585D04B4231375F30915A899CE98B6456C4269FC3ABFDC3C82DB5C53D542E"
+    },
+    {
+      "path": "LICENSE-DOCS-CC-BY-4.0.txt",
+      "bytes": 954,
+      "sha256": "6D8136184C779014BA786F93151FF2D99B3F31770140339FA564BEE0B160EA6F"
+    },
+    {
+      "path": "llms.txt",
+      "bytes": 318,
+      "sha256": "7161EFE00616B369AE93D6A2888FE12303E2EA85F1481C6B5BE6A99EABA45E37"
+    },
+    {
+      "path": "NOTICE.txt",
+      "bytes": 699,
+      "sha256": "D300BEBE116D35767CCAD8E6867F4553CBB958F2AE76DFD1C126CB503FF7CDED"
+    },
+    {
+      "path": "papers/LEIS-DPIA-FRIA-PREASSESSMENT-V1.0-CS.md",
+      "bytes": 9954,
+      "sha256": "A26EC1C19D9C2CB570916146D153B6DE5140C0B50C653612A15AFDBE1B37DEAF"
+    },
+    {
+      "path": "papers/LEIS-EU-AI-ACT-AND-DIGITAL-LIFE-REFERENCE-V1.0.md",
+      "bytes": 4202,
+      "sha256": "08B94A9F42CB947F620424C18E0F0474F4DEA4063960A067985931AAF48165E7"
+    },
+    {
+      "path": "README.md",
+      "bytes": 2161,
+      "sha256": "5F60E70D02C240F6E701CAE6B42985897ED2D8E5B82142F15B949DD769EA2842"
+    },
+    {
+      "path": "RELEASE-NOTES.md",
+      "bytes": 1325,
+      "sha256": "9CBB389EA791B981CD6A3327FC30176EAFB81F73340C38C0DF68C600E32CB5B1"
+    },
+    {
+      "path": "requirements.txt",
+      "bytes": 22,
+      "sha256": "0823942EF70818F828549A02EA027A7DA53E26FD72F20647EFC9ADABF9A04054"
+    },
+    {
+      "path": "results/leis-hopper-v0.2-self-test.json",
+      "bytes": 16454,
+      "sha256": "BADD9579F38DEECDBBB49A4F0F235F95EEB287383827DB9ACF97D58C7F1B5B99"
+    },
+    {
+      "path": "results/leis-kernel-v3.0.1-release-suite.json",
+      "bytes": 1402,
+      "sha256": "9F1DC5FA9D0FB3373C974CD0F3253F5787CA36FF895EF5EA23D18ECB42AFD30A"
+    },
+    {
+      "path": "results/leis-network-security-officer-v1.0-self-test.json",
+      "bytes": 2187,
+      "sha256": "6C7C3DF45937CA6F816094A967FE5D65B71AAFE454DE6F924E039AE37203BAAA"
+    },
+    {
+      "path": "results/leis-policy-profile-v1.0-self-test.json",
+      "bytes": 2790,
+      "sha256": "826A74BDD860D0705BA9FB95EBB642869BB6125807D727675C519581D802EC77"
+    },
+    {
+      "path": "results/leis-socratic-validator-v1.0-self-test.json",
+      "bytes": 743,
+      "sha256": "EBF279939963B5A52909D4E4DD9E683268B2354E0F9FE02BC00EC959DB68B6BF"
+    },
+    {
+      "path": "results/leis-transport-v0.3-self-test.json",
+      "bytes": 9447,
+      "sha256": "5977F3310B004EE999E89C532180450A0D10C7D9924BCF296FAEEF4DE3CED598"
+    },
+    {
+      "path": "results/leis-universal-hopper-v1.0-self-test.json",
+      "bytes": 5231,
+      "sha256": "4C99196DC60FF616ACD1D43CB6C401BBD1A36527B06E2FA333D981A2718A89E9"
+    },
+    {
+      "path": "schemas/leis-hopper-offer-v0.2.schema.json",
+      "bytes": 2962,
+      "sha256": "FE44780DB08EACFD9CB8C8F151DD08D75EE4EA7B8E0E5E6EE93F580295ED92BE"
+    },
+    {
+      "path": "schemas/leis-hopper-patch-v0.2.schema.json",
+      "bytes": 933,
+      "sha256": "700B175F4DF8E6622CA1A440A7F9C79EAF029BBF579A99C05B8A8EA3032C08A2"
+    },
+    {
+      "path": "schemas/leis-hopper-receipt-v0.2.schema.json",
+      "bytes": 3220,
+      "sha256": "7B525030BEFA3996F90DAB50CCF6AA0729957A6C0A8AB92B9E2E831519068436"
+    },
+    {
+      "path": "schemas/leis-transport-v0.3.schema.json",
+      "bytes": 11198,
+      "sha256": "1E89DA722333ECCEC60280E0C7A022E0D8DC4AD14CADA381AD111FBD0A0EBF1B"
+    },
+    {
+      "path": "schemas/leis-universal-hopper-v1.0.schema.json",
+      "bytes": 5653,
+      "sha256": "F698ED188C07312F07F145A44FD022FF944C1FF7CD0BA83644B47ADE3C4D0FAB"
+    },
+    {
+      "path": "tools/leis_hopper_v0_2.py",
+      "bytes": 22248,
+      "sha256": "6292333A3E5F5C117407431A3A5AE8614391C9E756258FBFB351BE711B4D88D8"
+    },
+    {
+      "path": "tools/leis_network_security_officer_v1.py",
+      "bytes": 15917,
+      "sha256": "48F209553999AEA95E3A5709E71EF9711539B5762606069D600B4EE86AB6A1CC"
+    },
+    {
+      "path": "tools/leis_policy_profile_v1.py",
+      "bytes": 11087,
+      "sha256": "8E8C709FD978CD513277E16AF22348C4D539B8EA17AA84C01E98971E10C91E66"
+    },
+    {
+      "path": "tools/leis_release_suite_v301.py",
+      "bytes": 2758,
+      "sha256": "CC69E440A57D4AC335BECB8F399A293FCD227574A68E5B29D952AFD117BECCAA"
+    },
+    {
+      "path": "tools/leis_socratic_validator_v1.py",
+      "bytes": 4441,
+      "sha256": "92A1E1FA1216DA18BB6FBC6C5349311EDD8F6B59BE937BA5A91525785F8A38D9"
+    },
+    {
+      "path": "tools/leis_transport_v0_3.py",
+      "bytes": 26047,
+      "sha256": "379F5D8D38FB36FC2785DEC3D850A8AEF4E97B842EE365ACC8A90B32317658C1"
+    },
+    {
+      "path": "tools/leis_universal_hopper_v1.py",
+      "bytes": 51496,
+      "sha256": "70EE44DFC1FB9448577E45DFCC9CF5A2145246F5E79DDE9D8F02D715830654B6"
+    }
+  ]
+}
