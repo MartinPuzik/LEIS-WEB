@@ -4,3 +4,5 @@
 *.png binary
 *.zip binary
 *.pptx binary
+/releases/v3.0.1/** text eol=lf
+/public-site/public/releases/v3.0.1/** text eol=lf
