@@ -1,0 +1,18 @@
+{
+  "protocol_version": "0.3",
+  "message_type": "BRIDGE_CAPSULE",
+  "bridge_id": "BRIDGE-V03-001",
+  "source_space": "LEIS_CORE",
+  "target_space": "LEIS_TALMUD_RESEARCH",
+  "purpose": "Transfer one approved research question without merging the Spaces.",
+  "source_capsule_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "allowed_claim_ids": ["CLAIM-PROJECT4-STATE"],
+  "excluded_data": ["credentials", "business cases", "unreviewed legal claims"],
+  "owner_approval": {
+    "approved": true,
+    "owner": "Martin Puzik",
+    "scope": "Research question only; no LEIS Core finding may be inferred from the target Space."
+  },
+  "review_condition": "Review before any return Bridge Capsule is accepted into LEIS_CORE.",
+  "nonce": "20260815-BRIDGE-V03-001"
+}

@@ -1,0 +1,437 @@
+{
+  "protocol": "LEIS Understanding Hopper v0.2",
+  "all_passed": true,
+  "case_count": 12,
+  "cases": [
+    {
+      "case": "complete",
+      "expected": "CANDIDATE_SEMANTIC_REVIEW",
+      "actual": "CANDIDATE_SEMANTIC_REVIEW",
+      "passed": true,
+      "details": {
+        "protocol": "LEIS Understanding Hopper v0.2",
+        "offer_id": "HOP-V02-001",
+        "receipt_id": "R-HOP-V02-COMPLETE",
+        "offer_digest_sha256": "fc5f4f7bee7530be40c98361e2b13c500e860ac74966d3e404a347e5f1247ed2",
+        "state": "CANDIDATE_SEMANTIC_REVIEW",
+        "metrics": {
+          "critical_anchor_recovery": "7/7",
+          "claim_review_coverage": "3/3",
+          "receiver_condition_visibility": "5/5"
+        },
+        "missing_ids": [],
+        "missing_claim_reviews": [],
+        "schema_errors": [],
+        "integrity_errors": [],
+        "claim_issues": [],
+        "evidence_safety_errors": [],
+        "patch": null,
+        "human_semantic_review_required": true,
+        "semantic_equivalence_proven": false,
+        "external_action_performed": false,
+        "limitations": [
+          "Digest binding does not authenticate sender identity.",
+          "Exact same-offer receipt replay is not detectable without a receipt registry.",
+          "Structural recovery does not prove semantic equivalence."
+        ]
+      }
+    },
+    {
+      "case": "missing-critical",
+      "expected": "HOLD_MISSING_CRITICAL",
+      "actual": "HOLD_MISSING_CRITICAL",
+      "passed": true,
+      "details": {
+        "protocol": "LEIS Understanding Hopper v0.2",
+        "offer_id": "HOP-V02-001",
+        "receipt_id": "R-V02-MISSING",
+        "offer_digest_sha256": "fc5f4f7bee7530be40c98361e2b13c500e860ac74966d3e404a347e5f1247ed2",
+        "state": "HOLD_MISSING_CRITICAL",
+        "metrics": {
+          "critical_anchor_recovery": "6/7",
+          "claim_review_coverage": "3/3",
+          "receiver_condition_visibility": "5/5"
+        },
+        "missing_ids": [
+          "A1-RUN-V02-GATES"
+        ],
+        "missing_claim_reviews": [],
+        "schema_errors": [],
+        "integrity_errors": [],
+        "claim_issues": [],
+        "evidence_safety_errors": [],
+        "patch": {
+          "protocol_version": "0.2",
+          "offer_id": "HOP-V02-001",
+          "offer_digest_sha256": "fc5f4f7bee7530be40c98361e2b13c500e860ac74966d3e404a347e5f1247ed2",
+          "missing_objects": [
+            {
+              "id": "A1-RUN-V02-GATES",
+              "object_type": "next_action",
+              "meaning": "Run v0.2 positive and adversarial tests before another external receiver trial."
+            }
+          ]
+        },
+        "human_semantic_review_required": false,
+        "semantic_equivalence_proven": false,
+        "external_action_performed": false,
+        "limitations": [
+          "Digest binding does not authenticate sender identity.",
+          "Exact same-offer receipt replay is not detectable without a receipt registry.",
+          "Structural recovery does not prove semantic equivalence."
+        ]
+      }
+    },
+    {
+      "case": "digest-mismatch",
+      "expected": "HOLD_INTEGRITY",
+      "actual": "HOLD_INTEGRITY",
+      "passed": true,
+      "details": {
+        "protocol": "LEIS Understanding Hopper v0.2",
+        "offer_id": "HOP-V02-001",
+        "receipt_id": "R-V02-DIGEST",
+        "offer_digest_sha256": "fc5f4f7bee7530be40c98361e2b13c500e860ac74966d3e404a347e5f1247ed2",
+        "state": "HOLD_INTEGRITY",
+        "metrics": {
+          "critical_anchor_recovery": "7/7",
+          "claim_review_coverage": "3/3",
+          "receiver_condition_visibility": "5/5"
+        },
+        "missing_ids": [],
+        "missing_claim_reviews": [],
+        "schema_errors": [],
+        "integrity_errors": [
+          "offer digest mismatch"
+        ],
+        "claim_issues": [],
+        "evidence_safety_errors": [],
+        "patch": null,
+        "human_semantic_review_required": false,
+        "semantic_equivalence_proven": false,
+        "external_action_performed": false,
+        "limitations": [
+          "Digest binding does not authenticate sender identity.",
+          "Exact same-offer receipt replay is not detectable without a receipt registry.",
+          "Structural recovery does not prove semantic equivalence."
+        ]
+      }
+    },
+    {
+      "case": "version-mismatch",
+      "expected": "HOLD_INTEGRITY",
+      "actual": "HOLD_INTEGRITY",
+      "passed": true,
+      "details": {
+        "protocol": "LEIS Understanding Hopper v0.2",
+        "offer_id": "HOP-V02-001",
+        "receipt_id": "R-V02-VERSION",
+        "offer_digest_sha256": "fc5f4f7bee7530be40c98361e2b13c500e860ac74966d3e404a347e5f1247ed2",
+        "state": "HOLD_INTEGRITY",
+        "metrics": {
+          "critical_anchor_recovery": "7/7",
+          "claim_review_coverage": "3/3",
+          "receiver_condition_visibility": "5/5"
+        },
+        "missing_ids": [],
+        "missing_claim_reviews": [],
+        "schema_errors": [],
+        "integrity_errors": [
+          "protocol_version mismatch"
+        ],
+        "claim_issues": [],
+        "evidence_safety_errors": [],
+        "patch": null,
+        "human_semantic_review_required": false,
+        "semantic_equivalence_proven": false,
+        "external_action_performed": false,
+        "limitations": [
+          "Digest binding does not authenticate sender identity.",
+          "Exact same-offer receipt replay is not detectable without a receipt registry.",
+          "Structural recovery does not prove semantic equivalence."
+        ]
+      }
+    },
+    {
+      "case": "duplicate-id",
+      "expected": "HOLD_SCHEMA",
+      "actual": "HOLD_SCHEMA",
+      "passed": true,
+      "details": {
+        "protocol": "LEIS Understanding Hopper v0.2",
+        "offer_id": "HOP-V02-001",
+        "receipt_id": "R-V02-DUPLICATE",
+        "offer_digest_sha256": "fc5f4f7bee7530be40c98361e2b13c500e860ac74966d3e404a347e5f1247ed2",
+        "state": "HOLD_SCHEMA",
+        "metrics": {
+          "critical_anchor_recovery": "7/7",
+          "claim_review_coverage": "3/3",
+          "receiver_condition_visibility": "5/5"
+        },
+        "missing_ids": [],
+        "missing_claim_reviews": [],
+        "schema_errors": [
+          "duplicate recovered IDs: H1-PURPOSE"
+        ],
+        "integrity_errors": [],
+        "claim_issues": [],
+        "evidence_safety_errors": [],
+        "patch": null,
+        "human_semantic_review_required": false,
+        "semantic_equivalence_proven": false,
+        "external_action_performed": false,
+        "limitations": [
+          "Digest binding does not authenticate sender identity.",
+          "Exact same-offer receipt replay is not detectable without a receipt registry.",
+          "Structural recovery does not prove semantic equivalence."
+        ]
+      }
+    },
+    {
+      "case": "unsupported-claim",
+      "expected": "HOLD_EVIDENCE_OR_SAFETY",
+      "actual": "HOLD_EVIDENCE_OR_SAFETY",
+      "passed": true,
+      "details": {
+        "protocol": "LEIS Understanding Hopper v0.2",
+        "offer_id": "HOP-V02-001",
+        "receipt_id": "R-V02-UNSUPPORTED",
+        "offer_digest_sha256": "fc5f4f7bee7530be40c98361e2b13c500e860ac74966d3e404a347e5f1247ed2",
+        "state": "HOLD_EVIDENCE_OR_SAFETY",
+        "metrics": {
+          "critical_anchor_recovery": "7/7",
+          "claim_review_coverage": "3/3",
+          "receiver_condition_visibility": "5/5"
+        },
+        "missing_ids": [],
+        "missing_claim_reviews": [],
+        "schema_errors": [],
+        "integrity_errors": [],
+        "claim_issues": [],
+        "evidence_safety_errors": [
+          "receiver reported unsupported claims"
+        ],
+        "patch": null,
+        "human_semantic_review_required": false,
+        "semantic_equivalence_proven": false,
+        "external_action_performed": false,
+        "limitations": [
+          "Digest binding does not authenticate sender identity.",
+          "Exact same-offer receipt replay is not detectable without a receipt registry.",
+          "Structural recovery does not prove semantic equivalence."
+        ]
+      }
+    },
+    {
+      "case": "external-action",
+      "expected": "HOLD_EVIDENCE_OR_SAFETY",
+      "actual": "HOLD_EVIDENCE_OR_SAFETY",
+      "passed": true,
+      "details": {
+        "protocol": "LEIS Understanding Hopper v0.2",
+        "offer_id": "HOP-V02-001",
+        "receipt_id": "R-V02-EXTERNAL",
+        "offer_digest_sha256": "fc5f4f7bee7530be40c98361e2b13c500e860ac74966d3e404a347e5f1247ed2",
+        "state": "HOLD_EVIDENCE_OR_SAFETY",
+        "metrics": {
+          "critical_anchor_recovery": "7/7",
+          "claim_review_coverage": "3/3",
+          "receiver_condition_visibility": "5/5"
+        },
+        "missing_ids": [],
+        "missing_claim_reviews": [],
+        "schema_errors": [],
+        "integrity_errors": [],
+        "claim_issues": [],
+        "evidence_safety_errors": [
+          "receiver requested external actions"
+        ],
+        "patch": null,
+        "human_semantic_review_required": false,
+        "semantic_equivalence_proven": false,
+        "external_action_performed": false,
+        "limitations": [
+          "Digest binding does not authenticate sender identity.",
+          "Exact same-offer receipt replay is not detectable without a receipt registry.",
+          "Structural recovery does not prove semantic equivalence."
+        ]
+      }
+    },
+    {
+      "case": "challenged-claim",
+      "expected": "HOLD_CLAIM_RECONCILIATION",
+      "actual": "HOLD_CLAIM_RECONCILIATION",
+      "passed": true,
+      "details": {
+        "protocol": "LEIS Understanding Hopper v0.2",
+        "offer_id": "HOP-V02-001",
+        "receipt_id": "R-V02-CHALLENGE",
+        "offer_digest_sha256": "fc5f4f7bee7530be40c98361e2b13c500e860ac74966d3e404a347e5f1247ed2",
+        "state": "HOLD_CLAIM_RECONCILIATION",
+        "metrics": {
+          "critical_anchor_recovery": "7/7",
+          "claim_review_coverage": "3/3",
+          "receiver_condition_visibility": "5/5"
+        },
+        "missing_ids": [],
+        "missing_claim_reviews": [],
+        "schema_errors": [],
+        "integrity_errors": [],
+        "claim_issues": [
+          "claim C2-HOPPER-DONE challenged"
+        ],
+        "evidence_safety_errors": [],
+        "patch": null,
+        "human_semantic_review_required": false,
+        "semantic_equivalence_proven": false,
+        "external_action_performed": false,
+        "limitations": [
+          "Digest binding does not authenticate sender identity.",
+          "Exact same-offer receipt replay is not detectable without a receipt registry.",
+          "Structural recovery does not prove semantic equivalence."
+        ]
+      }
+    },
+    {
+      "case": "silent-relabel",
+      "expected": "HOLD_CLAIM_RECONCILIATION",
+      "actual": "HOLD_CLAIM_RECONCILIATION",
+      "passed": true,
+      "details": {
+        "protocol": "LEIS Understanding Hopper v0.2",
+        "offer_id": "HOP-V02-001",
+        "receipt_id": "R-V02-RELABEL",
+        "offer_digest_sha256": "fc5f4f7bee7530be40c98361e2b13c500e860ac74966d3e404a347e5f1247ed2",
+        "state": "HOLD_CLAIM_RECONCILIATION",
+        "metrics": {
+          "critical_anchor_recovery": "7/7",
+          "claim_review_coverage": "3/3",
+          "receiver_condition_visibility": "5/5"
+        },
+        "missing_ids": [],
+        "missing_claim_reviews": [],
+        "schema_errors": [],
+        "integrity_errors": [],
+        "claim_issues": [
+          "claim C1-FRESH-WINDOW-OUTPUT label changed from VERIFIED to INTERPRETATION"
+        ],
+        "evidence_safety_errors": [],
+        "patch": null,
+        "human_semantic_review_required": false,
+        "semantic_equivalence_proven": false,
+        "external_action_performed": false,
+        "limitations": [
+          "Digest binding does not authenticate sender identity.",
+          "Exact same-offer receipt replay is not detectable without a receipt registry.",
+          "Structural recovery does not prove semantic equivalence."
+        ]
+      }
+    },
+    {
+      "case": "missing-receiver-condition",
+      "expected": "HOLD_SCHEMA",
+      "actual": "HOLD_SCHEMA",
+      "passed": true,
+      "details": {
+        "protocol": "LEIS Understanding Hopper v0.2",
+        "offer_id": "HOP-V02-001",
+        "receipt_id": "R-V02-CONDITIONS",
+        "offer_digest_sha256": "fc5f4f7bee7530be40c98361e2b13c500e860ac74966d3e404a347e5f1247ed2",
+        "state": "HOLD_SCHEMA",
+        "metrics": {
+          "critical_anchor_recovery": "7/7",
+          "claim_review_coverage": "3/3",
+          "receiver_condition_visibility": "4/5"
+        },
+        "missing_ids": [],
+        "missing_claim_reviews": [],
+        "schema_errors": [
+          "receiver_conditions missing: model"
+        ],
+        "integrity_errors": [],
+        "claim_issues": [],
+        "evidence_safety_errors": [],
+        "patch": null,
+        "human_semantic_review_required": false,
+        "semantic_equivalence_proven": false,
+        "external_action_performed": false,
+        "limitations": [
+          "Digest binding does not authenticate sender identity.",
+          "Exact same-offer receipt replay is not detectable without a receipt registry.",
+          "Structural recovery does not prove semantic equivalence."
+        ]
+      }
+    },
+    {
+      "case": "unknown-top-level-field",
+      "expected": "HOLD_SCHEMA",
+      "actual": "HOLD_SCHEMA",
+      "passed": true,
+      "details": {
+        "protocol": "LEIS Understanding Hopper v0.2",
+        "offer_id": "HOP-V02-001",
+        "receipt_id": "R-V02-UNKNOWN-FIELD",
+        "offer_digest_sha256": "fc5f4f7bee7530be40c98361e2b13c500e860ac74966d3e404a347e5f1247ed2",
+        "state": "HOLD_SCHEMA",
+        "metrics": {
+          "critical_anchor_recovery": "7/7",
+          "claim_review_coverage": "3/3",
+          "receiver_condition_visibility": "5/5"
+        },
+        "missing_ids": [],
+        "missing_claim_reviews": [],
+        "schema_errors": [
+          "receipt has unknown fields: hidden_memory"
+        ],
+        "integrity_errors": [],
+        "claim_issues": [],
+        "evidence_safety_errors": [],
+        "patch": null,
+        "human_semantic_review_required": false,
+        "semantic_equivalence_proven": false,
+        "external_action_performed": false,
+        "limitations": [
+          "Digest binding does not authenticate sender identity.",
+          "Exact same-offer receipt replay is not detectable without a receipt registry.",
+          "Structural recovery does not prove semantic equivalence."
+        ]
+      }
+    },
+    {
+      "case": "new-source-challenge",
+      "expected": "HOLD_CLAIM_RECONCILIATION",
+      "actual": "HOLD_CLAIM_RECONCILIATION",
+      "passed": true,
+      "details": {
+        "protocol": "LEIS Understanding Hopper v0.2",
+        "offer_id": "HOP-V02-001",
+        "receipt_id": "R-V02-NEW-SOURCE",
+        "offer_digest_sha256": "fc5f4f7bee7530be40c98361e2b13c500e860ac74966d3e404a347e5f1247ed2",
+        "state": "HOLD_CLAIM_RECONCILIATION",
+        "metrics": {
+          "critical_anchor_recovery": "7/7",
+          "claim_review_coverage": "3/3",
+          "receiver_condition_visibility": "5/5"
+        },
+        "missing_ids": [],
+        "missing_claim_reviews": [],
+        "schema_errors": [],
+        "integrity_errors": [],
+        "claim_issues": [
+          "claim C2-HOPPER-DONE challenged"
+        ],
+        "evidence_safety_errors": [],
+        "patch": null,
+        "human_semantic_review_required": false,
+        "semantic_equivalence_proven": false,
+        "external_action_performed": false,
+        "limitations": [
+          "Digest binding does not authenticate sender identity.",
+          "Exact same-offer receipt replay is not detectable without a receipt registry.",
+          "Structural recovery does not prove semantic equivalence."
+        ]
+      }
+    }
+  ],
+  "non_claim": "These deterministic tests verify local structural and fail-closed behaviour only."
+}

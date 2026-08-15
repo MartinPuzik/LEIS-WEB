@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://leis.local/schemas/leis-hopper-patch-v0.2.schema.json",
+  "title": "LEIS Hopper PATCH v0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocol_version", "offer_id", "offer_digest_sha256", "missing_objects"],
+  "properties": {
+    "protocol_version": {"const": "0.2"},
+    "offer_id": {"type": "string", "minLength": 1},
+    "offer_digest_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "missing_objects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "object_type", "meaning"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "object_type": {"enum": ["critical_anchor", "unknown", "next_action"]},
+          "meaning": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

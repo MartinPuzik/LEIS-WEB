@@ -1,0 +1,25 @@
+{
+  "name": "LEIS Portable Kernel",
+  "release": "3.0.1",
+  "status": "PUBLIC_RELEASE",
+  "human_governed": true,
+  "test_evidence": {
+    "cases": 98,
+    "passed": 98,
+    "scope": "deterministic local protocol conformance"
+  },
+  "licences": {
+    "code_and_schemas": "Apache-2.0",
+    "original_documentation": "CC-BY-4.0"
+  },
+  "downloads": {
+    "archive": "/releases/LEIS-V3.0.1-PUBLIC.zip",
+    "kernel": "/releases/v3.0.1/LEIS-PORTABLE-KERNEL-V3.0.1.md",
+    "manifest": "/releases/v3.0.1/MANIFEST.json"
+  },
+  "non_claims": [
+    "No universal semantic identity or lossless reconstruction guarantee.",
+    "No legal, privacy, or scientific certification.",
+    "No autonomous public network or hidden access to other systems."
+  ]
+}

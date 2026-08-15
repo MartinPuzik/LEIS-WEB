@@ -1,0 +1,63 @@
+{
+  "protocol_version": "0.3",
+  "message_type": "CAPSULE",
+  "capsule_id": "CAPSULE-V03-001",
+  "space": "LEIS_CORE",
+  "seed_ref": "SEED-LEIS-CORE-001",
+  "task": "Continue bounded local Kernel and Hopper validation.",
+  "human_orientation": "This Capsule keeps the current Kernel identity, evidence boundary, open test gap, and next safe action visible to a person or machine receiver.",
+  "source_manifest": [
+    {
+      "id": "SRC-DASHBOARD",
+      "kind": "local_file",
+      "locator": "LEIS-DASHBOARD.md",
+      "inspected": true,
+      "content_role": "data_only"
+    }
+  ],
+  "claims": [
+    {
+      "id": "CLAIM-PROJECT4-STATE",
+      "text": "Project 4 is a local prototype and not a deployed universal network.",
+      "label": "VERIFIED",
+      "critical": true,
+      "source_refs": ["SRC-DASHBOARD"]
+    }
+  ],
+  "critical_anchors": [
+    {
+      "id": "ANCHOR-HUMAN-APPROVAL",
+      "kind": "safety",
+      "meaning": "External action and publication require explicit human approval."
+    }
+  ],
+  "lineage_delta": [
+    {
+      "id": "DELTA-V03-TRANSPORT",
+      "text": "Added allowlisted local PING/PONG and strict transport envelopes.",
+      "label": "VERIFIED",
+      "critical": false,
+      "source_refs": ["SRC-DASHBOARD"]
+    }
+  ],
+  "unknowns": [
+    {
+      "id": "UNKNOWN-SEMANTIC-REVIEW",
+      "meaning": "Two independent blinded semantic reviews remain outstanding."
+    }
+  ],
+  "next_action": {
+    "id": "ACTION-RUN-GATES",
+    "meaning": "Run the combined local gate suite before a new receiver trial."
+  },
+  "privacy_boundary": {
+    "owner": "Martin Puzik",
+    "allowed_classes": ["non-sensitive project metadata"],
+    "excluded_classes": ["credentials", "private business data", "personal records"],
+    "retention": "Local append-only project evidence only."
+  },
+  "non_claims": [
+    "No universal memory, semantic proof, zero-loss reconstruction, autonomous network, or public release."
+  ],
+  "encoding": "UTF-8"
+}

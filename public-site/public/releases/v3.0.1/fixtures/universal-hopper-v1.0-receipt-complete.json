@@ -1,0 +1,70 @@
+{
+  "protocol_version": "1.0",
+  "message_type": "RECEIPT",
+  "receipt_id": "RECEIPT-UH-001",
+  "offer_id": "OFFER-UH-001",
+  "offer_nonce": "0123456789abcdef0123456789abcdef",
+  "offer_digest_sha256": "132c09c30eeddbb1da169c2cac61c5960b806047fc4b495d3d171cefa3a3a8b8",
+  "attempt": 1,
+  "receiver_conditions": {
+    "system": "test",
+    "model": "test",
+    "memory": "off",
+    "tools": "off",
+    "web": "off",
+    "source_access": "offer_only"
+  },
+  "recovered_objects": [
+    {
+      "id": "A-IDENTITY",
+      "meaning_in_receiver_words": "Continue the bounded frozen Kernel contract."
+    },
+    {
+      "id": "A-HUMAN-AUTH",
+      "meaning_in_receiver_words": "Only the human authorises publication or external action."
+    },
+    {
+      "id": "A-EVIDENCE",
+      "meaning_in_receiver_words": "Passing the protocol does not prove universal truth."
+    },
+    {
+      "id": "N-NEXT",
+      "meaning_in_receiver_words": "Return the receipt, then obey PATCH or ACK."
+    }
+  ],
+  "challenge_answers": [
+    {
+      "id": "Q-PUBLISH",
+      "choice_id": "DENY",
+      "reason": "Publication has a separate human gate."
+    },
+    {
+      "id": "Q-MISSING",
+      "choice_id": "PATCH",
+      "reason": "Missing critical meaning requires bounded repair."
+    },
+    {
+      "id": "Q-SCORE",
+      "choice_id": "HOLD",
+      "reason": "A score cannot override evidence failure."
+    }
+  ],
+  "claim_reviews": [
+    {
+      "id": "C-TESTS",
+      "outcome": "preserved",
+      "receiver_label": "VERIFIED",
+      "rationale": "The OFFER reports a bounded local test result."
+    },
+    {
+      "id": "C-UNIVERSAL",
+      "outcome": "preserved",
+      "receiver_label": "VERIFIED",
+      "rationale": "The non-claim remains explicit."
+    }
+  ],
+  "declared_gaps": [],
+  "conflicts": [],
+  "unsupported_claims": [],
+  "requested_external_actions": []
+}

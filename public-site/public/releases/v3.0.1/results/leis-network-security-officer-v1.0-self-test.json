@@ -1,0 +1,103 @@
+{
+  "suite": "LEIS Network Security Officer v1.0",
+  "case_count": 14,
+  "passed_count": 14,
+  "all_passed": true,
+  "results": [
+    {
+      "name": "non-loopback bind rejected",
+      "passed": true,
+      "actual": "rejected"
+    },
+    {
+      "name": "loopback health",
+      "passed": true,
+      "actual": [
+        200,
+        "LOCAL_LOOPBACK_ONLY"
+      ]
+    },
+    {
+      "name": "unknown route rejected",
+      "passed": true,
+      "actual": [
+        404,
+        "HOLD_UNKNOWN_ROUTE"
+      ]
+    },
+    {
+      "name": "content type rejected",
+      "passed": true,
+      "actual": [
+        415,
+        "HOLD_CONTENT_TYPE"
+      ]
+    },
+    {
+      "name": "malformed JSON rejected",
+      "passed": true,
+      "actual": [
+        400,
+        "HOLD_ENCODING_OR_JSON"
+      ]
+    },
+    {
+      "name": "duplicate JSON key rejected",
+      "passed": true,
+      "actual": [
+        400,
+        "HOLD_ENCODING_OR_JSON"
+      ]
+    },
+    {
+      "name": "oversized body rejected",
+      "passed": true,
+      "actual": [
+        413,
+        "HOLD_SIZE"
+      ]
+    },
+    {
+      "name": "unknown offer rejected",
+      "passed": true,
+      "actual": [
+        404,
+        "HOLD_UNKNOWN_OFFER"
+      ]
+    },
+    {
+      "name": "unsafe external action held",
+      "passed": true,
+      "actual": "HOLD_EVIDENCE_OR_SAFETY"
+    },
+    {
+      "name": "policy failure held",
+      "passed": true,
+      "actual": "HOLD_POLICY"
+    },
+    {
+      "name": "valid local receipt accepted",
+      "passed": true,
+      "actual": "ACCEPTED_OPERATIONAL"
+    },
+    {
+      "name": "policy prompt text stayed inert",
+      "passed": true,
+      "actual": "POLICY_PROFILE_PASS"
+    },
+    {
+      "name": "accepted nonce replay held",
+      "passed": true,
+      "actual": "HOLD_REPLAY"
+    },
+    {
+      "name": "audit stores metadata only",
+      "passed": true,
+      "actual": 5
+    }
+  ],
+  "binding": "127.0.0.1 ephemeral port; server stopped after test",
+  "external_network_active": false,
+  "semantic_identity_proven": false,
+  "compliance_certified": false
+}

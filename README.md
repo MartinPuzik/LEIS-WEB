@@ -1,5 +1,27 @@
 # LEIS Protocol
 
+## Current verified public release: v3.0.1
+
+LEIS Portable Kernel v3.0.1 is the current evidence-bounded public release.
+
+- [Download the complete v3.0.1 ZIP](public/releases/LEIS-V3.0.1-PUBLIC.zip)
+- [Read the Portable Kernel](releases/v3.0.1/LEIS-PORTABLE-KERNEL-V3.0.1.md)
+- [Inspect the exact hash manifest](releases/v3.0.1/MANIFEST.json)
+- [Read the public whitepaper](releases/v3.0.1/LEIS-PUBLIC-WHITEPAPER-V1.0.md)
+- [Read the claims boundary](releases/v3.0.1/LEIS-MATHEMATICAL-AND-CLAIMS-BOUNDARY-V1.0.md)
+
+Release ZIP SHA-256:
+
+```text
+7C9748DD4C1B657622CF2669BF658DAC4CA786178ADED5FD6FFE29A59B68D889
+```
+
+The shipped suite passed 98/98 deterministic local protocol cases, including a loopback-only Network Security Officer. This is protocol conformance evidence for the shipped implementation. It is not proof of identical internal understanding, universal Hopper reliability, legal compliance, privacy certification, scientific validity, or an autonomous public AI network.
+
+Reference code and JSON schemas are licensed under Apache-2.0. Original LEIS documentation in this release is licensed under CC BY 4.0. See the licence and notice files inside the release.
+
+> Earlier papers and prototypes below are preserved as historical research lineage. Their presence in this repository does not promote their scientific, legal, benchmark, or integration claims to verified status. Use the v3.0.1 claims boundary before citing them.
+
 ## Reality-Oriented Cognitive Alignment Above Generative AI
 
 **LEIS is an understanding protocol, not an AI model, not a database, and not a storage product.**
@@ -23,7 +45,7 @@ This repository contains the first public technical package for LEIS:
 
 ---
 
-## Research Package
+## Historical research package
 
 If you are reviewing LEIS as a researcher, engineer, policy specialist, investor, media contact, hub, or potential integration partner, start here.
 
