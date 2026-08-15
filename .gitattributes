@@ -6,3 +6,11 @@
 *.pptx binary
 /releases/v3.0.1/** text eol=lf
 /public-site/public/releases/v3.0.1/** text eol=lf
+/releases/v3.0.1/.well-known/leis.json text eol=crlf
+/releases/v3.0.1/fixtures/universal-hopper-v1.0-*.json text eol=crlf
+/releases/v3.0.1/llms.txt text eol=crlf
+/releases/v3.0.1/results/*.json text eol=crlf
+/public-site/public/releases/v3.0.1/.well-known/leis.json text eol=crlf
+/public-site/public/releases/v3.0.1/fixtures/universal-hopper-v1.0-*.json text eol=crlf
+/public-site/public/releases/v3.0.1/llms.txt text eol=crlf
+/public-site/public/releases/v3.0.1/results/*.json text eol=crlf
