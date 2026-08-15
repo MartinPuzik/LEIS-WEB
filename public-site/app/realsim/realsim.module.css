@@ -56,7 +56,8 @@
 .telemetry small,
 .inspector > small,
 .systems > small,
-.instances small {
+.instances small,
+.spaceport small {
   color: #64e3ec;
   font: 750 0.57rem/1.35 ui-monospace, SFMono-Regular, Consolas, monospace;
   letter-spacing: 0.14em;
@@ -72,7 +73,8 @@
 .telemetry,
 .inspector,
 .systems,
-.instances {
+.instances,
+.spaceport {
   position: absolute;
   z-index: 7;
   border: 1px solid rgba(94, 207, 219, 0.28);
@@ -427,6 +429,75 @@
 .instances .flag { font-size: 1.18rem; }
 .instances p { margin: 8px 2px 0; color: #547b82; font: 620 0.45rem/1.4 ui-monospace, SFMono-Regular, Consolas, monospace; }
 
+.spaceport {
+  top: 338px;
+  right: 25px;
+  width: 232px;
+  padding: 13px;
+}
+
+.spaceport header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.spaceport header b {
+  color: #ffb45d;
+  font: 750 0.47rem/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+  letter-spacing: 0.07em;
+}
+
+.spaceport button {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px;
+  border: 1px solid rgba(255, 165, 79, 0.35);
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(80, 42, 18, 0.42), rgba(27, 22, 18, 0.56));
+  color: #fff3e2;
+  text-align: left;
+  cursor: pointer;
+}
+
+.spaceport button:hover,
+.spaceport button:focus-visible {
+  border-color: rgba(255, 184, 102, 0.78);
+  background: linear-gradient(135deg, rgba(112, 54, 20, 0.58), rgba(38, 29, 20, 0.69));
+  outline: none;
+}
+
+.spaceport button span { display: grid; gap: 3px; }
+.spaceport button strong { font-size: 0.67rem; }
+.spaceport button small { color: #aa8972; font-size: 0.45rem; letter-spacing: 0.02em; }
+.spaceport button i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ff9e45;
+  box-shadow: 0 0 7px #ff8a2d, 0 0 17px rgba(255, 126, 34, 0.65);
+  animation: engineIdle 0.82s ease-in-out infinite alternate;
+}
+
+.spaceport p {
+  margin: 8px 2px;
+  color: #78979d;
+  font: 620 0.47rem/1.45 ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+.spaceport a {
+  color: #b58a64;
+  font: 700 0.44rem/1.35 ui-monospace, SFMono-Regular, Consolas, monospace;
+  letter-spacing: 0.055em;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .legend {
   position: absolute;
   z-index: 6;
@@ -476,10 +547,16 @@
   50% { opacity: 0.45; transform: scale(0.72); }
 }
 
+@keyframes engineIdle {
+  from { opacity: 0.55; transform: scale(0.78); }
+  to { opacity: 1; transform: scale(1.12); }
+}
+
 @media (max-width: 920px) {
   .identity span,
   .systems,
-  .instances { display: none; }
+  .instances,
+  .spaceport { display: none; }
   .inspector { bottom: 110px; }
   .boundary span:first-child { display: none; }
   .boundary { justify-content: center; }
@@ -487,7 +564,8 @@
 }
 
 @media (max-height: 760px) {
-  .systems { display: none; }
+  .systems,
+  .spaceport { display: none; }
   .inspector { bottom: 76px; }
 }
 
@@ -527,5 +605,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .telemetry header > b i,
-  .instances button i { animation: none; }
+  .instances button i,
+  .spaceport button i { animation: none; }
 }

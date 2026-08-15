@@ -69,6 +69,14 @@ type LeisInstance = {
   lon: number;
 };
 
+type SimLanguage = "cs" | "en" | "de" | "fr" | "es";
+
+type StarshipSiteModel = {
+  group: THREE.Group;
+  engineGlow: THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial>;
+  engineLight: THREE.PointLight;
+};
+
 const windLatitudes = [-70, -50, -30, -10, 10, 30, 50, 70];
 const windLongitudes = Array.from({ length: 18 }, (_, index) => -170 + index * 20);
 const windSites = windLatitudes.flatMap((lat) => windLongitudes.map((lon) => ({ lat, lon })));
@@ -94,6 +102,45 @@ const leisInstances: LeisInstance[] = [{
   lat: 49.82,
   lon: 15.47,
 }];
+const starbaseSite = {
+  label: "Starbase / Starship V3",
+  area: "Cameron County, Texas",
+  lat: 25.997,
+  lon: -97.157,
+  source: "https://www.spacex.com/launches/starship-flight-12",
+};
+const spaceportCopy: Record<SimLanguage, { eyebrow: string; status: string; description: string; boundary: string }> = {
+  cs: {
+    eyebrow: "SPACEPORT 01",
+    status: "IDLE · BEZ STARTU",
+    description: "Starship V3 a Super Heavy V3 stojí na schematické rampě; viditelný je pouze klidový motorový žár.",
+    boundary: "SCHEMATIC · BEZ LIVE TELEMETRIE",
+  },
+  en: {
+    eyebrow: "SPACEPORT 01",
+    status: "IDLE · NO LAUNCH",
+    description: "Starship V3 and Super Heavy V3 stand on a schematic pad; only an idle engine glow is shown.",
+    boundary: "SCHEMATIC · NO LIVE TELEMETRY",
+  },
+  de: {
+    eyebrow: "RAUMHAFEN 01",
+    status: "LEERLAUF · KEIN START",
+    description: "Starship V3 und Super Heavy V3 stehen auf einer schematischen Rampe; sichtbar ist nur ein ruhiges Triebwerksglühen.",
+    boundary: "SCHEMATISCH · KEINE LIVE-TELEMETRIE",
+  },
+  fr: {
+    eyebrow: "PORT SPATIAL 01",
+    status: "VEILLE · AUCUN LANCEMENT",
+    description: "Starship V3 et Super Heavy V3 reposent sur un pas de tir schématique; seule une faible lueur moteur est affichée.",
+    boundary: "SCHÉMATIQUE · AUCUNE TÉLÉMÉTRIE EN DIRECT",
+  },
+  es: {
+    eyebrow: "PUERTO ESPACIAL 01",
+    status: "EN REPOSO · SIN LANZAMIENTO",
+    description: "Starship V3 y Super Heavy V3 permanecen en una plataforma esquemática; solo se muestra un tenue brillo de motor.",
+    boundary: "ESQUEMÁTICO · SIN TELEMETRÍA EN VIVO",
+  },
+};
 
 function vectorAt(lat: number, lon: number, radius = 1) {
   const phi = (lat * Math.PI) / 180;
@@ -193,6 +240,78 @@ function instancePinTexture() {
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
+}
+
+function createStarshipSite(): StarshipSiteModel {
+  const group = new THREE.Group();
+  group.name = "Starbase_Starship_V3_Schematic";
+  group.userData = { evidence: "SCHEMATIC", telemetry: false, launchState: "IDLE" };
+
+  const steel = new THREE.MeshStandardMaterial({ color: 0xc5cbd0, metalness: 0.88, roughness: 0.29 });
+  const heatShield = new THREE.MeshStandardMaterial({ color: 0x171b20, metalness: 0.2, roughness: 0.72 });
+  const towerMaterial = new THREE.MeshStandardMaterial({ color: 0x59636c, metalness: 0.72, roughness: 0.5 });
+  const padMaterial = new THREE.MeshStandardMaterial({ color: 0x20262b, metalness: 0.45, roughness: 0.75 });
+
+  const pad = new THREE.Mesh(new THREE.CylinderGeometry(0.047, 0.052, 0.012, 32), padMaterial);
+  pad.position.y = 0.006;
+  group.add(pad);
+
+  const padRing = new THREE.Mesh(
+    new THREE.RingGeometry(0.054, 0.061, 40),
+    new THREE.MeshBasicMaterial({ color: 0x58dce8, transparent: true, opacity: 0.5, side: THREE.DoubleSide }),
+  );
+  padRing.rotation.x = -Math.PI / 2;
+  padRing.position.y = 0.004;
+  group.add(padRing);
+
+  const booster = new THREE.Mesh(new THREE.CylinderGeometry(0.0125, 0.0145, 0.105, 24), steel);
+  booster.position.y = 0.068;
+  group.add(booster);
+
+  const hotStage = new THREE.Mesh(new THREE.CylinderGeometry(0.0132, 0.0132, 0.011, 24), heatShield);
+  hotStage.position.y = 0.126;
+  group.add(hotStage);
+
+  const ship = new THREE.Mesh(new THREE.CylinderGeometry(0.0117, 0.0124, 0.061, 24), steel);
+  ship.position.y = 0.162;
+  group.add(ship);
+
+  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.0117, 0.035, 24), steel);
+  nose.position.y = 0.21;
+  group.add(nose);
+
+  [-1, 1].forEach((side) => {
+    const boosterFin = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.024, 0.003), heatShield);
+    boosterFin.position.set(side * 0.015, 0.031, 0);
+    boosterFin.rotation.z = side * 0.18;
+    group.add(boosterFin);
+    const shipFlap = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.024, 0.0025), heatShield);
+    shipFlap.position.set(side * 0.013, 0.151, 0);
+    shipFlap.rotation.z = side * 0.2;
+    group.add(shipFlap);
+  });
+
+  const tower = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.205, 0.014), towerMaterial);
+  tower.position.set(-0.052, 0.108, 0);
+  group.add(tower);
+  [0.065, 0.112, 0.158, 0.202].forEach((height) => {
+    const brace = new THREE.Mesh(new THREE.BoxGeometry(0.048, 0.004, 0.006), towerMaterial);
+    brace.position.set(-0.03, height, 0);
+    group.add(brace);
+  });
+
+  const engineGlow = new THREE.Mesh(
+    new THREE.SphereGeometry(0.017, 20, 14),
+    new THREE.MeshBasicMaterial({ color: 0xff9c52, transparent: true, opacity: 0.36, blending: THREE.AdditiveBlending, depthWrite: false }),
+  );
+  engineGlow.position.y = 0.018;
+  engineGlow.scale.set(1, 0.35, 1);
+  group.add(engineGlow);
+  const engineLight = new THREE.PointLight(0xff7a38, 0.34, 0.18, 2);
+  engineLight.position.y = 0.022;
+  group.add(engineLight);
+
+  return { group, engineGlow, engineLight };
 }
 
 function cloudFieldTexture() {
@@ -295,6 +414,14 @@ export default function RealSimEarth() {
   const [layers, setLayers] = useState<LayerState>({ clouds: true, surface: true, jet: true });
   const [refreshedAt, setRefreshedAt] = useState<string | null>(null);
   const [weatherMeta, setWeatherMeta] = useState<WeatherMeta>(defaultWeatherMeta);
+  const [language, setLanguage] = useState<SimLanguage>("cs");
+
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get("lang")?.toLowerCase();
+    if (requested === "en" || requested === "de" || requested === "fr" || requested === "es" || requested === "cs") {
+      setLanguage(requested);
+    }
+  }, []);
 
   const refreshWeather = useCallback(async () => {
     setFeedState((current) => samplesRef.current.length ? "STALE" : current === "UNAVAILABLE" ? "LOADING" : current);
@@ -439,6 +566,14 @@ export default function RealSimEarth() {
       instancePulseMaterials.push(pulseMaterial);
       instanceGroup.add(pulse);
     });
+
+    const starshipSite = createStarshipSite();
+    const starbaseSurface = vectorAt(starbaseSite.lat, starbaseSite.lon, 1.006);
+    starshipSite.group.position.copy(starbaseSurface);
+    starshipSite.group.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), starbaseSurface.clone().normalize());
+    starshipSite.group.scale.setScalar(0.82);
+    starshipSite.group.renderOrder = 9;
+    earthGroup.add(starshipSite.group);
 
     const atmosphere = new THREE.Mesh(
       new THREE.SphereGeometry(1.075, 96, 64),
@@ -895,6 +1030,10 @@ export default function RealSimEarth() {
           child.scale.setScalar(0.82 + phase * 0.55);
           instancePulseMaterials[index].opacity = 0.72 - phase * 0.45;
         });
+        const idleFlicker = 0.72 + Math.sin(now * 0.011) * 0.13 + Math.sin(now * 0.023) * 0.06;
+        starshipSite.engineGlow.scale.set(0.92 + idleFlicker * 0.18, 0.24 + idleFlicker * 0.18, 0.92 + idleFlicker * 0.18);
+        starshipSite.engineGlow.material.opacity = 0.19 + idleFlicker * 0.2;
+        starshipSite.engineLight.intensity = 0.18 + idleFlicker * 0.24;
       }
       controls.update();
       stars.rotation.y += delta * 0.0015;
@@ -924,6 +1063,16 @@ export default function RealSimEarth() {
           (child.material as THREE.Material).dispose();
         }
       });
+      const siteGeometries = new Set<THREE.BufferGeometry>();
+      const siteMaterials = new Set<THREE.Material>();
+      starshipSite.group.traverse((child) => {
+        if (!(child instanceof THREE.Mesh)) return;
+        siteGeometries.add(child.geometry);
+        const materials = Array.isArray(child.material) ? child.material : [child.material];
+        materials.forEach((material) => siteMaterials.add(material));
+      });
+      siteGeometries.forEach((geometry) => geometry.dispose());
+      siteMaterials.forEach((material) => material.dispose());
       atmosphere.geometry.dispose();
       (atmosphere.material as THREE.Material).dispose();
       starGeometry.dispose();
@@ -1041,6 +1190,16 @@ export default function RealSimEarth() {
           <i />
         </button>)}
         <p>SELF_DECLARED · přibližná poloha · žádné automatické sledování polohy.</p>
+      </aside>
+
+      <aside className={styles.spaceport} aria-label="Starbase Starship V3 staging visualization">
+        <header><small>{spaceportCopy[language].eyebrow}</small><b>{spaceportCopy[language].status}</b></header>
+        <button type="button" onClick={() => bridgeRef.current?.focus(starbaseSite.lat, starbaseSite.lon)}>
+          <span><strong>{starbaseSite.label}</strong><small>{starbaseSite.area}</small></span>
+          <i aria-hidden="true" />
+        </button>
+        <p>{spaceportCopy[language].description}</p>
+        <a href={starbaseSite.source} target="_blank" rel="noreferrer">{spaceportCopy[language].boundary}</a>
       </aside>
 
       <div className={styles.legend} aria-label="Barevná legenda rychlosti větru">

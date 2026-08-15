@@ -121,6 +121,10 @@ test("grounds the first realSIM layer in live sampled weather", async () => {
   assert.match(earth, /SELF_DECLARED/);
   assert.match(earth, /žádné automatické sledování polohy/);
   assert.match(earth, /LEIS-CREATOR-CZ-001/);
+  assert.match(earth, /Starbase \/ Starship V3/);
+  assert.match(earth, /IDLE · NO LAUNCH/);
+  assert.match(earth, /SCHEMATIC · NO LIVE TELEMETRY/);
+  assert.match(earth, /spacex\.com\/launches\/starship-flight-12/);
 });
 
 test("adds the privacy-bounded LEIS Memory reading monitor", async () => {
