@@ -41,3 +41,14 @@ export const memoryPublicStatus = sqliteTable("memory_public_status", {
   payloadJson: text("payload_json").notNull(),
   updatedAt: text("updated_at").notNull(),
 });
+
+// One durable, public weather snapshot for 4D realSIM Earth. The browser never
+// contacts providers directly: it receives this bounded snapshot and animates
+// between refreshes. This avoids per-visitor provider calls and retry storms.
+export const realsimWeatherSnapshot = sqliteTable("realsim_weather_snapshot", {
+  id: integer("id").primaryKey(),
+  payloadJson: text("payload_json").notNull(),
+  fetchedAt: text("fetched_at").notNull(),
+  lastAttemptAt: text("last_attempt_at").notNull(),
+  provider: text("provider").notNull(),
+});

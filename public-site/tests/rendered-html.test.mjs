@@ -93,29 +93,34 @@ test("provides a focused local 4D realSIM workbench", async () => {
 });
 
 test("grounds the first realSIM layer in live sampled weather", async () => {
-  const [page, earth, weatherRoute] = await Promise.all([
+  const [page, earth, weatherRoute, schema] = await Promise.all([
     readFile(path.join(siteRoot, "app", "page.tsx"), "utf8"),
     readFile(path.join(siteRoot, "app", "realsim", "RealSimEarth.tsx"), "utf8"),
     readFile(path.join(siteRoot, "app", "api", "realsim-weather", "route.ts"), "utf8"),
+    readFile(path.join(siteRoot, "db", "schema.ts"), "utf8"),
   ]);
 
   assert.match(page, /api\.open-meteo\.com\/v1\/forecast/);
   assert.match(page, /No synthetic starting weather is shown/);
   assert.match(earth, /\/api\/realsim-weather/);
   assert.match(weatherRoute, /api\.open-meteo\.com\/v1\/forecast/);
-  assert.match(weatherRoute, /stale-while-revalidate=1800/);
-  assert.match(earth, /wind_direction_10m/);
-  assert.match(earth, /wind_gusts_10m/);
-  assert.match(earth, /wind_speed_250hPa/);
-  assert.match(earth, /wind_direction_250hPa/);
+  assert.match(weatherRoute, /stale-while-revalidate=10800/);
+  assert.match(weatherRoute, /freshForMs = 3 \* 60 \* 60 \* 1000/);
+  assert.match(weatherRoute, /MET Norway Locationforecast/);
+  assert.match(weatherRoute, /simulated_between_snapshots: true/);
+  assert.match(weatherRoute, /nearest_from_32_surface_cells/);
+  assert.match(schema, /realsim_weather_snapshot/);
   assert.match(earth, /cloudFieldTexture/);
   assert.match(earth, /cloudShell/);
   assert.match(earth, /deterministic multi-scale mask/);
   assert.match(earth, /dominantFlowMeshes/);
   assert.match(weatherRoute, /cell_selection: "nearest"/);
   assert.match(earth, /windSites\.length/);
-  assert.match(earth, /vizualizace 144 buněk/);
-  assert.match(earth, /nikoli radar ani výstražná služba/);
+  assert.match(earth, /pohyb mezi obnoveními je vizualizace posledního dostupného pole/);
+  assert.match(earth, /pohyb není nové měření/);
+  assert.match(earth, /SELF_DECLARED/);
+  assert.match(earth, /žádné automatické sledování polohy/);
+  assert.match(earth, /LEIS-CREATOR-CZ-001/);
 });
 
 test("adds the privacy-bounded LEIS Memory reading monitor", async () => {

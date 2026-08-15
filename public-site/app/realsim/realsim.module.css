@@ -55,7 +55,8 @@
 .identity span,
 .telemetry small,
 .inspector > small,
-.systems > small {
+.systems > small,
+.instances small {
   color: #64e3ec;
   font: 750 0.57rem/1.35 ui-monospace, SFMono-Regular, Consolas, monospace;
   letter-spacing: 0.14em;
@@ -70,7 +71,8 @@
 
 .telemetry,
 .inspector,
-.systems {
+.systems,
+.instances {
   position: absolute;
   z-index: 7;
   border: 1px solid rgba(94, 207, 219, 0.28);
@@ -123,6 +125,7 @@
 }
 
 .telemetry header > b.stateLOADING,
+.telemetry header > b.stateSNAPSHOT,
 .telemetry header > b.statePARTIAL,
 .telemetry header > b.stateSTALE { color: #f0c77e; border-color: rgba(240, 199, 126, 0.38); }
 .telemetry header > b.stateUNAVAILABLE { color: #ff8c8c; border-color: rgba(255, 140, 140, 0.38); }
@@ -198,6 +201,11 @@
   background: rgba(2, 13, 21, 0.5);
   color: #58757b;
   opacity: 0.68;
+}
+
+.layers button:disabled {
+  cursor: not-allowed;
+  opacity: 0.44;
 }
 
 .layers button:hover,
@@ -362,6 +370,63 @@
 .systems button span { color: #739da5; }
 .systems button b { color: #dff9fa; }
 
+.instances {
+  bottom: 83px;
+  left: 24px;
+  width: 250px;
+  padding: 13px;
+}
+
+.instances header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.instances header b {
+  color: #78efbc;
+  font: 750 0.5rem/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+  letter-spacing: 0.08em;
+}
+
+.instances button {
+  display: grid;
+  width: 100%;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 9px;
+  padding: 8px;
+  border: 1px solid rgba(91, 199, 211, 0.29);
+  border-radius: 10px;
+  background: rgba(10, 55, 68, 0.42);
+  color: #dff9fa;
+  text-align: left;
+  cursor: pointer;
+}
+
+.instances button:hover,
+.instances button:focus-visible {
+  border-color: rgba(102, 233, 241, 0.65);
+  background: rgba(16, 79, 92, 0.64);
+  outline: none;
+}
+
+.instances button > span:nth-child(2) { display: grid; gap: 2px; }
+.instances button strong { font-size: 0.66rem; }
+.instances button small { color: #779fa7; font-size: 0.45rem; letter-spacing: 0.02em; }
+.instances button i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #78efbc;
+  box-shadow: 0 0 12px #78efbc;
+  animation: statusPulse 1.8s ease-in-out infinite;
+}
+.instances .flag { font-size: 1.18rem; }
+.instances p { margin: 8px 2px 0; color: #547b82; font: 620 0.45rem/1.4 ui-monospace, SFMono-Regular, Consolas, monospace; }
+
 .legend {
   position: absolute;
   z-index: 6;
@@ -413,7 +478,8 @@
 
 @media (max-width: 920px) {
   .identity span,
-  .systems { display: none; }
+  .systems,
+  .instances { display: none; }
   .inspector { bottom: 110px; }
   .boundary span:first-child { display: none; }
   .boundary { justify-content: center; }
@@ -460,5 +526,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .telemetry header > b i { animation: none; }
+  .telemetry header > b i,
+  .instances button i { animation: none; }
 }

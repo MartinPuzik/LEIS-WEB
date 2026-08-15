@@ -5,7 +5,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import styles from "./realsim.module.css";
 
-type FeedState = "LOADING" | "LIVE" | "PARTIAL" | "STALE" | "UNAVAILABLE";
+type FeedState = "LOADING" | "LIVE" | "SNAPSHOT" | "PARTIAL" | "STALE" | "UNAVAILABLE";
 
 type WeatherSample = {
   lat: number;
@@ -47,11 +47,53 @@ type ParticleFlow = {
   rate: number;
 };
 
+type WeatherMeta = {
+  providerLabel: string;
+  providerUrl: string;
+  gridCount: number;
+  sourceCellCount: number;
+  spatialMethod: string;
+  jetAvailable: boolean;
+};
+
+type LeisInstance = {
+  id: string;
+  label: string;
+  area: string;
+  country: string;
+  role: string;
+  status: "ACTIVE";
+  evidence: "SELF_DECLARED";
+  approximate: true;
+  lat: number;
+  lon: number;
+};
+
 const windLatitudes = [-70, -50, -30, -10, 10, 30, 50, 70];
 const windLongitudes = Array.from({ length: 18 }, (_, index) => -170 + index * 20);
 const windSites = windLatitudes.flatMap((lat) => windLongitudes.map((lon) => ({ lat, lon })));
 const weatherUrl = "/api/realsim-weather";
 const weatherCacheKey = "leis-realsim-weather-v1";
+const defaultWeatherMeta: WeatherMeta = {
+  providerLabel: "Weather snapshot waiting",
+  providerUrl: "https://open-meteo.com/en/docs",
+  gridCount: windSites.length,
+  sourceCellCount: 0,
+  spatialMethod: "waiting",
+  jetAvailable: true,
+};
+const leisInstances: LeisInstance[] = [{
+  id: "LEIS-CREATOR-CZ-001",
+  label: "Martin Pužík",
+  area: "Czechia",
+  country: "CZ",
+  role: "Creator node",
+  status: "ACTIVE",
+  evidence: "SELF_DECLARED",
+  approximate: true,
+  lat: 49.82,
+  lon: 15.47,
+}];
 
 function vectorAt(lat: number, lon: number, radius = 1) {
   const phi = (lat * Math.PI) / 180;
@@ -106,6 +148,47 @@ function pointTexture() {
     gradient.addColorStop(1, "rgba(255,255,255,0)");
     context.fillStyle = gradient;
     context.fillRect(0, 0, 64, 64);
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+function instancePinTexture() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 192;
+  canvas.height = 192;
+  const context = canvas.getContext("2d");
+  if (context) {
+    context.clearRect(0, 0, 192, 192);
+    context.save();
+    context.beginPath();
+    context.arc(96, 82, 62, 0, Math.PI * 2);
+    context.clip();
+    context.fillStyle = "#fff";
+    context.fillRect(34, 20, 124, 62);
+    context.fillStyle = "#d7141a";
+    context.fillRect(34, 82, 124, 62);
+    context.fillStyle = "#11457e";
+    context.beginPath();
+    context.moveTo(34, 20);
+    context.lineTo(100, 82);
+    context.lineTo(34, 144);
+    context.closePath();
+    context.fill();
+    context.restore();
+    context.strokeStyle = "#6ff2ee";
+    context.lineWidth = 8;
+    context.beginPath();
+    context.arc(96, 82, 66, 0, Math.PI * 2);
+    context.stroke();
+    context.fillStyle = "#6ff2ee";
+    context.beginPath();
+    context.moveTo(78, 142);
+    context.lineTo(96, 183);
+    context.lineTo(114, 142);
+    context.closePath();
+    context.fill();
   }
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -211,14 +294,23 @@ export default function RealSimEarth() {
   const [motion, setMotion] = useState(true);
   const [layers, setLayers] = useState<LayerState>({ clouds: true, surface: true, jet: true });
   const [refreshedAt, setRefreshedAt] = useState<string | null>(null);
+  const [weatherMeta, setWeatherMeta] = useState<WeatherMeta>(defaultWeatherMeta);
 
   const refreshWeather = useCallback(async () => {
     setFeedState((current) => samplesRef.current.length ? "STALE" : current === "UNAVAILABLE" ? "LOADING" : current);
-    const accept = (next: WeatherSample[], state: FeedState, refreshed: string) => {
+    const accept = (next: WeatherSample[], state: FeedState, refreshed: string, meta: WeatherMeta) => {
       samplesRef.current = next;
       setSamples(next);
       setFeedState(state);
       setRefreshedAt(refreshed);
+      setWeatherMeta(meta);
+      if (!meta.jetAvailable) {
+        setLayers((current) => {
+          const nextLayers = { ...current, jet: false };
+          bridgeRef.current?.setLayers(nextLayers);
+          return nextLayers;
+        });
+      }
       bridgeRef.current?.updateWeather(next);
       setSelected((current) => current
         ? [...next].sort((a, b) => sampleDistance(a, current.lat, current.lon) - sampleDistance(b, current.lat, current.lon))[0]
@@ -226,41 +318,35 @@ export default function RealSimEarth() {
     };
     try {
       const response = await fetch(weatherUrl, { cache: "no-store" });
-      if (!response.ok) throw new Error(`Open-Meteo ${response.status}`);
+      if (!response.ok) throw new Error(`Weather snapshot ${response.status}`);
       const payload = await response.json();
-      const rows = Array.isArray(payload) ? payload : [payload];
-      const next = rows.slice(0, windSites.length).map((row: any, index: number) => {
-        const current = row?.current ?? {};
-        return {
-          ...windSites[index],
-          temperature: Number(current.temperature_2m ?? 0),
-          cloud: Math.max(0, Math.min(100, Number(current.cloud_cover ?? 0))),
-          precipitation: Math.max(0, Number(current.precipitation ?? 0)),
-          weatherCode: Number(current.weather_code ?? 0),
-          wind: Math.max(0, Number(current.wind_speed_10m ?? 0)),
-          windDirection: Number(current.wind_direction_10m ?? 0),
-          gust: Math.max(0, Number(current.wind_gusts_10m ?? 0)),
-          jetWind: Math.max(0, Number(current.wind_speed_250hPa ?? 0)),
-          jetDirection: Number(current.wind_direction_250hPa ?? 0),
-          observedAt: typeof current.time === "string" ? current.time : null,
-        } satisfies WeatherSample;
-      });
-      if (!next.length) throw new Error("Open-Meteo returned no current samples");
-      const refreshed = new Date().toISOString();
-      window.localStorage.setItem(weatherCacheKey, JSON.stringify({ savedAt: refreshed, samples: next }));
-      accept(next, next.length === windSites.length ? "LIVE" : "PARTIAL", refreshed);
+      const next = Array.isArray(payload?.samples) ? payload.samples as WeatherSample[] : [];
+      if (!next.length) throw new Error("Weather snapshot returned no samples");
+      const headerState = response.headers.get("X-LEIS-Weather") || payload.delivery_state;
+      const state: FeedState = ["LIVE", "SNAPSHOT", "PARTIAL", "STALE"].includes(headerState) ? headerState : "PARTIAL";
+      const refreshed = String(payload.refreshed_at || new Date().toISOString());
+      const meta: WeatherMeta = {
+        providerLabel: String(payload.provider_label || "Weather snapshot"),
+        providerUrl: String(payload.provider_url || "https://open-meteo.com/en/docs"),
+        gridCount: Number(payload.grid_count || next.length),
+        sourceCellCount: Number(payload.source_cell_count || next.length),
+        spatialMethod: String(payload.spatial_method || "unknown"),
+        jetAvailable: payload.jet_available !== false,
+      };
+      window.localStorage.setItem(weatherCacheKey, JSON.stringify({ savedAt: refreshed, samples: next, meta }));
+      accept(next, state, refreshed, meta);
     } catch {
       if (samplesRef.current.length) {
         setFeedState("STALE");
         return;
       }
       try {
-        const stored = JSON.parse(window.localStorage.getItem(weatherCacheKey) || "null") as { savedAt?: string; samples?: WeatherSample[] } | null;
+        const stored = JSON.parse(window.localStorage.getItem(weatherCacheKey) || "null") as { savedAt?: string; samples?: WeatherSample[]; meta?: WeatherMeta } | null;
         const cached = Array.isArray(stored?.samples)
           ? stored.samples.filter((sample) => Number.isFinite(sample.lat) && Number.isFinite(sample.lon) && Number.isFinite(sample.wind))
           : [];
         if (cached.length) {
-          accept(cached, "STALE", stored?.savedAt || new Date().toISOString());
+          accept(cached, "STALE", stored?.savedAt || new Date().toISOString(), stored?.meta || defaultWeatherMeta);
           return;
         }
       } catch {
@@ -272,8 +358,8 @@ export default function RealSimEarth() {
 
   useEffect(() => {
     if (!samples.length || !refreshedAt) return;
-    window.localStorage.setItem(weatherCacheKey, JSON.stringify({ savedAt: refreshedAt, samples }));
-  }, [samples, refreshedAt]);
+    window.localStorage.setItem(weatherCacheKey, JSON.stringify({ savedAt: refreshedAt, samples, meta: weatherMeta }));
+  }, [samples, refreshedAt, weatherMeta]);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -319,6 +405,40 @@ export default function RealSimEarth() {
     });
     const earth = new THREE.Mesh(earthGeometry, earthMaterial);
     earthGroup.add(earth);
+
+    const pinTexture = instancePinTexture();
+    const instanceGroup = new THREE.Group();
+    const instancePulseMaterials: THREE.MeshBasicMaterial[] = [];
+    earthGroup.add(instanceGroup);
+    leisInstances.forEach((instance) => {
+      const surface = vectorAt(instance.lat, instance.lon, 1.036);
+      const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: pinTexture,
+        transparent: true,
+        depthWrite: false,
+        depthTest: false,
+      }));
+      sprite.position.copy(vectorAt(instance.lat, instance.lon, 1.115));
+      sprite.scale.set(0.145, 0.145, 0.145);
+      sprite.renderOrder = 12;
+      sprite.userData.instanceId = instance.id;
+      instanceGroup.add(sprite);
+
+      const pulseMaterial = new THREE.MeshBasicMaterial({
+        color: 0x6ff2ee,
+        transparent: true,
+        opacity: 0.64,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      });
+      const pulse = new THREE.Mesh(new THREE.RingGeometry(0.028, 0.04, 36), pulseMaterial);
+      pulse.position.copy(surface);
+      pulse.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), surface.clone().normalize());
+      pulse.userData.phase = instancePulseMaterials.length * 1.7;
+      pulse.renderOrder = 10;
+      instancePulseMaterials.push(pulseMaterial);
+      instanceGroup.add(pulse);
+    });
 
     const atmosphere = new THREE.Mesh(
       new THREE.SphereGeometry(1.075, 96, 64),
@@ -770,6 +890,11 @@ export default function RealSimEarth() {
         dominantFlowMaterials.forEach((material, index) => {
           material.opacity = 0.27 + Math.sin(now * 0.0014 + index * 0.73) * 0.075;
         });
+        instanceGroup.children.filter((child) => child instanceof THREE.Mesh).forEach((child, index) => {
+          const phase = (Math.sin(now * 0.0023 + index * 1.7) + 1) / 2;
+          child.scale.setScalar(0.82 + phase * 0.55);
+          instancePulseMaterials[index].opacity = 0.72 - phase * 0.45;
+        });
       }
       controls.update();
       stars.rotation.y += delta * 0.0015;
@@ -778,7 +903,7 @@ export default function RealSimEarth() {
     };
     frame = requestAnimationFrame(animate);
     void refreshWeather();
-    const weatherTimer = window.setInterval(() => { void refreshWeather(); }, 10 * 60 * 1000);
+    const weatherTimer = window.setInterval(() => { void refreshWeather(); }, 30 * 60 * 1000);
 
     return () => {
       window.clearInterval(weatherTimer);
@@ -791,6 +916,14 @@ export default function RealSimEarth() {
       earthGeometry.dispose();
       earthMaterial.dispose();
       earthTexture.dispose();
+      pinTexture.dispose();
+      instanceGroup.children.forEach((child) => {
+        if (child instanceof THREE.Sprite) child.material.dispose();
+        if (child instanceof THREE.Mesh) {
+          child.geometry.dispose();
+          (child.material as THREE.Material).dispose();
+        }
+      });
       atmosphere.geometry.dispose();
       (atmosphere.material as THREE.Material).dispose();
       starGeometry.dispose();
@@ -850,9 +983,9 @@ export default function RealSimEarth() {
           <div><small>WEATHER 01</small><h1>Atmosférické pole</h1></div>
           <b className={styles[`state${feedState}`]}><i />{feedState}</b>
         </header>
-        <p>Viditelné modelové oblaky, přízemní vítr v 10 m a samostatné výškové proudy v hladině 250 hPa (~10,4 km).</p>
+        <p>Modelový snímek počasí se sdílí všem návštěvníkům; pohyb mezi obnoveními je vizualizace posledního dostupného pole.</p>
         <div className={styles.metrics}>
-          <span><b>{samples.length}</b><small>/ 144 buněk</small></span>
+          <span><b>{samples.length}</b><small>/ {weatherMeta.gridCount} buněk</small></span>
           <span><b>{peakWind.toFixed(0)}</b><small>km/h · 10 m</small></span>
           <span><b>{peakJet.toFixed(0)}</b><small>km/h · 250 hPa</small></span>
           <span><b>{averageCloud.toFixed(0)}%</b><small>prům. oblačnost</small></span>
@@ -860,7 +993,7 @@ export default function RealSimEarth() {
         <div className={styles.layers} aria-label="Viditelné vrstvy modelu">
           <button type="button" aria-pressed={layers.clouds} onClick={() => toggleLayer("clouds")}><i className={styles.cloudLayer} />Mraky</button>
           <button type="button" aria-pressed={layers.surface} onClick={() => toggleLayer("surface")}><i className={styles.surfaceWind} />Vítr 10 m</button>
-          <button type="button" aria-pressed={layers.jet} onClick={() => toggleLayer("jet")}><i className={styles.jetWind} />Proudy 250 hPa</button>
+          <button type="button" disabled={!weatherMeta.jetAvailable} aria-pressed={layers.jet && weatherMeta.jetAvailable} onClick={() => toggleLayer("jet")}><i className={styles.jetWind} />{weatherMeta.jetAvailable ? "Proudy 250 hPa" : "250 hPa nedostupné"}</button>
         </div>
         <div className={styles.actions}>
           <button type="button" onClick={() => void refreshWeather()}>Obnovit data</button>
@@ -870,7 +1003,8 @@ export default function RealSimEarth() {
         <dl>
           <div><dt>Modelový čas</dt><dd>{samples[0]?.observedAt?.replace("T", " ") ?? "čekám"} UTC</dd></div>
           <div><dt>Poslední kontakt</dt><dd>{refreshedAt ? new Date(refreshedAt).toLocaleTimeString("cs-CZ") : "čekám"}</dd></div>
-          <div><dt>Zdroj</dt><dd><a href="https://open-meteo.com/en/docs" target="_blank" rel="noreferrer">Open-Meteo Forecast API</a></dd></div>
+          <div><dt>Zdroj</dt><dd><a href={weatherMeta.providerUrl} target="_blank" rel="noreferrer">{weatherMeta.providerLabel}</a></dd></div>
+          <div><dt>Metoda</dt><dd>{weatherMeta.sourceCellCount} zdrojových buněk · {weatherMeta.spatialMethod}</dd></div>
         </dl>
       </aside>
 
@@ -884,11 +1018,11 @@ export default function RealSimEarth() {
           <div className={styles.inspectorGrid}>
             <span><b>{selected.wind.toFixed(1)}</b>km/h vítr</span>
             <span><b>{selected.gust.toFixed(1)}</b>km/h náraz</span>
-            <span><b>{selected.jetWind.toFixed(1)}</b>km/h · 250 hPa</span>
+            <span><b>{weatherMeta.jetAvailable ? selected.jetWind.toFixed(1) : "—"}</b>{weatherMeta.jetAvailable ? "km/h · 250 hPa" : "výšková data nejsou"}</span>
             <span><b>{selected.cloud.toFixed(0)}%</b>oblačnost</span>
             <span><b>{selected.precipitation.toFixed(1)}</b>mm srážky</span>
           </div>
-          <p>Vítr 10 m z {compass(selected.windDirection)} · {selected.windDirection.toFixed(0)}°; 250 hPa z {compass(selected.jetDirection)} · {selected.jetDirection.toFixed(0)}°. V poli je {wetCells} srážkových buněk.</p>
+          <p>Vítr 10 m z {compass(selected.windDirection)} · {selected.windDirection.toFixed(0)}°{weatherMeta.jetAvailable ? `; 250 hPa z ${compass(selected.jetDirection)} · ${selected.jetDirection.toFixed(0)}°` : ""}. V poli je {wetCells} srážkových buněk.</p>
         </> : <p>Čekám na první modelovou odpověď.</p>}
       </aside>
 
@@ -899,6 +1033,16 @@ export default function RealSimEarth() {
         </button>)}
       </aside>
 
+      <aside className={styles.instances} aria-label="Dobrovolně přihlášené LEIS instance">
+        <header><small>LEIS INSTANCE MAP</small><b>{leisInstances.length} ACTIVE</b></header>
+        {leisInstances.map((instance) => <button type="button" key={instance.id} onClick={() => bridgeRef.current?.focus(instance.lat, instance.lon)}>
+          <span className={styles.flag} aria-hidden="true">🇨🇿</span>
+          <span><strong>{instance.label}</strong><small>{instance.area} · {instance.role}</small></span>
+          <i />
+        </button>)}
+        <p>SELF_DECLARED · přibližná poloha · žádné automatické sledování polohy.</p>
+      </aside>
+
       <div className={styles.legend} aria-label="Barevná legenda rychlosti větru">
         <span><i className={styles.cloudLayer} />modelové oblaky</span>
         <span><i className={styles.surfaceWind} />vítr · 10 m</span>
@@ -907,7 +1051,7 @@ export default function RealSimEarth() {
 
       <footer className={styles.boundary}>
         <span>Tažením otáčíte · kolečkem přibližujete · kliknutím vybíráte buňku</span>
-        <span><a href="https://visibleearth.nasa.gov/images/73776/august-blue-marble-next-generation-w-topography-and-bathymetry" target="_blank" rel="noreferrer">NASA Blue Marble</a> = statický povrch (08/2004) · Open-Meteo = aktuální modelový vzorek 10 m + 250 hPa · oblaky/proudy jsou vizualizace 144 buněk, nikoli radar ani výstražná služba</span>
+        <span><a href="https://visibleearth.nasa.gov/images/73776/august-blue-marble-next-generation-w-topography-and-bathymetry" target="_blank" rel="noreferrer">NASA Blue Marble</a> = statický povrch (08/2004) · {weatherMeta.providerLabel} = poslední modelový snímek · pohyb není nové měření · piny jsou dobrovolné přibližné deklarace, nikoli live tracking</span>
       </footer>
     </div>
   );
