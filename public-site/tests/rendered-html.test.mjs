@@ -113,7 +113,11 @@ test("grounds the first realSIM layer in live sampled weather", async () => {
   assert.match(earth, /cloudFieldTexture/);
   assert.match(earth, /cloudShell/);
   assert.match(earth, /deterministic multi-scale mask/);
-  assert.match(earth, /dominantFlowMeshes/);
+  assert.match(earth, /canvas\.width - 1/);
+  assert.match(earth, /cloudShell\.rotation\.y/);
+  assert.match(earth, /surfaceParticlesPerSample = 34/);
+  assert.match(earth, /windLines\.visible = false/);
+  assert.match(earth, /controls\.autoRotateSpeed = 0\.38/);
   assert.match(weatherRoute, /cell_selection: "nearest"/);
   assert.match(earth, /windSites\.length/);
   assert.match(earth, /pohyb mezi obnoveními je vizualizace posledního dostupného pole/);
@@ -121,6 +125,12 @@ test("grounds the first realSIM layer in live sampled weather", async () => {
   assert.match(earth, /SELF_DECLARED/);
   assert.match(earth, /žádné automatické sledování polohy/);
   assert.match(earth, /LEIS-CREATOR-CZ-001/);
+  assert.match(earth, /createCzechFlagMarker/);
+  assert.match(earth, /LEIS_CZ_Flag_Pole/);
+  assert.match(earth, /SLS-KSC-39B/);
+  assert.match(earth, /ESA-KOUROU/);
+  assert.match(earth, /Launch_Site_Catalogue/);
+  assert.match(earth, /SCHEMATIC_CATALOGUE/);
   assert.match(earth, /Starbase \/ Starship V3/);
   assert.match(earth, /IDLE · NO LAUNCH/);
   assert.match(earth, /SCHEMATIC · NO LIVE TELEMETRY/);

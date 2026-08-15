@@ -77,6 +77,21 @@ type StarshipSiteModel = {
   engineLight: THREE.PointLight;
 };
 
+type CzechFlagModel = {
+  group: THREE.Group;
+  flagPositions: THREE.BufferAttribute;
+  basePositions: Float32Array;
+};
+
+type LaunchSite = {
+  id: string;
+  rocket: string;
+  agency: string;
+  site: string;
+  lat: number;
+  lon: number;
+};
+
 const windLatitudes = [-70, -50, -30, -10, 10, 30, 50, 70];
 const windLongitudes = Array.from({ length: 18 }, (_, index) => -170 + index * 20);
 const windSites = windLatitudes.flatMap((lat) => windLongitudes.map((lon) => ({ lat, lon })));
@@ -109,6 +124,16 @@ const starbaseSite = {
   lon: -97.157,
   source: "https://www.spacex.com/launches/starship-flight-12",
 };
+const launchSites: LaunchSite[] = [
+  { id: "SLS-KSC-39B", rocket: "SLS", agency: "NASA", site: "Kennedy LC-39B", lat: 28.627, lon: -80.621 },
+  { id: "ELECTRON-MAHIA", rocket: "Electron", agency: "Rocket Lab", site: "Māhia LC-1", lat: -39.2615, lon: 177.8649 },
+  { id: "VULCAN-SLC41", rocket: "Vulcan Centaur", agency: "ULA", site: "Cape Canaveral SLC-41", lat: 28.583, lon: -80.583 },
+  { id: "SOYUZ-BAIKONUR", rocket: "Soyuz-2", agency: "Roscosmos", site: "Baikonur 31/6", lat: 45.996, lon: 63.564 },
+  { id: "LONG-MARCH-JIUQUAN", rocket: "Long March", agency: "CASC", site: "Jiuquan", lat: 40.9606, lon: 100.2983 },
+  { id: "H3-TANEGASHIMA", rocket: "H3", agency: "JAXA", site: "Tanegashima LA-Y2", lat: 30.4009, lon: 130.9763 },
+  { id: "ISRO-SRIHARIKOTA", rocket: "LVM3 / PSLV", agency: "ISRO", site: "Sriharikota", lat: 13.733, lon: 80.235 },
+  { id: "ESA-KOUROU", rocket: "Ariane 6 / Vega-C", agency: "ESA", site: "Kourou", lat: 5.236, lon: -52.775 },
+];
 const spaceportCopy: Record<SimLanguage, { eyebrow: string; status: string; description: string; boundary: string }> = {
   cs: {
     eyebrow: "SPACEPORT 01",
@@ -201,45 +226,118 @@ function pointTexture() {
   return texture;
 }
 
-function instancePinTexture() {
+function czechFlagTexture() {
   const canvas = document.createElement("canvas");
-  canvas.width = 192;
-  canvas.height = 192;
+  canvas.width = 384;
+  canvas.height = 240;
   const context = canvas.getContext("2d");
   if (context) {
-    context.clearRect(0, 0, 192, 192);
-    context.save();
-    context.beginPath();
-    context.arc(96, 82, 62, 0, Math.PI * 2);
-    context.clip();
     context.fillStyle = "#fff";
-    context.fillRect(34, 20, 124, 62);
+    context.fillRect(0, 0, canvas.width, canvas.height / 2);
     context.fillStyle = "#d7141a";
-    context.fillRect(34, 82, 124, 62);
+    context.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
     context.fillStyle = "#11457e";
     context.beginPath();
-    context.moveTo(34, 20);
-    context.lineTo(100, 82);
-    context.lineTo(34, 144);
-    context.closePath();
-    context.fill();
-    context.restore();
-    context.strokeStyle = "#6ff2ee";
-    context.lineWidth = 8;
-    context.beginPath();
-    context.arc(96, 82, 66, 0, Math.PI * 2);
-    context.stroke();
-    context.fillStyle = "#6ff2ee";
-    context.beginPath();
-    context.moveTo(78, 142);
-    context.lineTo(96, 183);
-    context.lineTo(114, 142);
+    context.moveTo(0, 0);
+    context.lineTo(canvas.width * 0.5, canvas.height / 2);
+    context.lineTo(0, canvas.height);
     context.closePath();
     context.fill();
   }
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
+}
+
+function labelTexture(title: string, subtitle: string) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 512;
+  canvas.height = 128;
+  const context = canvas.getContext("2d");
+  if (context) {
+    context.fillStyle = "rgba(2, 15, 24, .88)";
+    context.beginPath();
+    context.roundRect(4, 4, 504, 120, 20);
+    context.fill();
+    context.strokeStyle = "rgba(103, 238, 234, .55)";
+    context.lineWidth = 3;
+    context.stroke();
+    context.fillStyle = "#f4fbff";
+    context.font = "600 30px Arial";
+    context.fillText(title, 24, 52);
+    context.fillStyle = "#83cbd3";
+    context.font = "22px Arial";
+    context.fillText(subtitle, 24, 91);
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+function createCzechFlagMarker(): CzechFlagModel {
+  const group = new THREE.Group();
+  group.name = "LEIS_CZ_Flag_Pole";
+  const pole = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.003, 0.004, 0.19, 12),
+    new THREE.MeshStandardMaterial({ color: 0xb9c6ca, metalness: 0.8, roughness: 0.3 }),
+  );
+  pole.position.y = 0.095;
+  group.add(pole);
+  const geometry = new THREE.PlaneGeometry(0.115, 0.068, 14, 4);
+  const position = geometry.getAttribute("position") as THREE.BufferAttribute;
+  const basePositions = new Float32Array(position.array as ArrayLike<number>);
+  const flag = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({
+    map: czechFlagTexture(),
+    side: THREE.DoubleSide,
+    roughness: 0.64,
+    metalness: 0.02,
+  }));
+  flag.position.set(0.058, 0.151, 0);
+  group.add(flag);
+  const label = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: labelTexture("CZ · LEIS", "Martin Pužík · creator node"),
+    transparent: true,
+    depthTest: true,
+    depthWrite: false,
+  }));
+  label.position.set(0.09, 0.225, 0);
+  label.scale.set(0.24, 0.06, 1);
+  group.add(label);
+  return { group, flagPositions: position, basePositions };
+}
+
+function createLaunchMarker(site: LaunchSite) {
+  const group = new THREE.Group();
+  group.name = `Launch_${site.id}`;
+  group.userData = { site, evidence: "SCHEMATIC_CATALOGUE", telemetry: false };
+  const pad = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.018, 0.021, 0.005, 18),
+    new THREE.MeshStandardMaterial({ color: 0x28343c, metalness: 0.58, roughness: 0.6 }),
+  );
+  pad.position.y = 0.0025;
+  group.add(pad);
+  const rocket = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.0045, 0.006, 0.06, 14),
+    new THREE.MeshStandardMaterial({ color: 0xdce6ea, metalness: 0.62, roughness: 0.34 }),
+  );
+  rocket.position.y = 0.034;
+  group.add(rocket);
+  const nose = new THREE.Mesh(
+    new THREE.ConeGeometry(0.0045, 0.018, 14),
+    new THREE.MeshStandardMaterial({ color: 0xf0f5f7, metalness: 0.45, roughness: 0.36 }),
+  );
+  nose.position.y = 0.073;
+  group.add(nose);
+  const label = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: labelTexture(site.rocket, site.site),
+    transparent: true,
+    depthTest: true,
+    depthWrite: false,
+  }));
+  label.position.set(0.07, 0.11, 0);
+  label.scale.set(0.19, 0.0475, 1);
+  group.add(label);
+  return group;
 }
 
 function createStarshipSite(): StarshipSiteModel {
@@ -316,8 +414,8 @@ function createStarshipSite(): StarshipSiteModel {
 
 function cloudFieldTexture() {
   const canvas = document.createElement("canvas");
-  canvas.width = 1024;
-  canvas.height = 512;
+  canvas.width = 1536;
+  canvas.height = 768;
   const context = canvas.getContext("2d", { alpha: true });
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -348,7 +446,7 @@ function cloudFieldTexture() {
       const latBlend = latPosition - row0;
       const poleFade = smoothstep(0, 18, 90 - Math.abs(lat));
 
-      for (let x = 0; x < canvas.width; x += 1) {
+      for (let x = 0; x < canvas.width - 1; x += 1) {
         const lon = -180 + (x / (canvas.width - 1)) * 360;
         const longitudePosition = (((lon + 170) / 20) % windLongitudes.length + windLongitudes.length) % windLongitudes.length;
         const column0 = Math.floor(longitudePosition);
@@ -369,20 +467,32 @@ function cloudFieldTexture() {
         const precipitation = interpolate("precipitation");
         // A deterministic multi-scale mask gives the coarse 20-degree model
         // field cloud-like edges without pretending to add measured detail.
-        const waveA = Math.sin(lon * 0.105 + Math.sin(lat * 0.047) * 2.2);
-        const waveB = Math.sin(lon * 0.247 - lat * 0.173 + Math.sin(lon * 0.031) * 1.8);
-        const waveC = Math.cos(lon * 0.059 + lat * 0.286);
-        const structure = 0.5 + waveA * 0.22 + waveB * 0.17 + waveC * 0.11;
-        const density = cover * 1.05 + (structure - 0.5) * 0.9 - 0.32;
-        const opacity = smoothstep(0.08, 0.74, density) * poleFade;
-        const edgeSoftness = 0.78 + opacity * 0.22;
+        const theta = (lon * Math.PI) / 180;
+        const phi = (lat * Math.PI) / 180;
+        // Integer longitudinal harmonics meet exactly at -180/+180 and
+        // preserve a seamless wrap. Detail remains a deterministic visual
+        // interpretation of the coarse model field, not measured cloud shape.
+        const waveA = Math.sin(theta * 3 + Math.sin(phi * 2) * 2.4);
+        const waveB = Math.sin(theta * 7 - phi * 4 + Math.sin(theta * 2) * 1.7);
+        const waveC = Math.cos(theta * 11 + phi * 6 + Math.sin(phi * 3));
+        const waveD = Math.sin(theta * 19 - phi * 9 + Math.cos(theta * 5));
+        const structure = 0.5 + waveA * 0.19 + waveB * 0.15 + waveC * 0.1 + waveD * 0.06;
+        const density = cover * 1.3 + (structure - 0.5) * 1.05 - 0.47;
+        const opacity = Math.pow(smoothstep(0.025, 0.57, density), 0.82) * poleFade;
+        const edgeSoftness = 0.74 + opacity * 0.26;
         const stormShade = Math.min(32, precipitation * 18);
         const offset = (y * canvas.width + x) * 4;
         image.data[offset] = Math.round((225 - stormShade) * edgeSoftness);
         image.data[offset + 1] = Math.round((239 - stormShade * 0.65) * edgeSoftness);
         image.data[offset + 2] = Math.round((246 - stormShade * 0.35) * edgeSoftness);
-        image.data[offset + 3] = Math.round(opacity * 205);
+        image.data[offset + 3] = Math.round(opacity * 238);
       }
+      const first = (y * canvas.width) * 4;
+      const last = (y * canvas.width + canvas.width - 1) * 4;
+      image.data[last] = image.data[first];
+      image.data[last + 1] = image.data[first + 1];
+      image.data[last + 2] = image.data[first + 2];
+      image.data[last + 3] = image.data[first + 3];
     }
 
     context.putImageData(image, 0, 0);
@@ -502,7 +612,7 @@ export default function RealSimEarth() {
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.12;
     renderer.setClearColor(0x000000, 0);
-    renderer.domElement.setAttribute("aria-label", "Interaktivní 3D Země s živými modelovými vektory počasí");
+    renderer.domElement.setAttribute("aria-label", "Interaktivní 3D Země s animovaným modelovým prouděním počasí");
     mount.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -512,7 +622,7 @@ export default function RealSimEarth() {
     controls.minDistance = 1.65;
     controls.maxDistance = 5.2;
     controls.autoRotate = !reducedMotion;
-    controls.autoRotateSpeed = 0.22;
+    controls.autoRotateSpeed = 0.38;
     controls.rotateSpeed = 0.42;
     controls.zoomSpeed = 0.72;
 
@@ -523,6 +633,11 @@ export default function RealSimEarth() {
     const textureLoader = new THREE.TextureLoader();
     const earthTexture = textureLoader.load("/earth-blue-marble-august.jpg");
     earthTexture.colorSpace = THREE.SRGBColorSpace;
+    earthTexture.wrapS = THREE.RepeatWrapping;
+    earthTexture.wrapT = THREE.ClampToEdgeWrapping;
+    earthTexture.minFilter = THREE.LinearMipmapLinearFilter;
+    earthTexture.magFilter = THREE.LinearFilter;
+    earthTexture.offset.x = 0.5 / 21600;
     earthTexture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
     const earthGeometry = new THREE.SphereGeometry(1, 96, 64);
     const earthMaterial = new THREE.MeshStandardMaterial({
@@ -533,38 +648,16 @@ export default function RealSimEarth() {
     const earth = new THREE.Mesh(earthGeometry, earthMaterial);
     earthGroup.add(earth);
 
-    const pinTexture = instancePinTexture();
     const instanceGroup = new THREE.Group();
-    const instancePulseMaterials: THREE.MeshBasicMaterial[] = [];
     earthGroup.add(instanceGroup);
+    const czechFlag = createCzechFlagMarker();
     leisInstances.forEach((instance) => {
-      const surface = vectorAt(instance.lat, instance.lon, 1.036);
-      const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
-        map: pinTexture,
-        transparent: true,
-        depthWrite: false,
-        depthTest: false,
-      }));
-      sprite.position.copy(vectorAt(instance.lat, instance.lon, 1.115));
-      sprite.scale.set(0.145, 0.145, 0.145);
-      sprite.renderOrder = 12;
-      sprite.userData.instanceId = instance.id;
-      instanceGroup.add(sprite);
-
-      const pulseMaterial = new THREE.MeshBasicMaterial({
-        color: 0x6ff2ee,
-        transparent: true,
-        opacity: 0.64,
-        depthWrite: false,
-        side: THREE.DoubleSide,
-      });
-      const pulse = new THREE.Mesh(new THREE.RingGeometry(0.028, 0.04, 36), pulseMaterial);
-      pulse.position.copy(surface);
-      pulse.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), surface.clone().normalize());
-      pulse.userData.phase = instancePulseMaterials.length * 1.7;
-      pulse.renderOrder = 10;
-      instancePulseMaterials.push(pulseMaterial);
-      instanceGroup.add(pulse);
+      const surface = vectorAt(instance.lat, instance.lon, 1.006);
+      czechFlag.group.position.copy(surface);
+      czechFlag.group.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), surface.clone().normalize());
+      czechFlag.group.scale.setScalar(0.72);
+      czechFlag.group.userData.instanceId = instance.id;
+      instanceGroup.add(czechFlag.group);
     });
 
     const starshipSite = createStarshipSite();
@@ -574,6 +667,19 @@ export default function RealSimEarth() {
     starshipSite.group.scale.setScalar(0.82);
     starshipSite.group.renderOrder = 9;
     earthGroup.add(starshipSite.group);
+
+    const launchSiteGroup = new THREE.Group();
+    launchSiteGroup.name = "Launch_Site_Catalogue";
+    launchSiteGroup.userData = { evidence: "SCHEMATIC_CATALOGUE", telemetry: false };
+    launchSites.forEach((site) => {
+      const marker = createLaunchMarker(site);
+      const surface = vectorAt(site.lat, site.lon, 1.006);
+      marker.position.copy(surface);
+      marker.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), surface.clone().normalize());
+      marker.scale.setScalar(0.72);
+      launchSiteGroup.add(marker);
+    });
+    earthGroup.add(launchSiteGroup);
 
     const atmosphere = new THREE.Mesh(
       new THREE.SphereGeometry(1.075, 96, 64),
@@ -742,8 +848,11 @@ export default function RealSimEarth() {
       const surfaceEnds: THREE.Vector3[] = [];
       const jetStarts: THREE.Vector3[] = [];
       const jetEnds: THREE.Vector3[] = [];
-      const surfaceParticlesPerSample = 18;
-      const jetParticlesPerSample = 16;
+      // Dense, tiny moving particles replace the old coarse helper vectors.
+      // Their paths are advected along the sampled wind direction; no static
+      // arrows, giant tubes or cell markers are exposed to visitors.
+      const surfaceParticlesPerSample = 34;
+      const jetParticlesPerSample = 22;
       const surfacePhases = new Float32Array(next.length * surfaceParticlesPerSample);
       const surfaceSpeeds = new Float32Array(next.length * surfaceParticlesPerSample);
       const surfaceParticlePositions = new Float32Array(next.length * surfaceParticlesPerSample * 3);
@@ -828,7 +937,7 @@ export default function RealSimEarth() {
         depthWrite: false,
         blending: THREE.AdditiveBlending,
       }));
-      weatherGroup.add(windLines);
+      windLines.visible = false;
 
       const particleGeometry = new THREE.BufferGeometry();
       const positionAttribute = new THREE.BufferAttribute(surfaceParticlePositions, 3);
@@ -837,10 +946,10 @@ export default function RealSimEarth() {
       windPoints = new THREE.Points(particleGeometry, new THREE.PointsMaterial({
         map: glowTexture,
         vertexColors: true,
-        size: 0.031,
+        size: 0.0085,
         sizeAttenuation: true,
         transparent: true,
-        opacity: 1,
+        opacity: 0.82,
         alphaTest: 0.015,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
@@ -869,7 +978,7 @@ export default function RealSimEarth() {
         blending: THREE.AdditiveBlending,
       }));
       jetLines.renderOrder = 4;
-      weatherGroup.add(jetLines);
+      jetLines.visible = false;
 
       const jetParticleGeometry = new THREE.BufferGeometry();
       const jetPositionAttribute = new THREE.BufferAttribute(jetParticlePositions, 3);
@@ -878,10 +987,10 @@ export default function RealSimEarth() {
       jetPoints = new THREE.Points(jetParticleGeometry, new THREE.PointsMaterial({
         map: glowTexture,
         vertexColors: true,
-        size: 0.038,
+        size: 0.0095,
         sizeAttenuation: true,
         transparent: true,
-        opacity: 0.96,
+        opacity: 0.76,
         alphaTest: 0.012,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
@@ -901,7 +1010,7 @@ export default function RealSimEarth() {
 
       const dominant = [...next]
         .sort((a, b) => b.jetWind - a.jetWind)
-        .slice(0, 16);
+        .slice(0, 0);
       dominant.forEach((sample, index) => {
         const endCoordinate = destination(sample.lat, sample.lon, sample.jetDirection, 24 + Math.min(46, sample.jetWind * 0.16));
         const start = vectorAt(sample.lat, sample.lon, 1.072);
@@ -937,7 +1046,7 @@ export default function RealSimEarth() {
         depthWrite: false,
       }));
       weatherPoints.renderOrder = 7;
-      weatherGroup.add(weatherPoints);
+      weatherPoints.visible = false;
       applyLayerVisibility();
     };
 
@@ -1022,14 +1131,15 @@ export default function RealSimEarth() {
       if (motionRef.current && !reducedMotion) {
         if (surfaceFlow) advance(surfaceFlow, delta);
         if (jetFlow) advance(jetFlow, delta);
-        dominantFlowMaterials.forEach((material, index) => {
-          material.opacity = 0.27 + Math.sin(now * 0.0014 + index * 0.73) * 0.075;
-        });
-        instanceGroup.children.filter((child) => child instanceof THREE.Mesh).forEach((child, index) => {
-          const phase = (Math.sin(now * 0.0023 + index * 1.7) + 1) / 2;
-          child.scale.setScalar(0.82 + phase * 0.55);
-          instancePulseMaterials[index].opacity = 0.72 - phase * 0.45;
-        });
+        for (let index = 0; index < czechFlag.flagPositions.count; index += 1) {
+          const offset = index * 3;
+          const x = czechFlag.basePositions[offset];
+          const flex = THREE.MathUtils.clamp((x + 0.0575) / 0.115, 0, 1);
+          czechFlag.flagPositions.setZ(index, czechFlag.basePositions[offset + 2] + Math.sin(now * 0.0044 + flex * 7.2) * 0.006 * flex);
+        }
+        czechFlag.flagPositions.needsUpdate = true;
+        cloudShell.rotation.y += delta * 0.004;
+        cloudVeil.rotation.y -= delta * 0.0015;
         const idleFlicker = 0.72 + Math.sin(now * 0.011) * 0.13 + Math.sin(now * 0.023) * 0.06;
         starshipSite.engineGlow.scale.set(0.92 + idleFlicker * 0.18, 0.24 + idleFlicker * 0.18, 0.92 + idleFlicker * 0.18);
         starshipSite.engineGlow.material.opacity = 0.19 + idleFlicker * 0.2;
@@ -1055,7 +1165,6 @@ export default function RealSimEarth() {
       earthGeometry.dispose();
       earthMaterial.dispose();
       earthTexture.dispose();
-      pinTexture.dispose();
       instanceGroup.children.forEach((child) => {
         if (child instanceof THREE.Sprite) child.material.dispose();
         if (child instanceof THREE.Mesh) {
@@ -1073,6 +1182,13 @@ export default function RealSimEarth() {
       });
       siteGeometries.forEach((geometry) => geometry.dispose());
       siteMaterials.forEach((material) => material.dispose());
+      launchSiteGroup.traverse((child) => {
+        if (child instanceof THREE.Mesh || child instanceof THREE.Sprite) {
+          if (child instanceof THREE.Mesh) child.geometry.dispose();
+          const materials = Array.isArray(child.material) ? child.material : [child.material];
+          materials.forEach((material) => material.dispose());
+        }
+      });
       atmosphere.geometry.dispose();
       (atmosphere.material as THREE.Material).dispose();
       starGeometry.dispose();
