@@ -59,6 +59,20 @@ test("uses the Portable Kernel as the single public onboarding file", async () =
   assert.match(page, /The older Root Seed remains in the lineage archive/);
 });
 
+test("publishes a privacy-bounded foundation information map", async () => {
+  const [page, foundation] = await Promise.all([
+    readFile(path.join(siteRoot, "app", "page.tsx"), "utf8"),
+    readFile(path.join(publicRoot, "foundation", "LEIS-FOUNDATION-START-HERE-V1.0-CS.md"), "utf8"),
+  ]);
+
+  assert.match(page, /href="\/foundation\/LEIS-FOUNDATION-START-HERE-V1\.0-CS\.md"/);
+  assert.match(page, /Podklady pro nadační fond/);
+  assert.match(foundation, /nejde o zakladatelske pravni jednani, podani, pravni radu ani potvrzeni registrace/);
+  assert.match(foundation, /Soukrome listiny pro zamysleny Nadacni fond LEIS se sem neumistuji/);
+  assert.match(foundation, /Nadacni fond vznikne az zapisem do verejneho rejstriku/);
+  assert.doesNotMatch(foundation, /O-612809/);
+});
+
 test("matches every v3.0.1 manifest entry and the approved release ZIP", async () => {
   const releaseRoot = path.join(publicRoot, "releases", "v3.0.1");
   const manifest = JSON.parse(await readFile(path.join(releaseRoot, "MANIFEST.json"), "utf8"));
