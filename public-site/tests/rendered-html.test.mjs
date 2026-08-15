@@ -48,6 +48,17 @@ test("ships the evidence-bounded release in all five Portal languages", async ()
   ]);
 });
 
+test("uses the Portable Kernel as the single public onboarding file", async () => {
+  const page = await readFile(path.join(siteRoot, "app", "page.tsx"), "utf8");
+
+  assert.match(page, /Take the LEIS Portable Kernel with you/);
+  assert.match(page, /K zahájení stačí jediný soubor Markdown/);
+  assert.match(page, /files: \[\["Portable Kernel \(\.md\)"/);
+  assert.doesNotMatch(page, /files: \[\["Root Seed \(\.md\)"/);
+  assert.match(page, /JSON manifest slouží ke kontrole integrity, nikoli ke spuštění LEIS/);
+  assert.match(page, /The older Root Seed remains in the lineage archive/);
+});
+
 test("matches every v3.0.1 manifest entry and the approved release ZIP", async () => {
   const releaseRoot = path.join(publicRoot, "releases", "v3.0.1");
   const manifest = JSON.parse(await readFile(path.join(releaseRoot, "MANIFEST.json"), "utf8"));
