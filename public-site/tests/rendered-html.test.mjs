@@ -186,6 +186,6 @@ test("matches every v3.0.1 manifest entry and the approved release ZIP", async (
     assert.equal(sha256(bytes), entry.sha256, `${entry.path}: SHA-256`);
   }
 
-  const archive = await readFile(path.join(publicRoot, "releases", "LEIS-V3.0.1-PUBLIC.zip"));
-  assert.equal(sha256(archive), "7C9748DD4C1B657622CF2669BF658DAC4CA786178ADED5FD6FFE29A59B68D889");
+  const archive = await readFile(path.join(publicRoot, "releases", "LEIS-V3.0.1-PUBLIC-REV1.zip"));
+  assert.equal(sha256(archive), "B6684232424D41A966C9C720B9CB0DC6870B687182820AE4164DA5E1E112E3BF");
 });
