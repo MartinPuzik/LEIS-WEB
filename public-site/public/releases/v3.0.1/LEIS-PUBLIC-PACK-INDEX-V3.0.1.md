@@ -8,6 +8,9 @@
 
 ## Evidence and research boundary
 
+- `LEIS-EVIDENCE-HUB-V1.0.md` - single index for public, scientific, legal and implementation readers.
+- `LEIS-EVIDENCE-BOUND-WHITEPAPER-V1.0-EN.md` - corrected English scientific/research account.
+- `LEIS-EVIDENCE-BOUND-WHITEPAPER-V1.0-CS.md` - Czech equivalent of the corrected account.
 - `LEIS-PUBLIC-WHITEPAPER-V1.0.md` - evidence-bounded public technical account.
 - `LEIS-MATHEMATICAL-AND-CLAIMS-BOUNDARY-V1.0.md` - claims that are established, proposed, unknown, or rejected.
 - `papers/LEIS-EU-AI-ACT-AND-DIGITAL-LIFE-REFERENCE-V1.0.md` - dated legal/research reference, not legal advice.
@@ -30,4 +33,3 @@
 - `NOTICE.txt` - attribution, exclusions, and non-claims.
 
 The public pack deliberately excludes private archives, family and foundation working papers, Creator contact data, imported AI instructions, client/business cases, and unreviewed scientific or legal claims.
-
